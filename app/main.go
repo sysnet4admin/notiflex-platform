@@ -10,13 +10,50 @@ import (
 	"strings"
 	"time"
 
+	"github.com/IBM/sarama"
 	"github.com/valkey-io/valkey-go"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
+	"go.opentelemetry.io/otel/sdk/resource"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	semconv "go.opentelemetry.io/otel/semconv/v1.26.0"
 )
 
-var version = "v0.3.0"
+var version = "v0.5.0"
+
+func initTracer() func() {
+	endpoint := os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT")
+	if endpoint == "" {
+		return func() {}
+	}
+	ctx := context.Background()
+	exporter, err := otlptracehttp.New(ctx,
+		otlptracehttp.WithEndpoint(endpoint),
+		otlptracehttp.WithInsecure(),
+	)
+	if err != nil {
+		log.Printf("OTel exporter error: %v", err)
+		return func() {}
+	}
+	res, _ := resource.New(ctx,
+		resource.WithAttributes(
+			semconv.ServiceNameKey.String("notiflex-api"),
+			semconv.ServiceVersionKey.String(version),
+		),
+	)
+	tp := sdktrace.NewTracerProvider(
+		sdktrace.WithBatcher(exporter),
+		sdktrace.WithResource(res),
+	)
+	otel.SetTracerProvider(tp)
+	return func() { tp.Shutdown(ctx) }
+}
 
 func main() {
 	hostname, _ := os.Hostname()
+	shutdown := initTracer()
+	defer shutdown()
+	tracer := otel.Tracer("notiflex-api")
 
 	// Read Valkey password
 	password := os.Getenv("VALKEY_PASSWORD")
@@ -49,6 +86,28 @@ func main() {
 		defer valkeyClient.Close()
 	}
 
+	// Connect to Kafka with retry
+	kafkaAddr := os.Getenv("KAFKA_ADDR")
+	var kafkaProducer sarama.SyncProducer
+	if kafkaAddr != "" {
+		config := sarama.NewConfig()
+		config.Producer.Return.Successes = true
+		for i := 0; i < 10; i++ {
+			var err error
+			kafkaProducer, err = sarama.NewSyncProducer([]string{kafkaAddr}, config)
+			if err == nil {
+				log.Printf("Kafka connected to %s", kafkaAddr)
+				break
+			}
+			log.Printf("Kafka retry %d/10: %v", i+1, err)
+			time.Sleep(3 * time.Second)
+		}
+		if kafkaProducer == nil {
+			log.Fatal("Failed to connect to Kafka after 10 retries")
+		}
+		defer kafkaProducer.Close()
+	}
+
 	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
@@ -63,6 +122,9 @@ func main() {
 	})
 
 	http.HandleFunc("/notify", func(w http.ResponseWriter, r *http.Request) {
+		ctx, span := tracer.Start(r.Context(), "notify")
+		defer span.End()
+
 		if r.Method != http.MethodPost {
 			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 			return
@@ -74,12 +136,40 @@ func main() {
 		}
 		tenant := req["tenant"]
 		message := req["message"]
-		log.Printf("[NOTIFY] tenant=%s message=%s", tenant, message)
+
+		// Valkey INCR
+		var id int64
+		if valkeyClient != nil {
+			_, vSpan := tracer.Start(ctx, "valkey-incr")
+			resp := valkeyClient.Do(ctx, valkeyClient.B().Incr().Key("notiflex:notify:"+tenant).Build())
+			val, err := resp.AsInt64()
+			if err == nil {
+				id = val
+			}
+			vSpan.End()
+		}
+
+		// Kafka produce
+		if kafkaProducer != nil {
+			_, kSpan := tracer.Start(ctx, "kafka-produce")
+			msg := &sarama.ProducerMessage{
+				Topic: "notifications",
+				Value: sarama.StringEncoder(fmt.Sprintf(`{"tenant":"%s","message":"%s","id":%d}`, tenant, message, id)),
+			}
+			_, _, err := kafkaProducer.SendMessage(msg)
+			if err != nil {
+				log.Printf("[KAFKA] send error: %v", err)
+			}
+			kSpan.End()
+		}
+
+		log.Printf("[NOTIFY] tenant=%s message=%s id=%d", tenant, message, id)
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]string{
+		json.NewEncoder(w).Encode(map[string]interface{}{
 			"status":  "accepted",
 			"tenant":  tenant,
 			"message": message,
+			"id":      id,
 		})
 	})
 
