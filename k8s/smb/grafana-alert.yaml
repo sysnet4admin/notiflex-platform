@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-alert-rules
+  namespace: notiflex
+  labels:
+    app: notiflex
+data:
+  alert-rules.yaml: |
+    groups:
+      - name: notiflex-alerts
+        rules:
+          - alert: NotiflexPodRestart
+            expr: increase(kube_pod_container_status_restarts_total{namespace="notiflex"}[5m]) > 0
+            for: 1m
+            labels:
+              severity: warning
+            annotations:
+              summary: "Notiflex Pod restarted"
+          - alert: NotiflexHighCPU
+            expr: rate(container_cpu_usage_seconds_total{namespace="notiflex"}[5m]) > 0.8
+            for: 2m
+            labels:
+              severity: warning
+            annotations:
+              summary: "Notiflex high CPU usage"
