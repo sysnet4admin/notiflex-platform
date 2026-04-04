@@ -19,8 +19,8 @@
 | ch4 | 4.2 메트릭 모니터링 | ✅ | 2026-04-04 | Prometheus + Grafana |
 | ch4 | 4.3 로그 수집 | ✅ | 2026-04-04 | Loki + Fluent Bit |
 | ch4 | 4.4 알림 | ✅ | 2026-04-04 | PrometheusRule |
-| ch5 | 5.2 트래픽 관리 | ⬜ | | |
-| ch5 | 5.3 무중단 배포 | ⬜ | | |
+| ch5 | 5.2 트래픽 관리 | ✅ | 2026-04-04 | Gateway API |
+| ch5 | 5.3 무중단 배포 | ✅ | 2026-04-04 | Argo Rollouts Blue/Green |
 | ch6 | 6.1 캐시 | ⬜ | | |
 | ch6 | 6.2 시크릿 관리 | ⬜ | | |
 | ch6 | 6.3 Canary 전환 | ⬜ | | |
@@ -46,6 +46,8 @@
 | CI | GitHub Actions | Jenkins, GitLab CI | GitHub 네이티브, 무료 |
 | 메트릭 | Prometheus+Grafana | Datadog, CloudWatch | 오픈소스, GKE 네이티브 |
 | 로그 | Loki+Fluent Bit | ELK, CloudWatch Logs | 가벼움, Grafana 통합 |
+| 트래픽 | Gateway API | Ingress NGINX, Istio | K8s 표준, GKE 네이티브 |
+| 배포 | Argo Rollouts | Flagger, K8s native | Canary+B/G, ArgoCD 통합 |
 
 ## 현재 버전
 
