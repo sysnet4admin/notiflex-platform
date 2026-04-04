@@ -27,14 +27,14 @@
 | ch7 | 7.2 멀티 노드풀 | ✅ | 2026-04-04 | api/worker/ops 3개 풀 |
 | ch7 | 7.3 App of Apps | ✅ | 2026-04-04 | root-app + directory.recurse |
 | ch7 | 7.4 멀티테넌시 | ✅ | 2026-04-04 | enterprise namespace 분리 |
-| ch8 | 8.1 메시징 | ⬜ | | |
-| ch8 | 8.2 트레이싱 | ⬜ | | |
-| ch8 | 8.3 CronJob | ⬜ | | |
-| ch9 | 9.1 저장소 분석 | ⬜ | | |
-| ch9 | 9.2 회고 | ⬜ | | |
-| ch9 | 9.3 온보딩 문서 | ⬜ | | |
-| ch9 | 9.4 GitAIOps 분석 | ⬜ | | |
-| ch9 | 9.5 마무리 | ⬜ | | |
+| ch8 | 8.1 메시징 | ✅ | 2026-04-04 | Kafka (Strimzi KRaft) |
+| ch8 | 8.2 트레이싱 | ✅ | 2026-04-04 | Tempo + OTel SDK |
+| ch8 | 8.3 CronJob | ✅ | 2026-04-04 | 5분 헬스체크 |
+| ch9 | 9.1 저장소 분석 | ✅ | 2026-04-04 | |
+| ch9 | 9.2 회고 | ✅ | 2026-04-04 | JOURNEY.md 기반 |
+| ch9 | 9.3 온보딩 문서 | ✅ | 2026-04-04 | |
+| ch9 | 9.4 GitAIOps 분석 | ✅ | 2026-04-04 | |
+| ch9 | 9.5 마무리 | ✅ | 2026-04-04 | |
 
 ## 도구 선택 기록
 
@@ -50,13 +50,17 @@
 | 배포 | Argo Rollouts | Flagger, K8s native | Canary+B/G, ArgoCD 통합 |
 | 캐시 | Valkey | Redis, Memcached | BSD 라이선스, Redis 호환 |
 | 시크릿 | GKE CSI+Secret Manager | Sealed Secrets, ESO | GKE 네이티브, Workload Identity |
+| 메시징 | Kafka (Strimzi) | RabbitMQ, NATS | 높은 처리량, KRaft, CNCF |
+| 트레이싱 | Tempo | Jaeger, Zipkin | Grafana 통합, 가벼움 |
 
 ## 현재 버전
 
 | 컴포넌트 | 버전 | 변경 이력 |
 |---------|------|----------|
 | Go | 1.25 | 초기 설정 |
-| Notiflex 이미지 | v0.3.0 | v0.1.0→v0.1.1(ch3)→v0.2.0(ch6.1)→v0.2.1(ch6.2)→v0.3.0(ch6.3) |
+| Notiflex 이미지 | v0.5.0 | v0.1.0→v0.1.1(ch3)→v0.2.0(ch6.1)→v0.2.1(ch6.2)→v0.3.0(ch6.3)→v0.4.0(ch8.1)→v0.5.0(ch8.2) |
+| Kafka | Strimzi (latest) | ch8.1 설치 |
+| OTel SDK | 1.43.0 | ch8.2 추가 |
 | ArgoCD | v3.3.6 (stable) | ch3.2 설치 |
 
 ## 현재 리소스
