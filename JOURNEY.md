@@ -16,9 +16,9 @@
 | ch3 | 3.3 기능 추가 | ✅ | 2026-04-04 | v0.1.1 롤링 업데이트 |
 | ch3 | 3.4 CI | ✅ | 2026-04-04 | GitHub Actions |
 | ch3 | 3.5 CI-CD 연결 | ✅ | 2026-04-04 | CI→매니페스트 업데이트→ArgoCD |
-| ch4 | 4.2 메트릭 모니터링 | ⬜ | | |
-| ch4 | 4.3 로그 수집 | ⬜ | | |
-| ch4 | 4.4 알림 | ⬜ | | |
+| ch4 | 4.2 메트릭 모니터링 | ✅ | 2026-04-04 | Prometheus + Grafana |
+| ch4 | 4.3 로그 수집 | ✅ | 2026-04-04 | Loki + Fluent Bit |
+| ch4 | 4.4 알림 | ✅ | 2026-04-04 | PrometheusRule |
 | ch5 | 5.2 트래픽 관리 | ⬜ | | |
 | ch5 | 5.3 무중단 배포 | ⬜ | | |
 | ch6 | 6.1 캐시 | ⬜ | | |
@@ -44,6 +44,8 @@
 |------|------|-----------|----------|
 | GitOps | ArgoCD | Flux, Jenkins X | Web UI, CRD 기반, CNCF Graduated |
 | CI | GitHub Actions | Jenkins, GitLab CI | GitHub 네이티브, 무료 |
+| 메트릭 | Prometheus+Grafana | Datadog, CloudWatch | 오픈소스, GKE 네이티브 |
+| 로그 | Loki+Fluent Bit | ELK, CloudWatch Logs | 가벼움, Grafana 통합 |
 
 ## 현재 버전
 
