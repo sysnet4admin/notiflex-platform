@@ -12,10 +12,10 @@
 | ch2 | 2.5 GKE 클러스터 | ✅ | 2026-04-04 | 2노드 e2-medium Spot |
 | ch2 | 2.6 빌드/배포 | ✅ | 2026-04-04 | v0.1.0 Cloud Build |
 | ch2 | 2.7 첫 커밋 | ✅ | 2026-04-04 | |
-| ch3 | 3.2 GitOps 도구 | ⬜ | | |
-| ch3 | 3.3 기능 추가 | ⬜ | | |
-| ch3 | 3.4 CI | ⬜ | | |
-| ch3 | 3.5 CI-CD 연결 | ⬜ | | |
+| ch3 | 3.2 GitOps 도구 | ✅ | 2026-04-05 | ArgoCD v3.3.6 |
+| ch3 | 3.3 기능 추가 | ✅ | 2026-04-05 | v0.1.1 /notify |
+| ch3 | 3.4 CI | ✅ | 2026-04-05 | GitHub Actions |
+| ch3 | 3.5 CI-CD 연결 | ✅ | 2026-04-05 | sed 매니페스트 업데이트 |
 | ch4 | 4.2 메트릭 모니터링 | ⬜ | | |
 | ch4 | 4.3 로그 수집 | ⬜ | | |
 | ch4 | 4.4 알림 | ⬜ | | |
@@ -42,15 +42,16 @@
 
 | 영역 | 선택 | 검토한 대안 | 선택 이유 |
 |------|------|-----------|----------|
-| | | | |
+| GitOps | ArgoCD | Flux, Jenkins X | UI 강점, CRD 기반, CNCF Graduated |
+| CI | GitHub Actions | Jenkins, GitLab CI | GitHub 네이티브, 무료 tier |
 
 ## 현재 버전
 
 | 컴포넌트 | 버전 | 변경 이력 |
 |---------|------|----------|
 | Go | 1.25 | |
-| Notiflex 이미지 | v0.1.0 | 초기 버전 |
-| ArgoCD | | |
+| Notiflex 이미지 | v0.1.1 | v0.1.0→v0.1.1 (/notify) |
+| ArgoCD | v3.3.6 | |
 | Kafka | | |
 | OTel SDK | | |
 
