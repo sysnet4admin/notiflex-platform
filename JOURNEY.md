@@ -24,9 +24,9 @@
 | ch6 | 6.1 캐시 | ✅ | 2026-04-05 | Valkey 9.0.3 standalone |
 | ch6 | 6.2 시크릿 관리 | ✅ | 2026-04-05 | GKE Secret Manager CSI |
 | ch6 | 6.3 Canary 전환 | ✅ | 2026-04-05 | B/G→Canary v0.3.0 |
-| ch7 | 7.2 멀티 노드풀 | ⬜ | | |
-| ch7 | 7.3 App of Apps | ⬜ | | |
-| ch7 | 7.4 멀티테넌시 | ⬜ | | |
+| ch7 | 7.2 멀티 노드풀 | ✅ | 2026-04-05 | api/worker/ops 3풀 |
+| ch7 | 7.3 App of Apps | ✅ | 2026-04-05 | root-app 패턴 |
+| ch7 | 7.4 멀티테넌시 | ✅ | 2026-04-05 | enterprise 테넌트 |
 | ch8 | 8.1 메시징 | ⬜ | | |
 | ch8 | 8.2 트레이싱 | ⬜ | | |
 | ch8 | 8.3 CronJob | ⬜ | | |
@@ -59,7 +59,10 @@
 
 | 노드풀 | 머신 타입 | 노드 수 | 주요 워크로드 |
 |--------|----------|---------|-------------|
-| default-pool | e2-medium | 2 | notiflex-api |
+| default-pool | e2-medium | 2 | monitoring, argocd |
+| api-pool | e2-medium | 1 | notiflex-api |
+| worker-pool | e2-standard-2 | 1 | Kafka, Valkey |
+| ops-pool | e2-small | 1 | Tempo |
 
 ## 트러블슈팅 이력
 
