@@ -1,0 +1,26 @@
+tempo:
+  receivers:
+    otlp:
+      protocols:
+        grpc:
+          endpoint: "0.0.0.0:4317"
+  resources:
+    requests:
+      cpu: 25m
+      memory: 128Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+  storage:
+    trace:
+      backend: local
+      local:
+        path: /var/tempo/traces
+persistence:
+  enabled: false
+tolerations:
+  - key: role
+    value: ops
+    effect: NoSchedule
+nodeSelector:
+  cloud.google.com/gke-nodepool: ops-pool
