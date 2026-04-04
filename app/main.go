@@ -9,7 +9,7 @@ import (
 	"sync/atomic"
 )
 
-var version = "v0.1.0"
+var version = "v0.1.1"
 
 func main() {
 	hostname, _ := os.Hostname()
@@ -34,6 +34,14 @@ func main() {
 		json.NewEncoder(w).Encode(map[string]interface{}{
 			"id":  id,
 			"pod": hostname,
+		})
+	})
+
+	http.HandleFunc("/notify", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]string{
+			"status":  "accepted",
+			"message": "notification queued",
 		})
 	})
 
