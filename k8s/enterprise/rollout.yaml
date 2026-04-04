@@ -2,9 +2,9 @@ apiVersion: argoproj.io/v1alpha1
 kind: Rollout
 metadata:
   name: notiflex-api
-  namespace: notiflex
+  namespace: enterprise
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: notiflex-api
@@ -23,12 +23,11 @@ spec:
           env:
             - name: VALKEY_ADDR
               value: valkey-primary.notiflex.svc.cluster.local:6379
-            - name: VALKEY_PASSWORD_FILE
-              value: /mnt/secrets/valkey-password
-          volumeMounts:
-            - name: secrets
-              mountPath: /mnt/secrets
-              readOnly: true
+            - name: VALKEY_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: valkey-secret
+                  key: password
           readinessProbe:
             httpGet:
               path: /health
@@ -38,25 +37,14 @@ spec:
           resources:
             requests:
               cpu: 25m
-              memory: 32Mi
+              memory: 64Mi
             limits:
               cpu: 200m
-              memory: 64Mi
-      volumes:
-        - name: secrets
-          csi:
-            driver: secrets-store-gke.csi.k8s.io
-            readOnly: true
-            volumeAttributes:
-              secretProviderClass: notiflex-secrets
+              memory: 128Mi
   strategy:
     canary:
       canaryService: notiflex-api-preview
       stableService: notiflex-api
       steps:
-      - setWeight: 20
-      - pause: {duration: 30s}
       - setWeight: 50
-      - pause: {duration: 30s}
-      - setWeight: 80
       - pause: {duration: 30s}
