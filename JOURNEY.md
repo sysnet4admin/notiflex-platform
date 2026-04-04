@@ -21,9 +21,9 @@
 | ch4 | 4.4 알림 | ✅ | 2026-04-05 | PrometheusRule |
 | ch5 | 5.2 트래픽 관리 | ✅ | 2026-04-05 | GKE Gateway API |
 | ch5 | 5.3 무중단 배포 | ✅ | 2026-04-05 | Argo Rollouts B/G v0.2.0 |
-| ch6 | 6.1 캐시 | ⬜ | | |
-| ch6 | 6.2 시크릿 관리 | ⬜ | | |
-| ch6 | 6.3 Canary 전환 | ⬜ | | |
+| ch6 | 6.1 캐시 | ✅ | 2026-04-05 | Valkey 9.0.3 standalone |
+| ch6 | 6.2 시크릿 관리 | ✅ | 2026-04-05 | GKE Secret Manager CSI |
+| ch6 | 6.3 Canary 전환 | ✅ | 2026-04-05 | B/G→Canary v0.3.0 |
 | ch7 | 7.2 멀티 노드풀 | ⬜ | | |
 | ch7 | 7.3 App of Apps | ⬜ | | |
 | ch7 | 7.4 멀티테넌시 | ⬜ | | |
@@ -50,7 +50,7 @@
 | 컴포넌트 | 버전 | 변경 이력 |
 |---------|------|----------|
 | Go | 1.25 | |
-| Notiflex 이미지 | v0.2.0 | v0.1.0→v0.1.1→v0.2.0 (B/G) |
+| Notiflex 이미지 | v0.3.0 | v0.1.0→v0.1.1→v0.2.0→v0.3.0 (Canary) |
 | ArgoCD | v3.3.6 | |
 | Kafka | | |
 | OTel SDK | | |
