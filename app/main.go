@@ -1,19 +1,53 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
-	"sync/atomic"
+	"strings"
+	"time"
+
+	"github.com/valkey-io/valkey-go"
 )
 
-var version = "v0.2.0"
+var version = "v0.3.0"
 
 func main() {
 	hostname, _ := os.Hostname()
-	var counter int64
+
+	// Read Valkey password
+	password := os.Getenv("VALKEY_PASSWORD")
+	if pwFile := os.Getenv("VALKEY_PASSWORD_FILE"); pwFile != "" {
+		if data, err := os.ReadFile(pwFile); err == nil {
+			password = strings.TrimSpace(string(data))
+		}
+	}
+
+	// Connect to Valkey with retry
+	addr := os.Getenv("VALKEY_ADDR")
+	var valkeyClient valkey.Client
+	if addr != "" {
+		for i := 0; i < 10; i++ {
+			var err error
+			valkeyClient, err = valkey.NewClient(valkey.ClientOption{
+				InitAddress: []string{addr},
+				Password:    password,
+			})
+			if err == nil {
+				log.Printf("Valkey connected to %s", addr)
+				break
+			}
+			log.Printf("Valkey retry %d/10: %v", i+1, err)
+			time.Sleep(3 * time.Second)
+		}
+		if valkeyClient == nil {
+			log.Fatal("Failed to connect to Valkey after 10 retries")
+		}
+		defer valkeyClient.Close()
+	}
 
 	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
@@ -50,7 +84,17 @@ func main() {
 	})
 
 	http.HandleFunc("/id", func(w http.ResponseWriter, r *http.Request) {
-		id := atomic.AddInt64(&counter, 1)
+		ctx := context.Background()
+		var id int64
+		if valkeyClient != nil {
+			resp := valkeyClient.Do(ctx, valkeyClient.B().Incr().Key("notiflex:id").Build())
+			val, err := resp.AsInt64()
+			if err != nil {
+				http.Error(w, "Valkey error", http.StatusInternalServerError)
+				return
+			}
+			id = val
+		}
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(map[string]interface{}{
 			"id":  id,
