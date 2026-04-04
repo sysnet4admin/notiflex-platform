@@ -1,5 +1,5 @@
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
 metadata:
   name: notiflex-api
   namespace: notiflex
@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: api
-          image: asia-northeast3-docker.pkg.dev/inlaid-vehicle-484800-n8/notiflex/api:v0.1.1
+          image: asia-northeast3-docker.pkg.dev/inlaid-vehicle-484800-n8/notiflex/api:v0.2.0
           ports:
             - containerPort: 8080
           readinessProbe:
@@ -24,12 +24,6 @@ spec:
               port: 8080
             initialDelaySeconds: 5
             periodSeconds: 10
-          livenessProbe:
-            httpGet:
-              path: /health
-              port: 8080
-            initialDelaySeconds: 10
-            periodSeconds: 30
           resources:
             requests:
               cpu: 25m
@@ -37,3 +31,9 @@ spec:
             limits:
               cpu: 200m
               memory: 64Mi
+  strategy:
+    blueGreen:
+      activeService: notiflex-api
+      previewService: notiflex-api-preview
+      autoPromotionEnabled: true
+      autoPromotionSeconds: 30
