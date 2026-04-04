@@ -21,9 +21,9 @@
 | ch4 | 4.4 알림 | ✅ | 2026-04-04 | PrometheusRule |
 | ch5 | 5.2 트래픽 관리 | ✅ | 2026-04-04 | Gateway API |
 | ch5 | 5.3 무중단 배포 | ✅ | 2026-04-04 | Argo Rollouts B/G |
-| ch6 | 6.1 캐시 | ⬜ | | |
-| ch6 | 6.2 시크릿 관리 | ⬜ | | |
-| ch6 | 6.3 Canary 전환 | ⬜ | | |
+| ch6 | 6.1 캐시 | ✅ | 2026-04-04 | Valkey standalone |
+| ch6 | 6.2 시크릿 관리 | ✅ | 2026-04-04 | GKE CSI + Secret Manager |
+| ch6 | 6.3 Canary 전환 | ✅ | 2026-04-04 | B/G → Canary |
 | ch7 | 7.2 멀티 노드풀 | ⬜ | | |
 | ch7 | 7.3 App of Apps | ⬜ | | |
 | ch7 | 7.4 멀티테넌시 | ⬜ | | |
