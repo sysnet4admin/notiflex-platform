@@ -21,9 +21,9 @@
 | ch4 | 4.4 알림 | ✅ | 2026-04-04 | PrometheusRule |
 | ch5 | 5.2 트래픽 관리 | ✅ | 2026-04-04 | Gateway API |
 | ch5 | 5.3 무중단 배포 | ✅ | 2026-04-04 | Argo Rollouts Blue/Green |
-| ch6 | 6.1 캐시 | ⬜ | | |
-| ch6 | 6.2 시크릿 관리 | ⬜ | | |
-| ch6 | 6.3 Canary 전환 | ⬜ | | |
+| ch6 | 6.1 캐시 | ✅ | 2026-04-04 | Valkey |
+| ch6 | 6.2 시크릿 관리 | ✅ | 2026-04-04 | GKE CSI + Secret Manager |
+| ch6 | 6.3 Canary 전환 | ✅ | 2026-04-04 | Blue/Green → Canary |
 | ch7 | 7.2 멀티 노드풀 | ⬜ | | |
 | ch7 | 7.3 App of Apps | ⬜ | | |
 | ch7 | 7.4 멀티테넌시 | ⬜ | | |
@@ -48,13 +48,15 @@
 | 로그 | Loki+Fluent Bit | ELK, CloudWatch Logs | 가벼움, Grafana 통합 |
 | 트래픽 | Gateway API | Ingress NGINX, Istio | K8s 표준, GKE 네이티브 |
 | 배포 | Argo Rollouts | Flagger, K8s native | Canary+B/G, ArgoCD 통합 |
+| 캐시 | Valkey | Redis, Memcached | BSD 라이선스, Redis 호환 |
+| 시크릿 | GKE CSI+Secret Manager | Sealed Secrets, ESO | GKE 네이티브, Workload Identity |
 
 ## 현재 버전
 
 | 컴포넌트 | 버전 | 변경 이력 |
 |---------|------|----------|
 | Go | 1.25 | 초기 설정 |
-| Notiflex 이미지 | v0.1.1 | v0.1.0→v0.1.1(ch3) |
+| Notiflex 이미지 | v0.3.0 | v0.1.0→v0.1.1(ch3)→v0.2.0(ch6.1)→v0.2.1(ch6.2)→v0.3.0(ch6.3) |
 | ArgoCD | v3.3.6 (stable) | ch3.2 설치 |
 
 ## 현재 리소스
@@ -69,4 +71,5 @@
 
 | 챕터 | 문제 | 해결 |
 |------|------|------|
-| | | |
+| ch6.2 | GKE CSI driver 이름이 오픈소스와 다름 | driver: secrets-store-gke.csi.k8s.io, provider: gke |
+| ch6.2 | Secret Manager 값과 Valkey password 불일치 | gcloud secrets versions add로 업데이트 |
