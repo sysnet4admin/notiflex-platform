@@ -24,9 +24,9 @@
 | ch6 | 6.1 캐시 | ✅ | 2026-04-04 | Valkey |
 | ch6 | 6.2 시크릿 관리 | ✅ | 2026-04-04 | GKE CSI + Secret Manager |
 | ch6 | 6.3 Canary 전환 | ✅ | 2026-04-04 | Blue/Green → Canary |
-| ch7 | 7.2 멀티 노드풀 | ⬜ | | |
-| ch7 | 7.3 App of Apps | ⬜ | | |
-| ch7 | 7.4 멀티테넌시 | ⬜ | | |
+| ch7 | 7.2 멀티 노드풀 | ✅ | 2026-04-04 | api/worker/ops 3개 풀 |
+| ch7 | 7.3 App of Apps | ✅ | 2026-04-04 | root-app + directory.recurse |
+| ch7 | 7.4 멀티테넌시 | ✅ | 2026-04-04 | enterprise namespace 분리 |
 | ch8 | 8.1 메시징 | ⬜ | | |
 | ch8 | 8.2 트레이싱 | ⬜ | | |
 | ch8 | 8.3 CronJob | ⬜ | | |
@@ -63,7 +63,10 @@
 
 | 노드풀 | 머신 타입 | 노드 수 | 주요 워크로드 |
 |--------|----------|---------|-------------|
-| default-pool | e2-medium | 2 | notiflex-api |
+| default-pool | e2-medium | 2 | ArgoCD, monitoring, Valkey |
+| api-pool | e2-medium | 1 | notiflex-api (smb+enterprise) |
+| worker-pool | e2-standard-2 | 1 | (ch8 Kafka용) |
+| ops-pool | e2-medium | 1 | (ch8 Tempo, CronJob용) |
 
 ## 트러블슈팅 이력
 
