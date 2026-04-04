@@ -13,6 +13,7 @@ spec:
       labels:
         app: notiflex-api
     spec:
+      serviceAccountName: notiflex-sa
       containers:
         - name: api
           image: asia-northeast3-docker.pkg.dev/inlaid-vehicle-484800-n8/notiflex/api:v0.2.0
@@ -22,7 +23,7 @@ spec:
             - name: VALKEY_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: valkey
+                  name: valkey-csi
                   key: valkey-password
           ports:
             - containerPort: 8080
@@ -38,6 +39,10 @@ spec:
               port: 8080
             initialDelaySeconds: 10
             periodSeconds: 30
+          volumeMounts:
+            - name: secrets
+              mountPath: /mnt/secrets
+              readOnly: true
           resources:
             requests:
               cpu: 25m
@@ -45,6 +50,13 @@ spec:
             limits:
               cpu: 200m
               memory: 128Mi
+      volumes:
+        - name: secrets
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: notiflex-secrets
   strategy:
     blueGreen:
       activeService: notiflex-api
