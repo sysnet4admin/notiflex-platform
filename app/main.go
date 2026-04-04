@@ -8,7 +8,7 @@ import (
 	"os"
 )
 
-var version = "v0.1.0"
+var version = "v0.1.1"
 
 func main() {
 	hostname, _ := os.Hostname()
