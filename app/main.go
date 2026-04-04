@@ -9,10 +9,11 @@ import (
 	"os"
 	"time"
 
+	"github.com/IBM/sarama"
 	"github.com/valkey-io/valkey-go"
 )
 
-var version = "v0.3.0"
+var version = "v0.4.0"
 
 func main() {
 	hostname, _ := os.Hostname()
@@ -47,6 +48,29 @@ func main() {
 	}
 	defer client.Close()
 
+	kafkaAddr := os.Getenv("KAFKA_ADDR")
+	if kafkaAddr == "" {
+		kafkaAddr = "notiflex-kafka-kafka-bootstrap.kafka.svc.cluster.local:9092"
+	}
+
+	config := sarama.NewConfig()
+	config.Producer.Return.Successes = true
+	config.Producer.RequiredAcks = sarama.WaitForAll
+
+	var producer sarama.SyncProducer
+	for i := 0; i < 10; i++ {
+		producer, err = sarama.NewSyncProducer([]string{kafkaAddr}, config)
+		if err == nil {
+			break
+		}
+		log.Printf("Kafka 연결 재시도 %d/10: %v", i+1, err)
+		time.Sleep(3 * time.Second)
+	}
+	if err != nil {
+		log.Fatalf("Kafka 연결 실패: %v", err)
+	}
+	defer producer.Close()
+
 	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
@@ -61,10 +85,35 @@ func main() {
 	})
 
 	http.HandleFunc("/notify", func(w http.ResponseWriter, r *http.Request) {
+		ctx := context.Background()
+		idResult := client.Do(ctx, client.B().Incr().Key("notiflex:id").Build())
+		id, err := idResult.AsInt64()
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		msg := map[string]interface{}{
+			"id":        id,
+			"pod":       hostname,
+			"timestamp": time.Now().UTC().Format(time.RFC3339),
+		}
+		msgBytes, _ := json.Marshal(msg)
+
+		_, _, err = producer.SendMessage(&sarama.ProducerMessage{
+			Topic: "notifications",
+			Value: sarama.ByteEncoder(msgBytes),
+		})
+		if err != nil {
+			http.Error(w, fmt.Sprintf("Kafka send failed: %v", err), http.StatusInternalServerError)
+			return
+		}
+
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]string{
-			"status":  "accepted",
-			"message": "notification queued",
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"status": "accepted",
+			"id":     id,
+			"pod":    hostname,
 		})
 	})
 
