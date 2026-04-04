@@ -1,0 +1,18 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: notiflex-alerts
+  namespace: notiflex
+  labels:
+    release: kube-prometheus
+spec:
+  groups:
+    - name: notiflex
+      rules:
+        - alert: NotiflexNoPods
+          expr: absent(up{namespace="notiflex", job="notiflex-api"}) == 1
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "No Notiflex pods running"
