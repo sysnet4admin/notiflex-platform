@@ -2,9 +2,9 @@ apiVersion: argoproj.io/v1alpha1
 kind: Rollout
 metadata:
   name: notiflex-api
-  namespace: notiflex
+  namespace: notiflex-enterprise
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: notiflex-api
@@ -13,7 +13,6 @@ spec:
       labels:
         app: notiflex-api
     spec:
-      serviceAccountName: notiflex-sa
       nodeSelector:
         cloud.google.com/gke-nodepool: api-pool
       containers:
@@ -25,7 +24,7 @@ spec:
             - name: VALKEY_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: valkey-csi
+                  name: valkey-enterprise
                   key: valkey-password
           ports:
             - containerPort: 8080
@@ -35,16 +34,6 @@ spec:
               port: 8080
             initialDelaySeconds: 5
             periodSeconds: 10
-          livenessProbe:
-            httpGet:
-              path: /health
-              port: 8080
-            initialDelaySeconds: 10
-            periodSeconds: 30
-          volumeMounts:
-            - name: secrets
-              mountPath: /mnt/secrets
-              readOnly: true
           resources:
             requests:
               cpu: 25m
@@ -52,21 +41,7 @@ spec:
             limits:
               cpu: 200m
               memory: 128Mi
-      volumes:
-        - name: secrets
-          csi:
-            driver: secrets-store.csi.k8s.io
-            readOnly: true
-            volumeAttributes:
-              secretProviderClass: notiflex-secrets
   strategy:
     canary:
-      canaryService: notiflex-api-preview
-      stableService: notiflex-api
       steps:
-      - setWeight: 20
-      - pause: {duration: 30s}
-      - setWeight: 50
-      - pause: {duration: 30s}
-      - setWeight: 80
-      - pause: {duration: 30s}
+      - setWeight: 100
