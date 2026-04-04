@@ -9,7 +9,7 @@ import (
 	"sync/atomic"
 )
 
-var version = "v0.1.0"
+var version = "v0.1.1"
 
 func main() {
 	hostname, _ := os.Hostname()
@@ -25,6 +25,27 @@ func main() {
 		json.NewEncoder(w).Encode(map[string]string{
 			"version": version,
 			"pod":     hostname,
+		})
+	})
+
+	http.HandleFunc("/notify", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+			return
+		}
+		var req map[string]string
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			http.Error(w, "Invalid JSON", http.StatusBadRequest)
+			return
+		}
+		tenant := req["tenant"]
+		message := req["message"]
+		log.Printf("[NOTIFY] tenant=%s message=%s", tenant, message)
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]string{
+			"status":  "accepted",
+			"tenant":  tenant,
+			"message": message,
 		})
 	})
 
