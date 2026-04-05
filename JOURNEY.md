@@ -27,9 +27,9 @@
 | ch7 | 7.2 멀티 노드풀 | ✅ | 2026-04-05 | api/worker/ops 3풀 |
 | ch7 | 7.3 App of Apps | ✅ | 2026-04-05 | root-app 패턴 |
 | ch7 | 7.4 멀티테넌시 | ✅ | 2026-04-05 | enterprise 테넌트 |
-| ch8 | 8.1 메시징 | ⬜ | | |
-| ch8 | 8.2 트레이싱 | ⬜ | | |
-| ch8 | 8.3 CronJob | ⬜ | | |
+| ch8 | 8.1 메시징 | ✅ | 2026-04-05 | Strimzi Kafka (KRaft) |
+| ch8 | 8.2 트레이싱 | ✅ | 2026-04-05 | Tempo + OTel |
+| ch8 | 8.3 CronJob | ✅ | 2026-04-05 | 5분 헬스체크 |
 | ch9 | 9.1 저장소 분석 | ⬜ | | |
 | ch9 | 9.2 회고 | ⬜ | | |
 | ch9 | 9.3 온보딩 문서 | ⬜ | | |
@@ -53,13 +53,17 @@
 | 노드 분리 | nodeSelector | taint, affinity | 단순, 직관적 |
 | 앱 관리 | App of Apps | ApplicationSet | Git 기반, 직관적 YAML |
 | 멀티테넌시 | Namespace + RBAC | vCluster | 경량, K8s 네이티브 |
+| 메시징 | Kafka (Strimzi) | RabbitMQ, NATS | KRaft 모드, Operator 관리 |
+| 트레이싱 | Tempo + OTel | Jaeger | Grafana 통합, 경량 |
 
 ## 현재 버전
 
 | 컴포넌트 | 버전 | 변경 이력 |
 |---------|------|----------|
 | Go | 1.25 | |
-| Notiflex 이미지 | v0.5.0 | v0.1.0→v0.1.1→v0.2.0→v0.3.0→v0.4.0→v0.5.0 |
+| Notiflex 이미지 | v0.7.0 | v0.1.0→v0.1.1→v0.2.0→v0.3.0→v0.4.0→v0.5.0→v0.6.0→v0.7.0 |
+| Kafka | 4.1.0 (Strimzi) | |
+| Tempo | latest | |
 | ArgoCD | v3.3.6 | |
 
 ## 현재 리소스
@@ -68,8 +72,8 @@
 |--------|----------|---------|-------------|
 | default-pool | e2-medium | 2 | 시스템, Valkey |
 | api-pool | e2-medium | 1 | notiflex-api (SMB+Enterprise) |
-| worker-pool | e2-standard-2 | 1 | (ch8: Kafka) |
-| ops-pool | e2-small | 1 | (ch8: 모니터링 이전 예정) |
+| worker-pool | e2-standard-2 | 1 | Kafka (Strimzi) |
+| ops-pool | e2-small | 1 | Tempo, CronJob |
 
 ## 트러블슈팅 이력
 
