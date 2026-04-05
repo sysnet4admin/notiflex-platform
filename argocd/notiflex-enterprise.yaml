@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: notiflex-enterprise
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/sysnet4admin/notiflex-platform.git
+    targetRevision: main
+    path: k8s/enterprise
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: enterprise
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
