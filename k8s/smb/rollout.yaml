@@ -15,9 +15,17 @@ spec:
     spec:
       containers:
         - name: api
-          image: asia-northeast3-docker.pkg.dev/inlaid-vehicle-484800-n8/notiflex/api:v0.2.0
+          image: asia-northeast3-docker.pkg.dev/inlaid-vehicle-484800-n8/notiflex/api:v0.3.0
           ports:
             - containerPort: 8080
+          env:
+            - name: VALKEY_ADDR
+              value: valkey-primary.notiflex.svc.cluster.local:6379
+            - name: VALKEY_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: valkey
+                  key: valkey-password
           resources:
             requests:
               cpu: 25m
