@@ -9,7 +9,7 @@ import (
 	"sync/atomic"
 )
 
-var version = "v0.1.1"
+var version = "v0.2.0"
 var counter int64
 
 func main() {
