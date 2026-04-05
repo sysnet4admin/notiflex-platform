@@ -8,12 +8,13 @@ import (
 	"sync/atomic"
 )
 
-var version = "v0.1.0"
+var version = "v0.1.1"
 var counter int64
 
 func main() {
 	http.HandleFunc("/health", healthHandler)
 	http.HandleFunc("/id", idHandler)
+	http.HandleFunc("/notify", notifyHandler)
 
 	port := "8080"
 	fmt.Printf("Notiflex API %s starting on :%s\n", version, port)
@@ -28,6 +29,18 @@ func healthHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]string{
 		"status":  "ok",
 		"version": version,
+	})
+}
+
+func notifyHandler(w http.ResponseWriter, r *http.Request) {
+	id := atomic.AddInt64(&counter, 1)
+	pod := os.Getenv("HOSTNAME")
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"notification_id": id,
+		"pod":             pod,
+		"version":         version,
+		"status":          "queued",
 	})
 }
 
