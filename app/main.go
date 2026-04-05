@@ -12,15 +12,24 @@ import (
 	"github.com/valkey-io/valkey-go"
 )
 
-var version = "v0.3.0"
+var version = "v0.4.0"
 var valkeyClient valkey.Client
 
 func main() {
 	addr := os.Getenv("VALKEY_ADDR")
-	password := os.Getenv("VALKEY_PASSWORD")
-
 	if addr == "" {
 		addr = "valkey-primary.notiflex.svc.cluster.local:6379"
+	}
+
+	var password string
+	if pwFile := os.Getenv("VALKEY_PASSWORD_FILE"); pwFile != "" {
+		if data, err := os.ReadFile(pwFile); err == nil {
+			password = string(data)
+			log.Printf("Valkey 비밀번호를 파일에서 읽음: %s", pwFile)
+		}
+	}
+	if password == "" {
+		password = os.Getenv("VALKEY_PASSWORD")
 	}
 
 	var err error
