@@ -19,8 +19,8 @@
 | ch4 | 4.2 메트릭 모니터링 | ✅ | 2026-04-05 | kube-prometheus-stack |
 | ch4 | 4.3 로그 수집 | ✅ | 2026-04-05 | Loki + Fluent Bit |
 | ch4 | 4.4 알림 | ✅ | 2026-04-05 | PrometheusRule |
-| ch5 | 5.2 트래픽 관리 | ⬜ | | |
-| ch5 | 5.3 무중단 배포 | ⬜ | | |
+| ch5 | 5.2 트래픽 관리 | ✅ | 2026-04-05 | GKE Gateway API |
+| ch5 | 5.3 무중단 배포 | ✅ | 2026-04-05 | Argo Rollouts B/G |
 | ch6 | 6.1 캐시 | ⬜ | | |
 | ch6 | 6.2 시크릿 관리 | ⬜ | | |
 | ch6 | 6.3 Canary 전환 | ⬜ | | |
@@ -45,13 +45,15 @@
 | GitOps | ArgoCD | Flux, Jenkins X | UI, CNCF Graduated |
 | 메트릭 | Prometheus+Grafana | Datadog | 무료, K8s 네이티브 |
 | 로그 | Loki+Fluent Bit | ELK | 경량, Grafana 통합 |
+| 트래픽 | GKE Gateway API | Ingress NGINX, Istio | K8s 표준, 설치 불필요 |
+| 배포 | Argo Rollouts | Flagger | ArgoCD 생태계 |
 
 ## 현재 버전
 
 | 컴포넌트 | 버전 | 변경 이력 |
 |---------|------|----------|
 | Go | 1.25 | |
-| Notiflex 이미지 | v0.1.1 | v0.1.0→v0.1.1 |
+| Notiflex 이미지 | v0.2.0 | v0.1.0→v0.1.1→v0.2.0 |
 | ArgoCD | v3.3.6 | |
 
 ## 현재 리소스
