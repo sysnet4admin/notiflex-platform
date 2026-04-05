@@ -12,13 +12,55 @@ import (
 
 	"github.com/IBM/sarama"
 	"github.com/valkey-io/valkey-go"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
+	"go.opentelemetry.io/otel/sdk/resource"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	semconv "go.opentelemetry.io/otel/semconv/v1.26.0"
 )
 
-var version = "v0.6.0"
+var version = "v0.7.0"
 var valkeyClient valkey.Client
 var kafkaProducer sarama.SyncProducer
+var tracer = otel.Tracer("notiflex-api")
+
+func initTracer() func() {
+	endpoint := os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT")
+	if endpoint == "" {
+		return func() {}
+	}
+
+	ctx := context.Background()
+	exporter, err := otlptracegrpc.New(ctx,
+		otlptracegrpc.WithEndpoint(endpoint),
+		otlptracegrpc.WithInsecure(),
+	)
+	if err != nil {
+		log.Printf("OTel exporter 초기화 실패: %v", err)
+		return func() {}
+	}
+
+	tp := sdktrace.NewTracerProvider(
+		sdktrace.WithBatcher(exporter),
+		sdktrace.WithResource(resource.NewWithAttributes(
+			semconv.SchemaURL,
+			semconv.ServiceNameKey.String("notiflex-api"),
+			semconv.ServiceVersionKey.String(version),
+		)),
+	)
+	otel.SetTracerProvider(tp)
+	tracer = tp.Tracer("notiflex-api")
+	log.Printf("OTel 트레이싱 활성화: %s", endpoint)
+
+	return func() {
+		tp.Shutdown(ctx)
+	}
+}
 
 func main() {
+	shutdown := initTracer()
+	defer shutdown()
+
 	// Valkey 연결
 	addr := os.Getenv("VALKEY_ADDR")
 	if addr == "" {
@@ -85,6 +127,9 @@ func main() {
 }
 
 func healthHandler(w http.ResponseWriter, r *http.Request) {
+	_, span := tracer.Start(r.Context(), "healthHandler")
+	defer span.End()
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{
 		"status":  "ok",
@@ -93,12 +138,18 @@ func healthHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func nextID(ctx context.Context) (int64, error) {
+	ctx, span := tracer.Start(ctx, "nextID")
+	defer span.End()
+
 	cmd := valkeyClient.B().Incr().Key("notiflex:id").Build()
 	return valkeyClient.Do(ctx, cmd).AsInt64()
 }
 
 func notifyHandler(w http.ResponseWriter, r *http.Request) {
-	id, err := nextID(r.Context())
+	ctx, span := tracer.Start(r.Context(), "notifyHandler")
+	defer span.End()
+
+	id, err := nextID(ctx)
 	if err != nil {
 		http.Error(w, "ID generation failed", http.StatusInternalServerError)
 		return
@@ -106,6 +157,7 @@ func notifyHandler(w http.ResponseWriter, r *http.Request) {
 	pod := os.Getenv("HOSTNAME")
 
 	if kafkaProducer != nil {
+		_, kafkaSpan := tracer.Start(ctx, "kafkaProduce")
 		msg := &sarama.ProducerMessage{
 			Topic: "notifications",
 			Key:   sarama.StringEncoder(strconv.FormatInt(id, 10)),
@@ -115,6 +167,7 @@ func notifyHandler(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			log.Printf("Kafka send failed: %v", err)
 		}
+		kafkaSpan.End()
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -128,7 +181,10 @@ func notifyHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func idHandler(w http.ResponseWriter, r *http.Request) {
-	id, err := nextID(r.Context())
+	ctx, span := tracer.Start(r.Context(), "idHandler")
+	defer span.End()
+
+	id, err := nextID(ctx)
 	if err != nil {
 		http.Error(w, "ID generation failed", http.StatusInternalServerError)
 		return
@@ -136,6 +192,7 @@ func idHandler(w http.ResponseWriter, r *http.Request) {
 	pod := os.Getenv("HOSTNAME")
 
 	if kafkaProducer != nil {
+		_, kafkaSpan := tracer.Start(ctx, "kafkaProduce")
 		msg := &sarama.ProducerMessage{
 			Topic: "notifications",
 			Key:   sarama.StringEncoder(strconv.FormatInt(id, 10)),
@@ -145,6 +202,7 @@ func idHandler(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			log.Printf("Kafka send failed: %v", err)
 		}
+		kafkaSpan.End()
 	}
 
 	w.Header().Set("Content-Type", "application/json")
