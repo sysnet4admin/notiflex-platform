@@ -16,9 +16,9 @@
 | ch3 | 3.3 기능 추가 | ✅ | 2026-04-05 | /notify 엔드포인트 |
 | ch3 | 3.4 CI | ✅ | 2026-04-05 | GitHub Actions |
 | ch3 | 3.5 CI-CD 연결 | ✅ | 2026-04-05 | |
-| ch4 | 4.2 메트릭 모니터링 | ⬜ | | |
-| ch4 | 4.3 로그 수집 | ⬜ | | |
-| ch4 | 4.4 알림 | ⬜ | | |
+| ch4 | 4.2 메트릭 모니터링 | ✅ | 2026-04-05 | kube-prometheus-stack |
+| ch4 | 4.3 로그 수집 | ✅ | 2026-04-05 | Loki + Fluent Bit |
+| ch4 | 4.4 알림 | ✅ | 2026-04-05 | PrometheusRule |
 | ch5 | 5.2 트래픽 관리 | ⬜ | | |
 | ch5 | 5.3 무중단 배포 | ⬜ | | |
 | ch6 | 6.1 캐시 | ⬜ | | |
@@ -43,6 +43,8 @@
 | 영역 | 선택 | 검토한 대안 | 선택 이유 |
 |------|------|-----------|----------|
 | GitOps | ArgoCD | Flux, Jenkins X | UI, CNCF Graduated |
+| 메트릭 | Prometheus+Grafana | Datadog | 무료, K8s 네이티브 |
+| 로그 | Loki+Fluent Bit | ELK | 경량, Grafana 통합 |
 
 ## 현재 버전
 
