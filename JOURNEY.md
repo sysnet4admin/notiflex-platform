@@ -79,4 +79,4 @@
 
 | 챕터 | 문제 | 해결 |
 |------|------|------|
-| | | |
+| ch6 | ArgoCD Sync 정상이나 매니페스트 미반영 (v3 NetworkPolicy가 repo-server egress 차단) | NetworkPolicy 삭제 + 전체 재시작 |
