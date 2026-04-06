@@ -10,6 +10,8 @@ import (
 
 var counter int64
 
+const version = "v0.1.1"
+
 func main() {
 	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
@@ -24,6 +26,10 @@ func main() {
 		})
 	})
 
-	fmt.Println("Notiflex API v0.1.0 listening on :8080")
+	http.HandleFunc("/version", func(w http.ResponseWriter, r *http.Request) {
+		json.NewEncoder(w).Encode(map[string]string{"version": version})
+	})
+
+	fmt.Printf("Notiflex API %s listening on :8080\n", version)
 	http.ListenAndServe(":8080", nil)
 }
