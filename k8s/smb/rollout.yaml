@@ -53,8 +53,13 @@ spec:
             volumeAttributes:
               secretProviderClass: notiflex-secrets
   strategy:
-    blueGreen:
-      activeService: notiflex-api
-      previewService: notiflex-api-preview
-      autoPromotionEnabled: true
-      autoPromotionSeconds: 30
+    canary:
+      canaryService: notiflex-api-preview
+      stableService: notiflex-api
+      steps:
+      - setWeight: 20
+      - pause: {duration: 30s}
+      - setWeight: 50
+      - pause: {duration: 30s}
+      - setWeight: 80
+      - pause: {duration: 30s}
