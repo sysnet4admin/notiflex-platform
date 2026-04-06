@@ -1,0 +1,35 @@
+name: CI - Build and Push
+
+on:
+  push:
+    branches: [main]
+    paths: ['app/**']
+
+env:
+  REGION: asia-northeast3
+  REPO: notiflex
+  IMAGE: api
+
+jobs:
+  build-push:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker
+        run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
+
+      - name: Build and Push
+        run: |
+          TAG=${GITHUB_SHA::7}
+          IMAGE_URI=${{ env.REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ env.REPO }}/${{ env.IMAGE }}
+          docker build -t ${IMAGE_URI}:${TAG} app/
+          docker push ${IMAGE_URI}:${TAG}
+          echo "### 🐳 Image pushed" >> $GITHUB_STEP_SUMMARY
+          echo "${IMAGE_URI}:${TAG}" >> $GITHUB_STEP_SUMMARY
