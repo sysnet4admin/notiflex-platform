@@ -15,6 +15,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: google-github-actions/auth@v2
         with:
@@ -29,7 +31,20 @@ jobs:
         run: |
           TAG=${GITHUB_SHA::7}
           IMAGE_URI=${{ env.REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ env.REPO }}/${{ env.IMAGE }}
+          echo "IMAGE_URI=${IMAGE_URI}" >> $GITHUB_ENV
+          echo "TAG=${TAG}" >> $GITHUB_ENV
           docker build -t ${IMAGE_URI}:${TAG} app/
           docker push ${IMAGE_URI}:${TAG}
           echo "### 🐳 Image pushed" >> $GITHUB_STEP_SUMMARY
           echo "${IMAGE_URI}:${TAG}" >> $GITHUB_STEP_SUMMARY
+
+      - name: Update manifest and push
+        run: |
+          echo "Updating image tag to ${IMAGE_URI}:${TAG}"
+          sed -i "s|image: .*${IMAGE}:.*|image: ${IMAGE_URI}:${TAG}|" k8s/smb/deployment.yaml
+          cat k8s/smb/deployment.yaml | grep image:
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add k8s/smb/deployment.yaml
+          git commit -m "chore: update image tag to ${TAG}" || echo "No changes to commit"
+          git push
