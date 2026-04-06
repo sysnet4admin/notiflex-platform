@@ -12,7 +12,7 @@ import (
 )
 
 var (
-	version = "v0.3.0"
+	version = "v0.3.1"
 	client  valkey.Client
 )
 
@@ -20,6 +20,11 @@ func main() {
 	hostname, _ := os.Hostname()
 	addr := os.Getenv("VALKEY_ADDR")
 	password := os.Getenv("VALKEY_PASSWORD")
+	if pwFile := os.Getenv("VALKEY_PASSWORD_FILE"); pwFile != "" {
+		if data, err := os.ReadFile(pwFile); err == nil {
+			password = string(data)
+		}
+	}
 
 	if addr == "" {
 		addr = "valkey-primary.notiflex.svc.cluster.local:6379"
