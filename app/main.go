@@ -19,6 +19,11 @@ func main() {
 		json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
 	})
 
+	http.HandleFunc("/version", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]string{"version": "v0.1.1"})
+	})
+
 	http.HandleFunc("/id", func(w http.ResponseWriter, r *http.Request) {
 		id := atomic.AddInt64(&counter, 1)
 		w.Header().Set("Content-Type", "application/json")
