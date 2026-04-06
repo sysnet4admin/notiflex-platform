@@ -14,7 +14,7 @@ const version = "v0.1.1"
 
 func main() {
 	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
-		json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
+		json.NewEncoder(w).Encode(map[string]string{"status": "ok", "version": version})
 	})
 
 	http.HandleFunc("/id", func(w http.ResponseWriter, r *http.Request) {
