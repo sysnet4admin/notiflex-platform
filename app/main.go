@@ -10,15 +10,62 @@ import (
 
 	"github.com/IBM/sarama"
 	"github.com/valkey-io/valkey-go"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
+	"go.opentelemetry.io/otel/sdk/resource"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	semconv "go.opentelemetry.io/otel/semconv/v1.26.0"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 var (
-	version  = "v0.5.0"
+	version  = "v0.6.0"
 	client   valkey.Client
 	producer sarama.SyncProducer
+	tracer   = otel.Tracer("notiflex")
 )
 
+func initTracer() func() {
+	endpoint := os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT")
+	if endpoint == "" {
+		endpoint = "tempo.monitoring.svc.cluster.local:4317"
+	}
+
+	ctx := context.Background()
+	conn, err := grpc.NewClient(endpoint, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		log.Printf("OTel gRPC 연결 실패: %v", err)
+		return func() {}
+	}
+
+	exporter, err := otlptracegrpc.New(ctx, otlptracegrpc.WithGRPCConn(conn))
+	if err != nil {
+		log.Printf("OTel exporter 생성 실패: %v", err)
+		return func() {}
+	}
+
+	res, _ := resource.New(ctx,
+		resource.WithAttributes(
+			semconv.ServiceNameKey.String("notiflex-api"),
+			semconv.ServiceVersionKey.String(version),
+		),
+	)
+
+	tp := sdktrace.NewTracerProvider(
+		sdktrace.WithBatcher(exporter),
+		sdktrace.WithResource(res),
+	)
+	otel.SetTracerProvider(tp)
+	tracer = tp.Tracer("notiflex")
+
+	return func() { tp.Shutdown(ctx) }
+}
+
 func main() {
+	shutdown := initTracer()
+	defer shutdown()
+
 	hostname, _ := os.Hostname()
 	addr := os.Getenv("VALKEY_ADDR")
 	password := os.Getenv("VALKEY_PASSWORD")
@@ -91,6 +138,8 @@ func main() {
 	}()
 
 	http.HandleFunc("/version", func(w http.ResponseWriter, r *http.Request) {
+		_, span := tracer.Start(r.Context(), "GET /version")
+		defer span.End()
 		w.Header().Set("Content-Type", "application/json")
 		fmt.Fprintf(w, `{"version":"%s"}`, version)
 	})
@@ -101,7 +150,9 @@ func main() {
 	})
 
 	http.HandleFunc("/id", func(w http.ResponseWriter, r *http.Request) {
-		ctx := context.Background()
+		ctx, span := tracer.Start(r.Context(), "GET /id")
+		defer span.End()
+
 		resp := client.Do(ctx, client.B().Incr().Key("notiflex:id").Build())
 		id, _ := resp.ToInt64()
 
