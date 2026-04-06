@@ -8,12 +8,14 @@ import (
 	"os"
 	"time"
 
+	"github.com/IBM/sarama"
 	"github.com/valkey-io/valkey-go"
 )
 
 var (
-	version = "v0.4.0"
-	client  valkey.Client
+	version  = "v0.5.0"
+	client   valkey.Client
+	producer sarama.SyncProducer
 )
 
 func main() {
@@ -21,7 +23,6 @@ func main() {
 	addr := os.Getenv("VALKEY_ADDR")
 	password := os.Getenv("VALKEY_PASSWORD")
 
-	// 파일 기반 비밀번호 (CSI Driver)
 	if pwFile := os.Getenv("VALKEY_PASSWORD_FILE"); pwFile != "" {
 		if data, err := os.ReadFile(pwFile); err == nil {
 			password = string(data)
@@ -32,7 +33,6 @@ func main() {
 		addr = "valkey-primary.notiflex.svc.cluster.local:6379"
 	}
 
-	// 10회 재시도, 3초 간격
 	var err error
 	for i := 0; i < 10; i++ {
 		client, err = valkey.NewClient(valkey.ClientOption{
@@ -49,6 +49,45 @@ func main() {
 		log.Fatalf("Valkey 연결 실패: %v", err)
 	}
 	defer client.Close()
+
+	// Kafka Producer
+	kafkaBroker := os.Getenv("KAFKA_BROKER")
+	if kafkaBroker != "" {
+		config := sarama.NewConfig()
+		config.Producer.Return.Successes = true
+		for i := 0; i < 10; i++ {
+			producer, err = sarama.NewSyncProducer([]string{kafkaBroker}, config)
+			if err == nil {
+				break
+			}
+			log.Printf("Kafka 연결 재시도 %d/10: %v", i+1, err)
+			time.Sleep(3 * time.Second)
+		}
+		if err != nil {
+			log.Printf("Kafka Producer 연결 실패 (계속 진행): %v", err)
+		} else {
+			defer producer.Close()
+		}
+
+		// Consumer goroutine
+		go func() {
+			consumer, err := sarama.NewConsumer([]string{kafkaBroker}, nil)
+			if err != nil {
+				log.Printf("Kafka Consumer 시작 실패: %v", err)
+				return
+			}
+			defer consumer.Close()
+			partConsumer, err := consumer.ConsumePartition("notifications", 0, sarama.OffsetNewest)
+			if err != nil {
+				log.Printf("Kafka Partition Consumer 시작 실패: %v", err)
+				return
+			}
+			defer partConsumer.Close()
+			for msg := range partConsumer.Messages() {
+				log.Printf("[Kafka Consumer] %s", string(msg.Value))
+			}
+		}()
+	}
 
 	http.HandleFunc("/version", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
@@ -68,6 +107,15 @@ func main() {
 			http.Error(w, fmt.Sprintf("Valkey error: %v", err), 500)
 			return
 		}
+
+		if producer != nil {
+			msg := &sarama.ProducerMessage{
+				Topic: "notifications",
+				Value: sarama.StringEncoder(fmt.Sprintf(`{"event":"id_created","id":%d,"pod":"%s"}`, id, hostname)),
+			}
+			producer.SendMessage(msg)
+		}
+
 		w.Header().Set("Content-Type", "application/json")
 		fmt.Fprintf(w, `{"id":%d,"pod":"%s"}`, id, hostname)
 	})
