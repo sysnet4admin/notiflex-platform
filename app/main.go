@@ -8,12 +8,17 @@ import (
 )
 
 var (
-	version = "v0.1.0"
+	version = "v0.1.1"
 	counter int64
 )
 
 func main() {
 	hostname, _ := os.Hostname()
+
+	http.HandleFunc("/version", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		fmt.Fprintf(w, `{"version":"%s"}`, version)
+	})
 
 	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
