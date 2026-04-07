@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: api
-          image: asia-northeast3-docker.pkg.dev/inlaid-vehicle-484800-n8/notiflex/api:v0.4.0
+          image: asia-northeast3-docker.pkg.dev/inlaid-vehicle-484800-n8/notiflex/api:ac11f11f8bc4e5aadaad39909511eae109e86611
           ports:
             - containerPort: 8080
           env:
