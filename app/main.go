@@ -11,13 +11,18 @@ import (
 	"github.com/valkey-io/valkey-go"
 )
 
-const version = "v0.3.0"
+const version = "v0.4.0"
 
 var client valkey.Client
 
 func main() {
 	addr := os.Getenv("VALKEY_ADDR")
 	password := os.Getenv("VALKEY_PASSWORD")
+	if pwFile := os.Getenv("VALKEY_PASSWORD_FILE"); pwFile != "" {
+		if data, err := os.ReadFile(pwFile); err == nil {
+			password = string(data)
+		}
+	}
 
 	var err error
 	for i := 0; i < 10; i++ {
