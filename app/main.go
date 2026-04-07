@@ -11,16 +11,48 @@ import (
 
 	"github.com/IBM/sarama"
 	"github.com/valkey-io/valkey-go"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
+	"go.opentelemetry.io/otel/sdk/trace"
 )
 
-const version = "v0.5.0"
+const version = "v0.6.0"
 
 var (
 	client   valkey.Client
 	producer sarama.SyncProducer
+	tracer   = otel.Tracer("notiflex")
 )
 
+func initTracer() func() {
+	endpoint := os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT")
+	if endpoint == "" {
+		return func() {}
+	}
+
+	ctx := context.Background()
+	exporter, err := otlptracegrpc.New(ctx,
+		otlptracegrpc.WithEndpoint(endpoint),
+		otlptracegrpc.WithInsecure(),
+	)
+	if err != nil {
+		log.Printf("OTel exporter 생성 실패: %v", err)
+		return func() {}
+	}
+
+	tp := trace.NewTracerProvider(trace.WithBatcher(exporter))
+	otel.SetTracerProvider(tp)
+	log.Printf("OpenTelemetry 트레이싱 활성화: %s", endpoint)
+
+	return func() {
+		tp.Shutdown(ctx)
+	}
+}
+
 func main() {
+	shutdown := initTracer()
+	defer shutdown()
+
 	addr := os.Getenv("VALKEY_ADDR")
 	password := os.Getenv("VALKEY_PASSWORD")
 	if pwFile := os.Getenv("VALKEY_PASSWORD_FILE"); pwFile != "" {
@@ -69,12 +101,19 @@ func main() {
 	}
 
 	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+		_, span := tracer.Start(r.Context(), "GET /health")
+		defer span.End()
 		json.NewEncoder(w).Encode(map[string]string{"status": "ok", "version": version})
 	})
 
 	http.HandleFunc("/id", func(w http.ResponseWriter, r *http.Request) {
+		ctx, span := tracer.Start(r.Context(), "GET /id")
+		defer span.End()
+
+		_, valkeySpan := tracer.Start(ctx, "valkey.INCR")
 		cmd := client.B().Incr().Key("notiflex:id").Build()
-		id, err := client.Do(r.Context(), cmd).AsInt64()
+		id, err := client.Do(ctx, cmd).AsInt64()
+		valkeySpan.End()
 		if err != nil {
 			http.Error(w, err.Error(), 500)
 			return
@@ -83,6 +122,7 @@ func main() {
 
 		// Kafka로 이벤트 전송
 		if producer != nil {
+			_, kafkaSpan := tracer.Start(ctx, "kafka.produce")
 			msg := fmt.Sprintf(`{"id":%d,"pod":"%s","time":"%s"}`, id, pod, time.Now().Format(time.RFC3339))
 			_, _, err := producer.SendMessage(&sarama.ProducerMessage{
 				Topic: "notifications",
@@ -91,6 +131,7 @@ func main() {
 			if err != nil {
 				log.Printf("Kafka 전송 실패: %v", err)
 			}
+			kafkaSpan.End()
 		}
 
 		json.NewEncoder(w).Encode(map[string]interface{}{
@@ -100,6 +141,8 @@ func main() {
 	})
 
 	http.HandleFunc("/version", func(w http.ResponseWriter, r *http.Request) {
+		_, span := tracer.Start(r.Context(), "GET /version")
+		defer span.End()
 		json.NewEncoder(w).Encode(map[string]string{"version": version})
 	})
 
