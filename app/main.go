@@ -11,21 +11,65 @@ import (
 
 	"github.com/IBM/sarama"
 	"github.com/valkey-io/valkey-go"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
+	"go.opentelemetry.io/otel/sdk/resource"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	semconv "go.opentelemetry.io/otel/semconv/v1.26.0"
+	"go.opentelemetry.io/otel/trace"
 )
 
 var (
-	version      = "v0.6.0"
-	valkeyClient valkey.Client
+	version       = "v0.7.0"
+	valkeyClient  valkey.Client
 	kafkaProducer sarama.SyncProducer
+	tracer        trace.Tracer
 )
+
+func initTracer() func() {
+	endpoint := os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT")
+	if endpoint == "" {
+		return func() {}
+	}
+
+	ctx := context.Background()
+	exporter, err := otlptracegrpc.New(ctx,
+		otlptracegrpc.WithEndpoint(endpoint),
+		otlptracegrpc.WithInsecure(),
+	)
+	if err != nil {
+		log.Printf("OTel exporter 생성 실패: %v", err)
+		return func() {}
+	}
+
+	tp := sdktrace.NewTracerProvider(
+		sdktrace.WithBatcher(exporter),
+		sdktrace.WithResource(resource.NewWithAttributes(
+			semconv.SchemaURL,
+			semconv.ServiceNameKey.String("notiflex-api"),
+			semconv.ServiceVersionKey.String(version),
+		)),
+	)
+	otel.SetTracerProvider(tp)
+	tracer = tp.Tracer("notiflex-api")
+	log.Printf("OTel 트레이싱 초기화 완료: %s", endpoint)
+
+	return func() {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		tp.Shutdown(ctx)
+	}
+}
 
 func main() {
 	hostname, _ := os.Hostname()
 
+	shutdown := initTracer()
+	defer shutdown()
+
 	valkeyAddr := os.Getenv("VALKEY_ADDR")
 	valkeyPassword := os.Getenv("VALKEY_PASSWORD")
 
-	// 파일 기반 Secret (CSI Driver)이 있으면 우선 사용
 	if pwFile := os.Getenv("VALKEY_PASSWORD_FILE"); pwFile != "" {
 		if data, err := os.ReadFile(pwFile); err == nil {
 			valkeyPassword = string(data)
@@ -53,7 +97,6 @@ func main() {
 		defer valkeyClient.Close()
 	}
 
-	// Kafka Producer 초기화
 	kafkaBroker := os.Getenv("KAFKA_BROKER")
 	if kafkaBroker != "" {
 		config := sarama.NewConfig()
@@ -74,7 +117,6 @@ func main() {
 			log.Printf("Kafka 연결 실패 (계속 진행): %v", err)
 		} else {
 			defer kafkaProducer.Close()
-			// Consumer 시작 (백그라운드)
 			go startConsumer(kafkaBroker, hostname)
 		}
 	}
@@ -93,10 +135,19 @@ func main() {
 	})
 
 	http.HandleFunc("/id", func(w http.ResponseWriter, r *http.Request) {
-		ctx := context.Background()
-		var id int64
+		ctx := r.Context()
+		if tracer != nil {
+			var span trace.Span
+			ctx, span = tracer.Start(ctx, "generate-id")
+			defer span.End()
+		}
 
+		var id int64
 		if valkeyClient != nil {
+			if tracer != nil {
+				_, vSpan := tracer.Start(ctx, "valkey-incr")
+				defer vSpan.End()
+			}
 			result := valkeyClient.Do(ctx, valkeyClient.B().Incr().Key("notiflex:id").Build())
 			val, err := result.AsInt64()
 			if err != nil {
@@ -106,8 +157,11 @@ func main() {
 			id = val
 		}
 
-		// Kafka에 이벤트 발행
 		if kafkaProducer != nil {
+			if tracer != nil {
+				_, kSpan := tracer.Start(ctx, "kafka-produce")
+				defer kSpan.End()
+			}
 			msg := &sarama.ProducerMessage{
 				Topic: "notifications",
 				Value: sarama.StringEncoder(fmt.Sprintf(`{"id":%d,"pod":"%s","time":"%s"}`, id, hostname, time.Now().Format(time.RFC3339))),
