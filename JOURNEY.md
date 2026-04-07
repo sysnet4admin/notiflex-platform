@@ -11,8 +11,8 @@
 | ch2 | 2.4 GitHub 저장소 | ✅ | 2026-04-07 | notiflex-platform (기존 저장소 재사용) |
 | ch2 | 2.5 GKE 클러스터 | ✅ | 2026-04-07 | notiflex-cluster, e2-medium x2, Spot |
 | ch2 | 2.6 빌드/배포 | ✅ | 2026-04-07 | v0.1.0, Cloud Build, scratch 이미지 |
-| ch2 | 2.7 첫 커밋 | ⬜ | | |
-| ch3 | 3.2 GitOps 도구 | ⬜ | | |
+| ch2 | 2.7 첫 커밋 | ✅ | 2026-04-07 | Initial commit | |
+| ch3 | 3.2 GitOps 도구 | ✅ | 2026-04-07 | ArgoCD 선택 | |
 | ch3 | 3.3 기능 추가 | ⬜ | | |
 | ch3 | 3.4 CI | ⬜ | | |
 | ch3 | 3.5 CI-CD 연결 | ⬜ | | |
@@ -42,7 +42,7 @@
 
 | 영역 | 선택 | 검토한 대안 | 선택 이유 |
 |------|------|-----------|----------|
-| | | | |
+| GitOps | ArgoCD | Flux, Jenkins X, Spinnaker | Web UI로 배포 시각화, CNCF Graduated, e2-medium에서 구동 가능 |
 
 ## 현재 버전
 
@@ -50,7 +50,7 @@
 |---------|------|----------|
 | Go | 1.25 | ch2.6 초기 설정 |
 | Notiflex 이미지 | v0.1.0 | ch2.6 첫 빌드 |
-| ArgoCD | | |
+| ArgoCD | v3.3 (stable) | ch3.2 설치 |
 | Kafka | | |
 | OTel SDK | | |
 
