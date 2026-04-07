@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -8,12 +9,16 @@ import (
 	"os"
 	"time"
 
+	"github.com/IBM/sarama"
 	"github.com/valkey-io/valkey-go"
 )
 
-const version = "v0.4.1"
+const version = "v0.5.0"
 
-var client valkey.Client
+var (
+	client   valkey.Client
+	producer sarama.SyncProducer
+)
 
 func main() {
 	addr := os.Getenv("VALKEY_ADDR")
@@ -41,6 +46,28 @@ func main() {
 	}
 	defer client.Close()
 
+	// Kafka Producer 초기화
+	broker := os.Getenv("KAFKA_BROKER")
+	if broker != "" {
+		cfg := sarama.NewConfig()
+		cfg.Producer.Return.Successes = true
+		for i := 0; i < 10; i++ {
+			producer, err = sarama.NewSyncProducer([]string{broker}, cfg)
+			if err == nil {
+				break
+			}
+			log.Printf("Kafka 연결 재시도 %d/10: %v", i+1, err)
+			time.Sleep(3 * time.Second)
+		}
+		if err != nil {
+			log.Printf("Kafka 연결 실패 (계속 진행): %v", err)
+		} else {
+			defer producer.Close()
+			log.Printf("Kafka Producer 연결 성공: %s", broker)
+			go startConsumer(broker)
+		}
+	}
+
 	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(map[string]string{"status": "ok", "version": version})
 	})
@@ -53,6 +80,19 @@ func main() {
 			return
 		}
 		pod := os.Getenv("HOSTNAME")
+
+		// Kafka로 이벤트 전송
+		if producer != nil {
+			msg := fmt.Sprintf(`{"id":%d,"pod":"%s","time":"%s"}`, id, pod, time.Now().Format(time.RFC3339))
+			_, _, err := producer.SendMessage(&sarama.ProducerMessage{
+				Topic: "notifications",
+				Value: sarama.StringEncoder(msg),
+			})
+			if err != nil {
+				log.Printf("Kafka 전송 실패: %v", err)
+			}
+		}
+
 		json.NewEncoder(w).Encode(map[string]interface{}{
 			"id":  id,
 			"pod": pod,
@@ -65,4 +105,38 @@ func main() {
 
 	fmt.Printf("Notiflex API %s listening on :8080\n", version)
 	http.ListenAndServe(":8080", nil)
+}
+
+func startConsumer(broker string) {
+	cfg := sarama.NewConfig()
+	cfg.Consumer.Group.Rebalance.GroupStrategies = []sarama.BalanceStrategy{sarama.NewBalanceStrategyRoundRobin()}
+	cfg.Consumer.Offsets.Initial = sarama.OffsetNewest
+
+	group, err := sarama.NewConsumerGroup([]string{broker}, "notiflex-consumer", cfg)
+	if err != nil {
+		log.Printf("Kafka Consumer 생성 실패: %v", err)
+		return
+	}
+	defer group.Close()
+
+	handler := &consumerHandler{}
+	for {
+		if err := group.Consume(context.Background(), []string{"notifications"}, handler); err != nil {
+			log.Printf("Kafka Consumer 에러: %v", err)
+			time.Sleep(5 * time.Second)
+		}
+	}
+}
+
+type consumerHandler struct{}
+
+func (h *consumerHandler) Setup(_ sarama.ConsumerGroupSession) error   { return nil }
+func (h *consumerHandler) Cleanup(_ sarama.ConsumerGroupSession) error { return nil }
+func (h *consumerHandler) ConsumeClaim(session sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
+	for msg := range claim.Messages() {
+		log.Printf("[Kafka Consumer] topic=%s partition=%d offset=%d value=%s",
+			msg.Topic, msg.Partition, msg.Offset, string(msg.Value))
+		session.MarkMessage(msg, "")
+	}
+	return nil
 }
