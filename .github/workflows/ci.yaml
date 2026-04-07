@@ -9,7 +9,7 @@ jobs:
   build-and-push:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
 
     steps:
       - name: Checkout
@@ -29,4 +29,20 @@ jobs:
           TAG=${GITHUB_SHA::7}
           docker build -t ${IMAGE}:${TAG} app/
           docker push ${IMAGE}:${TAG}
+          echo "IMAGE_URI=${IMAGE}:${TAG}" >> $GITHUB_ENV
           echo "✅ Pushed ${IMAGE}:${TAG}"
+
+      - name: Update manifest
+        run: |
+          echo "Updating image to: $IMAGE_URI"
+          sed -i "s|image: asia-northeast3-docker.pkg.dev/.*/notiflex/api:.*|image: $IMAGE_URI|" k8s/smb/deployment.yaml
+          cat k8s/smb/deployment.yaml | grep image:
+
+      - name: Commit and Push manifest
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add k8s/smb/deployment.yaml
+          git diff --staged --quiet && echo "No changes" && exit 0
+          git commit -m "ci: update image tag to ${GITHUB_SHA::7}"
+          git push
