@@ -13,7 +13,7 @@ import (
 )
 
 var (
-	version     = "v0.3.0"
+	version     = "v0.4.0"
 	valkeyClient valkey.Client
 )
 
@@ -22,6 +22,14 @@ func main() {
 
 	valkeyAddr := os.Getenv("VALKEY_ADDR")
 	valkeyPassword := os.Getenv("VALKEY_PASSWORD")
+
+	// 파일 기반 Secret (CSI Driver)이 있으면 우선 사용
+	if pwFile := os.Getenv("VALKEY_PASSWORD_FILE"); pwFile != "" {
+		if data, err := os.ReadFile(pwFile); err == nil {
+			valkeyPassword = string(data)
+			log.Printf("Valkey 비밀번호를 파일에서 로드: %s", pwFile)
+		}
+	}
 
 	if valkeyAddr != "" {
 		var err error
