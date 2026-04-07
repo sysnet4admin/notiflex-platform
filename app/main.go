@@ -11,7 +11,7 @@ import (
 	"github.com/valkey-io/valkey-go"
 )
 
-const version = "v0.4.0"
+const version = "v0.4.1"
 
 var client valkey.Client
 
