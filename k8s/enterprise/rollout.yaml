@@ -1,0 +1,48 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: notiflex-api
+  namespace: enterprise
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: notiflex-api
+  strategy:
+    canary:
+      stableService: notiflex-api
+      steps:
+      - setWeight: 50
+      - pause: {duration: 30s}
+  template:
+    metadata:
+      labels:
+        app: notiflex-api
+    spec:
+      nodeSelector:
+        cloud.google.com/gke-nodepool: api-pool
+      containers:
+      - name: api
+        image: asia-northeast3-docker.pkg.dev/inlaid-vehicle-484800-n8/notiflex/api:v0.5.0
+        ports:
+        - containerPort: 8080
+        env:
+        - name: VALKEY_ADDR
+          value: valkey-primary.notiflex.svc.cluster.local:6379
+        - name: VALKEY_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: valkey
+              key: valkey-password
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 3
+          periodSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 10
