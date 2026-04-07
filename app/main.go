@@ -8,7 +8,7 @@ import (
 	"sync/atomic"
 )
 
-const version = "v0.1.0"
+const version = "v0.1.1"
 
 var counter int64
 
@@ -24,6 +24,10 @@ func main() {
 			"id":  id,
 			"pod": pod,
 		})
+	})
+
+	http.HandleFunc("/version", func(w http.ResponseWriter, r *http.Request) {
+		json.NewEncoder(w).Encode(map[string]string{"version": version})
 	})
 
 	fmt.Printf("Notiflex API %s listening on :8080\n", version)
