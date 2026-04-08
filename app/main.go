@@ -13,7 +13,7 @@ import (
 )
 
 var (
-	version = "v0.3.0"
+	version = "v0.4.0"
 	client  valkey.Client
 )
 
@@ -22,6 +22,12 @@ func main() {
 
 	valkeyAddr := os.Getenv("VALKEY_ADDR")
 	valkeyPass := os.Getenv("VALKEY_PASSWORD")
+	if pwFile := os.Getenv("VALKEY_PASSWORD_FILE"); pwFile != "" {
+		if data, err := os.ReadFile(pwFile); err == nil {
+			valkeyPass = string(data)
+			log.Printf("Valkey password loaded from file: %s", pwFile)
+		}
+	}
 
 	if valkeyAddr != "" {
 		var err error
