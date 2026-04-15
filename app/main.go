@@ -11,12 +11,54 @@ import (
 
 	"github.com/IBM/sarama"
 	"github.com/valkey-io/valkey-go"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
+	"go.opentelemetry.io/otel/sdk/resource"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	semconv "go.opentelemetry.io/otel/semconv/v1.26.0"
 )
 
 var valkeyClient valkey.Client
 var kafkaProducer sarama.SyncProducer
 
+func initTracer() func() {
+	endpoint := os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT")
+	if endpoint == "" {
+		return func() {}
+	}
+
+	ctx := context.Background()
+	exporter, err := otlptracegrpc.New(ctx,
+		otlptracegrpc.WithEndpoint(endpoint),
+		otlptracegrpc.WithInsecure(),
+	)
+	if err != nil {
+		log.Printf("OTel exporter 생성 실패: %v", err)
+		return func() {}
+	}
+
+	tp := sdktrace.NewTracerProvider(
+		sdktrace.WithBatcher(exporter),
+		sdktrace.WithResource(resource.NewWithAttributes(
+			semconv.SchemaURL,
+			semconv.ServiceNameKey.String("notiflex-api"),
+		)),
+	)
+	otel.SetTracerProvider(tp)
+
+	return func() {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		tp.Shutdown(ctx)
+	}
+}
+
 func main() {
+	shutdown := initTracer()
+	defer shutdown()
+
+	tracer := otel.Tracer("notiflex-api")
+
 	hostname, _ := os.Hostname()
 	addr := os.Getenv("VALKEY_ADDR")
 	password := os.Getenv("VALKEY_PASSWORD")
@@ -74,16 +116,22 @@ func main() {
 	}
 
 	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+		_, span := tracer.Start(r.Context(), "health-check")
+		defer span.End()
 		w.WriteHeader(http.StatusOK)
 		fmt.Fprintf(w, `{"status":"ok"}`)
 	})
 
 	http.HandleFunc("/version", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, `{"version":"v0.6.0","service":"notiflex-api"}`)
+		_, span := tracer.Start(r.Context(), "version")
+		defer span.End()
+		fmt.Fprintf(w, `{"version":"v0.7.0","service":"notiflex-api"}`)
 	})
 
 	http.HandleFunc("/id", func(w http.ResponseWriter, r *http.Request) {
-		ctx := context.Background()
+		ctx, span := tracer.Start(r.Context(), "generate-id")
+		defer span.End()
+
 		cmd := valkeyClient.B().Incr().Key("notiflex:id").Build()
 		result := valkeyClient.Do(ctx, cmd)
 		id, err := result.AsInt64()
@@ -94,6 +142,7 @@ func main() {
 
 		// Kafka produce
 		if kafkaProducer != nil {
+			_, kafkaSpan := tracer.Start(ctx, "kafka-produce")
 			msg := &sarama.ProducerMessage{
 				Topic: "notifications",
 				Value: sarama.StringEncoder(fmt.Sprintf(`{"id":"%d","timestamp":"%s","pod":"%s"}`, id, time.Now().Format(time.RFC3339), hostname)),
@@ -102,6 +151,7 @@ func main() {
 			if err != nil {
 				log.Printf("Kafka send error: %v", err)
 			}
+			kafkaSpan.End()
 		}
 
 		fmt.Fprintf(w, `{"id":"%d","generated_by":"%s"}`, id, hostname)
