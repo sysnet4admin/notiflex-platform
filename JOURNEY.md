@@ -19,8 +19,8 @@
 | ch4 | 4.2 메트릭 모니터링 | ✅ | 2026-04-15 | kube-prometheus-stack |
 | ch4 | 4.3 로그 수집 | ✅ | 2026-04-15 | Loki + Fluent Bit |
 | ch4 | 4.4 알림 | ✅ | 2026-04-15 | PrometheusRule Pod 재시작 |
-| ch5 | 5.2 트래픽 관리 | ⬜ | | |
-| ch5 | 5.3 무중단 배포 | ⬜ | | |
+| ch5 | 5.2 트래픽 관리 | ✅ | 2026-04-15 | Gateway API, 외부 IP 35.216.96.244 |
+| ch5 | 5.3 무중단 배포 | ✅ | 2026-04-15 | Argo Rollouts Blue/Green |
 | ch6 | 6.1 캐시 | ⬜ | | |
 | ch6 | 6.2 시크릿 관리 | ⬜ | | |
 | ch6 | 6.3 Canary 전환 | ⬜ | | |
@@ -44,6 +44,8 @@
 |------|------|-----------|----------|
 | GitOps | ArgoCD | Flux, Jenkins X, Spinnaker | Web UI, CNCF Graduated, 학습에 최적 |
 | CI | GitHub Actions | Cloud Build, GitLab CI, Jenkins | GitHub 네이티브, 무료, 간편 |
+| 트래픽 관리 | Gateway API | Ingress NGINX, Istio, Traefik | GKE 네이티브, 설치 불필요 |
+| 무중단 배포 | Argo Rollouts | Flagger, K8s Rolling | ArgoCD 통합, Blue/Green+Canary |
 
 ## 현재 버전
 
