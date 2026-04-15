@@ -24,9 +24,9 @@
 | ch6 | 6.1 캐시 | ✅ | 2026-04-15 | Valkey standalone, v0.3.0 |
 | ch6 | 6.2 시크릿 관리 | ✅ | 2026-04-15 | CSI Driver + Secret Manager + Workload Identity |
 | ch6 | 6.3 Canary 전환 | ✅ | 2026-04-15 | Blue/Green -> Canary 전환 |
-| ch7 | 7.2 멀티 노드풀 | ⬜ | | |
-| ch7 | 7.3 App of Apps | ⬜ | | |
-| ch7 | 7.4 멀티테넌시 | ⬜ | | |
+| ch7 | 7.2 멀티 노드풀 | ✅ | 2026-04-15 | api/worker/ops-pool 3개 추가 |
+| ch7 | 7.3 App of Apps | ✅ | 2026-04-15 | root-app이 argocd/ 감시 |
+| ch7 | 7.4 멀티테넌시 | ✅ | 2026-04-15 | enterprise NS + App of Apps |
 | ch8 | 8.1 메시징 | ⬜ | | |
 | ch8 | 8.2 트레이싱 | ⬜ | | |
 | ch8 | 8.3 CronJob | ⬜ | | |
@@ -49,6 +49,9 @@
 | 캐시 | Valkey | Redis, Memcached, DragonflyDB | Redis 호환, BSD 라이선스 |
 | Secret 관리 | CSI + Secret Manager | Sealed Secrets, ESO | GKE 네이티브, Workload Identity |
 | 배포 전략 진화 | Canary | Blue/Green 유지 | 점진적 전환, 리소스 효율 |
+| 노드 배치 | nodeSelector | taint/toleration, affinity | 가장 단순, GKE 자동 라벨 |
+| 앱 관리 | App of Apps | ApplicationSet, 수동 | 직관적, Git 디렉터리 감시 |
+| 멀티테넌시 | Namespace+RBAC | vCluster, 클러스터 분리 | K8s 기본, 리소스 효율 |
 
 ## 현재 버전
 
@@ -64,7 +67,10 @@
 
 | 노드풀 | 머신 타입 | 노드 수 | 주요 워크로드 |
 |--------|----------|---------|-------------|
-| default-pool | e2-medium | 2 | notiflex-api |
+| default-pool | e2-medium | 2 | 시스템, Valkey |
+| api-pool | e2-medium | 1 | notiflex-api |
+| worker-pool | e2-standard-2 | 1 | Kafka(예정) |
+| ops-pool | e2-small | 1 | CronJob(예정) |
 
 ## 트러블슈팅 이력
 
