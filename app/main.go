@@ -13,7 +13,7 @@ import (
 )
 
 var (
-	version     = "v0.3.0"
+	version     = "v0.4.0"
 	valkeyClient valkey.Client
 )
 
@@ -25,6 +25,11 @@ func main() {
 		addr = "valkey-primary.notiflex.svc.cluster.local:6379"
 	}
 	password := os.Getenv("VALKEY_PASSWORD")
+	if pwFile := os.Getenv("VALKEY_PASSWORD_FILE"); pwFile != "" {
+		if data, err := os.ReadFile(pwFile); err == nil {
+			password = string(data)
+		}
+	}
 
 	var err error
 	for i := 0; i < 10; i++ {
@@ -72,6 +77,6 @@ func main() {
 		})
 	})
 
-	log.Println("Notiflex API v0.3.0 starting on :8080")
+	log.Println("Notiflex API v0.4.0 starting on :8080")
 	http.ListenAndServe(":8080", nil)
 }
