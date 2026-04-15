@@ -18,6 +18,13 @@ func main() {
 	addr := os.Getenv("VALKEY_ADDR")
 	password := os.Getenv("VALKEY_PASSWORD")
 
+	// 파일 기반 비밀번호 (CSI Secret Manager 마운트)
+	if pwFile := os.Getenv("VALKEY_PASSWORD_FILE"); pwFile != "" {
+		if data, err := os.ReadFile(pwFile); err == nil {
+			password = string(data)
+		}
+	}
+
 	// Valkey 연결 (10회 재시도, 3초 간격)
 	var err error
 	for i := 0; i < 10; i++ {
@@ -42,7 +49,7 @@ func main() {
 	})
 
 	http.HandleFunc("/version", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, `{"version":"v0.3.0","service":"notiflex-api"}`)
+		fmt.Fprintf(w, `{"version":"v0.4.0","service":"notiflex-api"}`)
 	})
 
 	http.HandleFunc("/id", func(w http.ResponseWriter, r *http.Request) {
