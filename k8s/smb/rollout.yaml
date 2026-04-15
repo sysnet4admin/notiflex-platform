@@ -18,12 +18,14 @@ spec:
         cloud.google.com/gke-nodepool: api-pool
       containers:
       - name: api
-        image: asia-northeast3-docker.pkg.dev/inlaid-vehicle-484800-n8/notiflex/api:8828f1f
+        image: asia-northeast3-docker.pkg.dev/inlaid-vehicle-484800-n8/notiflex/api:v0.5.0
         env:
         - name: VALKEY_ADDR
           value: valkey-primary.notiflex.svc.cluster.local:6379
         - name: VALKEY_PASSWORD_FILE
           value: /mnt/secrets/valkey-password
+        - name: KAFKA_BROKER
+          value: notiflex-kafka-broker-brokers.kafka.svc.cluster.local:9092
         ports:
         - containerPort: 8080
         readinessProbe:
