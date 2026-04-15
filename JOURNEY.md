@@ -27,9 +27,9 @@
 | ch7 | 7.2 멀티 노드풀 | ✅ | 2026-04-15 | api/worker/ops-pool 3개 추가 |
 | ch7 | 7.3 App of Apps | ✅ | 2026-04-15 | root-app이 argocd/ 감시 |
 | ch7 | 7.4 멀티테넌시 | ✅ | 2026-04-15 | enterprise NS + App of Apps |
-| ch8 | 8.1 메시징 | ⬜ | | |
-| ch8 | 8.2 트레이싱 | ⬜ | | |
-| ch8 | 8.3 CronJob | ⬜ | | |
+| ch8 | 8.1 메시징 | ✅ | 2026-04-15 | Strimzi Kafka KRaft, Sarama producer |
+| ch8 | 8.2 트레이싱 | ✅ | 2026-04-15 | Tempo + OTel SDK v1.43.0 |
+| ch8 | 8.3 CronJob | ✅ | 2026-04-15 | 5분마다 헬스체크, ops-pool |
 | ch9 | 9.1 저장소 분석 | ⬜ | | |
 | ch9 | 9.2 회고 | ⬜ | | |
 | ch9 | 9.3 온보딩 문서 | ⬜ | | |
@@ -52,16 +52,19 @@
 | 노드 배치 | nodeSelector | taint/toleration, affinity | 가장 단순, GKE 자동 라벨 |
 | 앱 관리 | App of Apps | ApplicationSet, 수동 | 직관적, Git 디렉터리 감시 |
 | 멀티테넌시 | Namespace+RBAC | vCluster, 클러스터 분리 | K8s 기본, 리소스 효율 |
+| 메시징 | Kafka (Strimzi) | RabbitMQ, NATS, Pub/Sub | 높은 처리량, KRaft 모드 |
+| 트레이싱 | Grafana Tempo | Jaeger, Zipkin | Grafana 통합, 관측성 3축 |
+| 배치 자동화 | K8s CronJob | Argo Workflows, Airflow | K8s 내장, 설치 불필요 |
 
 ## 현재 버전
 
 | 컴포넌트 | 버전 | 변경 이력 |
 |---------|------|----------|
 | Go | 1.25 | ch2.6 초기 |
-| Notiflex 이미지 | v0.4.0 | ch2.6 v0.1.0 -> ch3.3 v0.1.1 -> ch3.5 v0.2.0 -> ch6.1 v0.3.0 -> ch6.2 v0.4.0 |
+| Notiflex 이미지 | v0.6.0 | ch2.6 v0.1.0 -> ch3.3 v0.1.1 -> ch3.5 v0.2.0 -> ch6.1 v0.3.0 -> ch6.2 v0.4.0 -> ch8.1 v0.5.0 -> ch8.2 v0.6.0 |
 | ArgoCD | 3.3.6 (stable) | ch3.2 설치 |
-| Kafka | | |
-| OTel SDK | | |
+| Kafka | 4.2.0 (Strimzi 0.51) | ch8.1 설치 |
+| OTel SDK | v1.43.0 | ch8.2 추가 |
 
 ## 현재 리소스
 
@@ -69,8 +72,8 @@
 |--------|----------|---------|-------------|
 | default-pool | e2-medium | 2 | 시스템, Valkey |
 | api-pool | e2-medium | 1 | notiflex-api |
-| worker-pool | e2-standard-2 | 1 | Kafka(예정) |
-| ops-pool | e2-small | 1 | CronJob(예정) |
+| worker-pool | e2-standard-2 | 1 | Kafka broker |
+| ops-pool | e2-small | 1 | CronJob, Tempo |
 
 ## 트러블슈팅 이력
 
@@ -78,4 +81,7 @@
 
 | 챕터 | 문제 | 해결 |
 |------|------|------|
-| | | |
+| ch8.1 | Kafka 4.0.0 UnsupportedKafkaVersionException | Strimzi 0.51은 4.1.0/4.1.1/4.2.0 지원. 4.2.0으로 변경 |
+| ch8.1 | Helm zsh escaping | tolerations[0] 패턴이 zsh에서 실패. --set 없이 설치 |
+| ch8.2 | git push rejected (CI 충돌) | CI가 SHA 태그로 이미지 업데이트. rebase로 해결 |
+| ch8.2 | Kafka DNS 실패 | Spot VM DNS 불안정. graceful degradation으로 앱 정상 동작 |
