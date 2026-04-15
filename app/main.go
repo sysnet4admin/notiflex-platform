@@ -10,7 +10,7 @@ import (
 
 var (
 	counter int64
-	version = "v0.1.1"
+	version = "v0.2.0"
 )
 
 func main() {
