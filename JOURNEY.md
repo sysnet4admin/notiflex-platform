@@ -12,10 +12,10 @@
 | ch2 | 2.5 GKE 클러스터 | ✅ | 2026-04-15 | e2-medium x2, Spot, Gateway API |
 | ch2 | 2.6 빌드/배포 | ✅ | 2026-04-15 | v0.1.0, Pod 2개 Running |
 | ch2 | 2.7 첫 커밋 | ✅ | 2026-04-15 | GitHub 푸시 완료 |
-| ch3 | 3.2 GitOps 도구 | ⬜ | | |
-| ch3 | 3.3 기능 추가 | ⬜ | | |
-| ch3 | 3.4 CI | ⬜ | | |
-| ch3 | 3.5 CI-CD 연결 | ⬜ | | |
+| ch3 | 3.2 GitOps 도구 | ✅ | 2026-04-15 | ArgoCD 설치, notiflex-smb App |
+| ch3 | 3.3 기능 추가 | ✅ | 2026-04-15 | /version endpoint, v0.1.1 |
+| ch3 | 3.4 CI | ✅ | 2026-04-15 | GitHub Actions CI |
+| ch3 | 3.5 CI-CD 연결 | ✅ | 2026-04-15 | CI 매니페스트 자동 업데이트 |
 | ch4 | 4.2 메트릭 모니터링 | ⬜ | | |
 | ch4 | 4.3 로그 수집 | ⬜ | | |
 | ch4 | 4.4 알림 | ⬜ | | |
@@ -42,15 +42,16 @@
 
 | 영역 | 선택 | 검토한 대안 | 선택 이유 |
 |------|------|-----------|----------|
-| | | | |
+| GitOps | ArgoCD | Flux, Jenkins X, Spinnaker | Web UI, CNCF Graduated, 학습에 최적 |
+| CI | GitHub Actions | Cloud Build, GitLab CI, Jenkins | GitHub 네이티브, 무료, 간편 |
 
 ## 현재 버전
 
 | 컴포넌트 | 버전 | 변경 이력 |
 |---------|------|----------|
 | Go | 1.25 | ch2.6 초기 |
-| Notiflex 이미지 | v0.1.0 | ch2.6 초기 |
-| ArgoCD | | |
+| Notiflex 이미지 | v0.2.0 | ch2.6 v0.1.0 → ch3.3 v0.1.1 → ch3.5 v0.2.0 |
+| ArgoCD | 3.3.6 (stable) | ch3.2 설치 |
 | Kafka | | |
 | OTel SDK | | |
 
