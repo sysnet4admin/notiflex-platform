@@ -1,0 +1,6 @@
+nodeSelector:
+  role: worker
+tolerations:
+- key: role
+  value: worker
+  effect: NoSchedule
