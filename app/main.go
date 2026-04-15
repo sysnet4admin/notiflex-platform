@@ -18,7 +18,7 @@ func main() {
 	})
 
 	http.HandleFunc("/version", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, `{"version":"v0.1.1","service":"notiflex-api"}`)
+		fmt.Fprintf(w, `{"version":"v0.2.0","service":"notiflex-api"}`)
 	})
 
 	http.HandleFunc("/id", func(w http.ResponseWriter, r *http.Request) {
