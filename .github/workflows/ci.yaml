@@ -13,8 +13,12 @@ env:
 jobs:
   build-push:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
     - uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
 
     - uses: google-github-actions/auth@v2
       with:
@@ -30,4 +34,18 @@ jobs:
         TAG=${GITHUB_SHA::7}
         docker build -t ${{ env.IMAGE }}:${TAG} app/
         docker push ${{ env.IMAGE }}:${TAG}
-        echo "IMAGE_TAG=${TAG}" >> $GITHUB_OUTPUT
+        echo "IMAGE_TAG=${TAG}" >> $GITHUB_ENV
+        echo "IMAGE_URI=${{ env.IMAGE }}:${TAG}" >> $GITHUB_ENV
+
+    - name: Update manifests
+      run: |
+        echo "Updating image to: $IMAGE_URI"
+        sed -i "s|image: .*notiflex/api:.*|image: ${IMAGE_URI}|" k8s/smb/deployment.yaml
+        cat k8s/smb/deployment.yaml | grep image
+
+    - name: Commit and push
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        git add k8s/smb/deployment.yaml
+        git diff --cached --quiet || (git commit -m "ci: update image tag to ${IMAGE_TAG}" && git push)
