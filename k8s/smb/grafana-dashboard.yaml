@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: notiflex-dashboard
+  namespace: monitoring
+  labels:
+    grafana_dashboard: "1"
+data:
+  notiflex-overview.json: |
+    {
+      "dashboard": {
+        "title": "Notiflex Overview",
+        "panels": [
+          {
+            "title": "Pod CPU Usage",
+            "type": "timeseries",
+            "targets": [{"expr": "rate(container_cpu_usage_seconds_total{namespace='notiflex'}[5m])"}],
+            "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0}
+          },
+          {
+            "title": "Pod Memory Usage",
+            "type": "timeseries",
+            "targets": [{"expr": "container_memory_working_set_bytes{namespace='notiflex'}"}],
+            "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0}
+          },
+          {
+            "title": "Pod Restarts",
+            "type": "stat",
+            "targets": [{"expr": "kube_pod_container_status_restarts_total{namespace='notiflex'}"}],
+            "gridPos": {"h": 4, "w": 24, "x": 0, "y": 8}
+          }
+        ],
+        "schemaVersion": 39,
+        "version": 1
+      }
+    }
