@@ -4,7 +4,7 @@ metadata:
   name: notiflex-api
   namespace: notiflex
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: notiflex-api
@@ -14,6 +14,8 @@ spec:
         app: notiflex-api
     spec:
       serviceAccountName: notiflex-secrets
+      nodeSelector:
+        cloud.google.com/gke-nodepool: api-pool
       containers:
       - name: api
         image: asia-northeast3-docker.pkg.dev/inlaid-vehicle-484800-n8/notiflex/api:v0.5.0
