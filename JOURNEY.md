@@ -21,9 +21,9 @@
 | ch4 | 4.4 알림 | ✅ | 2026-04-15 | PrometheusRule Pod 재시작 |
 | ch5 | 5.2 트래픽 관리 | ✅ | 2026-04-15 | Gateway API, 외부 IP 35.216.96.244 |
 | ch5 | 5.3 무중단 배포 | ✅ | 2026-04-15 | Argo Rollouts Blue/Green |
-| ch6 | 6.1 캐시 | ⬜ | | |
-| ch6 | 6.2 시크릿 관리 | ⬜ | | |
-| ch6 | 6.3 Canary 전환 | ⬜ | | |
+| ch6 | 6.1 캐시 | ✅ | 2026-04-15 | Valkey standalone, v0.3.0 |
+| ch6 | 6.2 시크릿 관리 | ✅ | 2026-04-15 | CSI Driver + Secret Manager + Workload Identity |
+| ch6 | 6.3 Canary 전환 | ✅ | 2026-04-15 | Blue/Green -> Canary 전환 |
 | ch7 | 7.2 멀티 노드풀 | ⬜ | | |
 | ch7 | 7.3 App of Apps | ⬜ | | |
 | ch7 | 7.4 멀티테넌시 | ⬜ | | |
@@ -46,13 +46,16 @@
 | CI | GitHub Actions | Cloud Build, GitLab CI, Jenkins | GitHub 네이티브, 무료, 간편 |
 | 트래픽 관리 | Gateway API | Ingress NGINX, Istio, Traefik | GKE 네이티브, 설치 불필요 |
 | 무중단 배포 | Argo Rollouts | Flagger, K8s Rolling | ArgoCD 통합, Blue/Green+Canary |
+| 캐시 | Valkey | Redis, Memcached, DragonflyDB | Redis 호환, BSD 라이선스 |
+| Secret 관리 | CSI + Secret Manager | Sealed Secrets, ESO | GKE 네이티브, Workload Identity |
+| 배포 전략 진화 | Canary | Blue/Green 유지 | 점진적 전환, 리소스 효율 |
 
 ## 현재 버전
 
 | 컴포넌트 | 버전 | 변경 이력 |
 |---------|------|----------|
 | Go | 1.25 | ch2.6 초기 |
-| Notiflex 이미지 | v0.2.0 | ch2.6 v0.1.0 → ch3.3 v0.1.1 → ch3.5 v0.2.0 |
+| Notiflex 이미지 | v0.4.0 | ch2.6 v0.1.0 -> ch3.3 v0.1.1 -> ch3.5 v0.2.0 -> ch6.1 v0.3.0 -> ch6.2 v0.4.0 |
 | ArgoCD | 3.3.6 (stable) | ch3.2 설치 |
 | Kafka | | |
 | OTel SDK | | |
