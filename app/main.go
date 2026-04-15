@@ -8,10 +8,21 @@ import (
 	"sync/atomic"
 )
 
-var counter int64
+var (
+	counter int64
+	version = "v0.1.1"
+)
 
 func main() {
 	hostname, _ := os.Hostname()
+
+	http.HandleFunc("/version", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]string{
+			"version": version,
+			"pod":     hostname,
+		})
+	})
 
 	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
