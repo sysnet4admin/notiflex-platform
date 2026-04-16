@@ -13,7 +13,7 @@ import (
 	"github.com/valkey-io/valkey-go"
 )
 
-const version = "0.3.0"
+const version = "0.4.0"
 
 func main() {
 	hostname, _ := os.Hostname()
