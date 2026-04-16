@@ -59,7 +59,7 @@ func initKafka() error {
 	cfg.Producer.RequiredAcks = sarama.WaitForLocal
 	cfg.Producer.Retry.Max = 3
 	cfg.Producer.Return.Successes = true
-	cfg.Version = sarama.V4_0_0_0
+	cfg.Version = sarama.V2_8_0_0
 	p, err := sarama.NewSyncProducer([]string{kafkaBroker}, cfg)
 	if err != nil {
 		return err
@@ -89,7 +89,7 @@ func publishEvent(id int64) error {
 func consumerLoop(ctx context.Context) {
 	cfg := sarama.NewConfig()
 	cfg.Consumer.Return.Errors = true
-	cfg.Version = sarama.V4_0_0_0
+	cfg.Version = sarama.V2_8_0_0
 	for {
 		c, err := sarama.NewConsumer([]string{kafkaBroker}, cfg)
 		if err != nil {
