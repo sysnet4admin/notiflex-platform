@@ -13,11 +13,54 @@ import (
 
 	"github.com/IBM/sarama"
 	"github.com/valkey-io/valkey-go"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
+	"go.opentelemetry.io/otel/sdk/resource"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	semconv "go.opentelemetry.io/otel/semconv/v1.26.0"
 )
 
-const version = "0.5.0"
+const version = "0.6.0"
+
+func initTracer() func() {
+	endpoint := os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT")
+	if endpoint == "" {
+		log.Println("OTEL_EXPORTER_OTLP_ENDPOINT not set, tracing disabled")
+		return func() {}
+	}
+
+	ctx := context.Background()
+	exporter, err := otlptracegrpc.New(ctx,
+		otlptracegrpc.WithEndpoint(endpoint),
+		otlptracegrpc.WithInsecure(),
+	)
+	if err != nil {
+		log.Printf("트레이서 초기화 실패: %v", err)
+		return func() {}
+	}
+
+	tp := sdktrace.NewTracerProvider(
+		sdktrace.WithBatcher(exporter),
+		sdktrace.WithResource(resource.NewWithAttributes(
+			semconv.SchemaURL,
+			semconv.ServiceNameKey.String("notiflex-api"),
+			semconv.ServiceVersionKey.String(version),
+		)),
+	)
+	otel.SetTracerProvider(tp)
+	log.Println("OpenTelemetry 트레이서 초기화 완료")
+
+	return func() {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		tp.Shutdown(ctx)
+	}
+}
 
 func main() {
+	shutdown := initTracer()
+	defer shutdown()
+
 	hostname, _ := os.Hostname()
 
 	valkeyAddr := os.Getenv("VALKEY_ADDR")
@@ -95,13 +138,18 @@ func main() {
 		}
 	}
 
+	tracer := otel.Tracer("notiflex-api")
+
 	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+		_, span := tracer.Start(r.Context(), "GET /health")
+		defer span.End()
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
 	})
 
 	http.HandleFunc("/id", func(w http.ResponseWriter, r *http.Request) {
-		ctx := context.Background()
+		ctx, span := tracer.Start(r.Context(), "GET /id")
+		defer span.End()
 		cmd := client.B().Incr().Key("notiflex:id").Build()
 		result := client.Do(ctx, cmd)
 		id, err := result.AsInt64()
@@ -131,6 +179,8 @@ func main() {
 	})
 
 	http.HandleFunc("/version", func(w http.ResponseWriter, r *http.Request) {
+		_, span := tracer.Start(r.Context(), "GET /version")
+		defer span.End()
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(map[string]string{
 			"version":    version,
