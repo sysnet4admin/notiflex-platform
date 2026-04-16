@@ -8,12 +8,14 @@ import (
 	"net/http"
 	"os"
 	"runtime"
+	"strings"
 	"time"
 
+	"github.com/IBM/sarama"
 	"github.com/valkey-io/valkey-go"
 )
 
-const version = "0.4.0"
+const version = "0.5.0"
 
 func main() {
 	hostname, _ := os.Hostname()
@@ -49,6 +51,50 @@ func main() {
 	defer client.Close()
 	log.Println("Valkey 연결 성공")
 
+	// Kafka Producer setup
+	kafkaBroker := os.Getenv("KAFKA_BROKER")
+	var producer sarama.SyncProducer
+	if kafkaBroker != "" {
+		brokers := strings.Split(kafkaBroker, ",")
+		config := sarama.NewConfig()
+		config.Producer.Return.Successes = true
+		config.Producer.Retry.Max = 5
+		for i := 0; i < 10; i++ {
+			producer, err = sarama.NewSyncProducer(brokers, config)
+			if err == nil {
+				break
+			}
+			log.Printf("Kafka 연결 재시도 %d/10: %v", i+1, err)
+			time.Sleep(3 * time.Second)
+		}
+		if err != nil {
+			log.Printf("Kafka 연결 실패 (계속 진행): %v", err)
+		} else {
+			log.Println("Kafka Producer 연결 성공")
+			defer producer.Close()
+
+			// Start Consumer
+			go func() {
+				consumer, err := sarama.NewConsumer(brokers, config)
+				if err != nil {
+					log.Printf("Kafka Consumer 생성 실패: %v", err)
+					return
+				}
+				defer consumer.Close()
+				pc, err := consumer.ConsumePartition("notifications", 0, sarama.OffsetNewest)
+				if err != nil {
+					log.Printf("Kafka Consumer 파티션 구독 실패: %v", err)
+					return
+				}
+				defer pc.Close()
+				log.Println("Kafka Consumer 시작")
+				for msg := range pc.Messages() {
+					log.Printf("Kafka consumer: received message on %s: %s", msg.Topic, string(msg.Value))
+				}
+			}()
+		}
+	}
+
 	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
@@ -63,9 +109,23 @@ func main() {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
+
+		idStr := fmt.Sprintf("%d", id)
+
+		// Kafka produce
+		if producer != nil {
+			msg := &sarama.ProducerMessage{
+				Topic: "notifications",
+				Value: sarama.StringEncoder(fmt.Sprintf(`{"id":"%s","timestamp":"%s","pod":"%s"}`, idStr, time.Now().Format(time.RFC3339), hostname)),
+			}
+			if _, _, err := producer.SendMessage(msg); err != nil {
+				log.Printf("Kafka 메시지 전송 실패: %v", err)
+			}
+		}
+
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(map[string]string{
-			"id":           fmt.Sprintf("%d", id),
+			"id":           idStr,
 			"generated_by": hostname,
 		})
 	})
