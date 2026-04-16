@@ -16,14 +16,19 @@ env:
 jobs:
   build-push:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
       - id: auth
         uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
       - uses: google-github-actions/setup-gcloud@v2
       - name: Build and push image
+        id: build
         run: |
           TAG=sha-${GITHUB_SHA::7}
           gcloud builds submit app/ \
@@ -31,4 +36,15 @@ jobs:
             --default-buckets-behavior=regional-user-owned-bucket \
             --tag="${REGION}-docker.pkg.dev/${PROJECT_ID}/${REPO}/${IMAGE}:${TAG}" \
             --project="${PROJECT_ID}"
-          echo "Pushed: ${REGION}-docker.pkg.dev/${PROJECT_ID}/${REPO}/${IMAGE}:${TAG}"
+          echo "tag=${TAG}" >> $GITHUB_OUTPUT
+          echo "image=${REGION}-docker.pkg.dev/${PROJECT_ID}/${REPO}/${IMAGE}:${TAG}" >> $GITHUB_OUTPUT
+      - name: Update deployment manifest
+        run: |
+          NEW_IMAGE="${{ steps.build.outputs.image }}"
+          sed -i "s|image: .*notiflex/api:.*|image: ${NEW_IMAGE}|" k8s/smb/deployment.yaml
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add k8s/smb/deployment.yaml
+          git diff --cached --quiet && echo "no changes" && exit 0
+          git commit -m "chore: update image to ${{ steps.build.outputs.tag }} [skip ci]"
+          git push origin main
