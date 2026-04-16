@@ -10,12 +10,22 @@ import (
 
 var counter int64
 
+const version = "0.1.1"
+
 func main() {
 	hostname, _ := os.Hostname()
 
 	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
+	})
+
+	http.HandleFunc("/version", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]string{
+			"version":      version,
+			"generated_by": hostname,
+		})
 	})
 
 	http.HandleFunc("/id", func(w http.ResponseWriter, r *http.Request) {
