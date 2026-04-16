@@ -27,11 +27,16 @@ spec:
           initialDelaySeconds: 10
           periodSeconds: 30
   strategy:
-    blueGreen:
-      activeService: notiflex-api
-      previewService: notiflex-api-preview
-      autoPromotionEnabled: false
-      scaleDownDelaySeconds: 30
+    canary:
+      canaryService: notiflex-api-preview
+      stableService: notiflex-api
+      steps:
+      - setWeight: 20
+      - pause: {duration: 30s}
+      - setWeight: 50
+      - pause: {duration: 30s}
+      - setWeight: 80
+      - pause: {duration: 30s}
 ---
 apiVersion: v1
 kind: Service
