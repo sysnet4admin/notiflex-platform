@@ -10,7 +10,7 @@ import (
 
 var counter int64
 
-const version = "0.1.2"
+const version = "0.2.0"
 
 func main() {
 	hostname, _ := os.Hostname()

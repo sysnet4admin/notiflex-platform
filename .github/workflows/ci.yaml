@@ -41,10 +41,10 @@ jobs:
       - name: Update deployment manifest
         run: |
           NEW_IMAGE="${{ steps.build.outputs.image }}"
-          sed -i "s|image: .*notiflex/api:.*|image: ${NEW_IMAGE}|" k8s/smb/deployment.yaml
+          sed -i "s|image: .*notiflex/api:.*|image: ${NEW_IMAGE}|" k8s/smb/rollout.yaml
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add k8s/smb/deployment.yaml
+          git add k8s/smb/rollout.yaml
           git diff --cached --quiet && echo "no changes" && exit 0
           git commit -m "chore: update image to ${{ steps.build.outputs.tag }} [skip ci]"
           git push origin main
