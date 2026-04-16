@@ -1,0 +1,21 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: notiflex-tempo
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/sysnet4admin/notiflex-platform
+    targetRevision: main
+    path: k8s/tempo
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: monitoring
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true
+    - ServerSideApply=true
