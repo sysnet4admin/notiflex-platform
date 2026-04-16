@@ -27,6 +27,8 @@ jobs:
         run: |
           TAG=sha-${GITHUB_SHA::7}
           gcloud builds submit app/ \
+            --region="${REGION}" \
+            --default-buckets-behavior=regional-user-owned-bucket \
             --tag="${REGION}-docker.pkg.dev/${PROJECT_ID}/${REPO}/${IMAGE}:${TAG}" \
             --project="${PROJECT_ID}"
           echo "Pushed: ${REGION}-docker.pkg.dev/${PROJECT_ID}/${REPO}/${IMAGE}:${TAG}"
