@@ -17,7 +17,7 @@ spec:
         cloud.google.com/gke-nodepool: api-pool
       containers:
       - name: api
-        image: asia-northeast3-docker.pkg.dev/inlaid-vehicle-484800-n8/notiflex/api:sha-86ffd12
+        image: asia-northeast3-docker.pkg.dev/inlaid-vehicle-484800-n8/notiflex/api:sha-889bc30
         env:
         - name: VALKEY_ADDR
           value: valkey-primary.notiflex.svc.cluster.local:6379
