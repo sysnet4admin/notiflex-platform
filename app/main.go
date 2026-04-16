@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-const version = "0.3.0"
+const version = "0.4.0"
 
 var valkeyAddr = getenv("VALKEY_ADDR", "valkey-primary.notiflex.svc.cluster.local:6379")
 
