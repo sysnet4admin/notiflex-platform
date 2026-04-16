@@ -1,0 +1,24 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+    paths: ['app/**']
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - uses: google-github-actions/setup-gcloud@v2
+
+      - name: Build and Push
+        run: |
+          gcloud builds submit app/ \
+            --tag=asia-northeast3-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/notiflex/api:${{ github.sha }} \
+            --project=${{ secrets.GCP_PROJECT_ID }}
