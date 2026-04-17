@@ -12,10 +12,10 @@
 | ch2 | 2.5 GKE 클러스터 | ✅ | 2026-04-17 | e2-medium×2, Spot, Gateway API, 1.35.1-gke |
 | ch2 | 2.6 빌드/배포 | ✅ | 2026-04-17 | Go v0.1.0 + AR + Deployment×2 |
 | ch2 | 2.7 첫 커밋 | ✅ | 2026-04-17 | Initial commit |
-| ch3 | 3.2 GitOps 도구 | ⬜ | | |
-| ch3 | 3.3 기능 추가 | ⬜ | | |
-| ch3 | 3.4 CI | ⬜ | | |
-| ch3 | 3.5 CI-CD 연결 | ⬜ | | |
+| ch3 | 3.2 GitOps 도구 | ✅ | 2026-04-17 | ArgoCD v3.x, 7 Pods + repo secret + default AppProject |
+| ch3 | 3.3 기능 추가 | ✅ | 2026-04-17 | v0.1.1 /version, Rolling Update |
+| ch3 | 3.4 CI | ✅ | 2026-04-17 | GitHub Actions + Cloud Build --async, sha-XXX 태그 |
+| ch3 | 3.5 CI-CD 연결 | ✅ | 2026-04-17 | CI가 deployment.yaml 자동 업데이트 + [skip ci] |
 | ch4 | 4.2 메트릭 모니터링 | ⬜ | | |
 | ch4 | 4.3 로그 수집 | ⬜ | | |
 | ch4 | 4.4 알림 | ⬜ | | |
@@ -42,7 +42,8 @@
 
 | 영역 | 선택 | 검토한 대안 | 선택 이유 |
 |------|------|-----------|----------|
-| | | | |
+| GitOps | ArgoCD | Flux, Jenkins X, Spinnaker | CNCF Graduated + 기본 UI + Argo Rollouts 연계 |
+| CI | GitHub Actions (+ Cloud Build 위임) | Cloud Build Trigger, GitLab CI, Jenkins | 저장소 네이티브 + 월 2,000분 무료 |
 
 ## 현재 버전
 
@@ -50,7 +51,7 @@
 |---------|------|----------|
 | Go | 1.25-alpine (builder), scratch (runtime) | v0.1.0 |
 | Notiflex 이미지 | v0.1.0 | ch2.6 최초 빌드 |
-| ArgoCD | | |
+| ArgoCD | stable (v3.x) | ch3.2 설치 |
 | Kafka | | |
 | OTel SDK | | |
 
