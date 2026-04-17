@@ -8,6 +8,8 @@ import (
 	"sync/atomic"
 )
 
+const version = "v0.1.1"
+
 var counter int64
 
 func main() {
@@ -27,6 +29,14 @@ func main() {
 		})
 	})
 
-	fmt.Println("Starting server on :8080")
+	http.HandleFunc("/version", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]string{
+			"version":      version,
+			"generated_by": hostname,
+		})
+	})
+
+	fmt.Printf("Starting server %s on :8080\n", version)
 	http.ListenAndServe(":8080", nil)
 }
