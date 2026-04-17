@@ -1,4 +1,4 @@
-// notiflex-api HTTP server
+// notiflex-api HTTP server (ch3.5 CI-CD test)
 package main
 
 import (
