@@ -52,10 +52,10 @@ jobs:
       - name: Update manifest image tag + git push
         run: |
           echo "IMAGE=$IMAGE"
-          sed -i "s|notiflex/api:.*|notiflex/api:sha-${GITHUB_SHA::7}|" k8s/smb/deployment.yaml
+          sed -i "s|notiflex/api:.*|notiflex/api:sha-${GITHUB_SHA::7}|" k8s/smb/rollout.yaml
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add k8s/smb/deployment.yaml
+          git add k8s/smb/rollout.yaml
           if git diff --cached --quiet; then
             echo "No manifest changes."
           else
