@@ -22,11 +22,26 @@ jobs:
       - name: Set up gcloud
         uses: google-github-actions/setup-gcloud@v2
 
-      - name: Configure Docker for Artifact Registry
-        run: gcloud auth configure-docker asia-northeast3-docker.pkg.dev --quiet
-
-      - name: Build and push image (SHA tag)
+      - name: Build and push image (SHA tag, async)
         run: |
           IMAGE="asia-northeast3-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/notiflex/api:sha-${GITHUB_SHA::7}"
-          gcloud builds submit app/ --tag="$IMAGE" --suppress-logs --project=${{ secrets.GCP_PROJECT_ID }}
-          echo "Built: $IMAGE"
+          BUILD_ID=$(gcloud builds submit app/ --tag="$IMAGE" --async \
+            --project=${{ secrets.GCP_PROJECT_ID }} --format='value(id)')
+          echo "BUILD_ID=$BUILD_ID" >> $GITHUB_ENV
+          echo "IMAGE=$IMAGE" >> $GITHUB_ENV
+          echo "Submitted build $BUILD_ID for image $IMAGE"
+
+      - name: Wait for build to complete
+        run: |
+          for i in $(seq 1 30); do
+            STATUS=$(gcloud builds describe "$BUILD_ID" \
+              --project=${{ secrets.GCP_PROJECT_ID }} --format='value(status)')
+            echo "[$i] build status: $STATUS"
+            case "$STATUS" in
+              SUCCESS) echo "Build succeeded."; exit 0 ;;
+              FAILURE|INTERNAL_ERROR|TIMEOUT|CANCELLED) echo "Build failed: $STATUS"; exit 1 ;;
+            esac
+            sleep 10
+          done
+          echo "Build timed out waiting 5 min"
+          exit 1
