@@ -4,7 +4,7 @@ metadata:
   name: notiflex-api
   namespace: notiflex
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: notiflex-api
