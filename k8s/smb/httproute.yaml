@@ -1,0 +1,16 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: notiflex-route
+  namespace: notiflex
+spec:
+  parentRefs:
+  - name: notiflex-gateway
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /
+    backendRefs:
+    - name: notiflex-api
+      port: 80
