@@ -7,19 +7,37 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/valkey-io/valkey-go"
 )
 
-const version = "v0.3.0"
+const version = "v0.4.0"
 
 var client valkey.Client
+
+func readSecret(path string) string {
+	if path == "" {
+		return ""
+	}
+	b, err := os.ReadFile(path)
+	if err != nil {
+		log.Printf("warn: cannot read %s: %v", path, err)
+		return ""
+	}
+	return strings.TrimSpace(string(b))
+}
 
 func main() {
 	hostname, _ := os.Hostname()
 	addr := os.Getenv("VALKEY_ADDR")
-	password := os.Getenv("VALKEY_PASSWORD")
+
+	// 파일 기반 → 환경변수 fallback
+	password := readSecret(os.Getenv("VALKEY_PASSWORD_FILE"))
+	if password == "" {
+		password = os.Getenv("VALKEY_PASSWORD")
+	}
 
 	var err error
 	for i := 0; i < 10; i++ {
@@ -59,7 +77,7 @@ func main() {
 		json.NewEncoder(w).Encode(map[string]string{
 			"id":           fmt.Sprintf("%d", n),
 			"generated_by": hostname,
-			"source":       "valkey",
+			"source":       "valkey+csi",
 		})
 	})
 
