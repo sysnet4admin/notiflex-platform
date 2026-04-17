@@ -16,7 +16,7 @@ spec:
       serviceAccountName: notiflex-app
       containers:
       - name: notiflex-api
-        image: asia-northeast3-docker.pkg.dev/inlaid-vehicle-484800-n8/notiflex/api:v0.5.0
+        image: asia-northeast3-docker.pkg.dev/inlaid-vehicle-484800-n8/notiflex/api:sha-5d73071
         ports:
         - containerPort: 8080
         env:
