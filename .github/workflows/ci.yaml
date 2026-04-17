@@ -28,5 +28,5 @@ jobs:
       - name: Build and push image (SHA tag)
         run: |
           IMAGE="asia-northeast3-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/notiflex/api:sha-${GITHUB_SHA::7}"
-          gcloud builds submit app/ --tag="$IMAGE" --project=${{ secrets.GCP_PROJECT_ID }}
+          gcloud builds submit app/ --tag="$IMAGE" --suppress-logs --project=${{ secrets.GCP_PROJECT_ID }}
           echo "Built: $IMAGE"
