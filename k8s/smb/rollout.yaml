@@ -16,7 +16,7 @@ spec:
       serviceAccountName: notiflex-app
       containers:
       - name: notiflex-api
-        image: asia-northeast3-docker.pkg.dev/inlaid-vehicle-484800-n8/notiflex/api:v0.4.0
+        image: asia-northeast3-docker.pkg.dev/inlaid-vehicle-484800-n8/notiflex/api:v0.5.0
         ports:
         - containerPort: 8080
         env:
@@ -29,16 +29,24 @@ spec:
           mountPath: /mnt/secrets
           readOnly: true
         readinessProbe:
-          httpGet: {path: /health, port: 8080}
+          httpGet:
+            path: /health
+            port: 8080
           initialDelaySeconds: 3
           periodSeconds: 5
         livenessProbe:
-          httpGet: {path: /health, port: 8080}
+          httpGet:
+            path: /health
+            port: 8080
           initialDelaySeconds: 10
           periodSeconds: 10
         resources:
-          requests: {cpu: 50m, memory: 32Mi}
-          limits: {cpu: 200m, memory: 64Mi}
+          requests:
+            cpu: 50m
+            memory: 32Mi
+          limits:
+            cpu: 200m
+            memory: 64Mi
       volumes:
       - name: secrets
         csi:
@@ -47,8 +55,16 @@ spec:
           volumeAttributes:
             secretProviderClass: notiflex-secrets
   strategy:
-    blueGreen:
-      activeService: notiflex-api
-      previewService: notiflex-api-preview
-      autoPromotionEnabled: true
-      autoPromotionSeconds: 30
+    canary:
+      canaryService: notiflex-api-preview
+      stableService: notiflex-api
+      steps:
+      - setWeight: 20
+      - pause:
+          duration: 30s
+      - setWeight: 50
+      - pause:
+          duration: 30s
+      - setWeight: 80
+      - pause:
+          duration: 30s
