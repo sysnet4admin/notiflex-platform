@@ -1,19 +1,43 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
-	"sync/atomic"
+	"time"
+
+	"github.com/valkey-io/valkey-go"
 )
 
-const version = "v0.2.0"
+const version = "v0.3.0"
 
-var counter int64
+var client valkey.Client
 
 func main() {
 	hostname, _ := os.Hostname()
+	addr := os.Getenv("VALKEY_ADDR")
+	password := os.Getenv("VALKEY_PASSWORD")
+
+	var err error
+	for i := 0; i < 10; i++ {
+		client, err = valkey.NewClient(valkey.ClientOption{
+			InitAddress: []string{addr},
+			Password:    password,
+		})
+		if err == nil {
+			break
+		}
+		log.Printf("Valkey 연결 재시도 %d/10: %v", i+1, err)
+		time.Sleep(3 * time.Second)
+	}
+	if err != nil {
+		log.Fatalf("Valkey 연결 실패: %v", err)
+	}
+	defer client.Close()
+	log.Printf("Valkey connected: %s", addr)
 
 	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
@@ -21,11 +45,21 @@ func main() {
 	})
 
 	http.HandleFunc("/id", func(w http.ResponseWriter, r *http.Request) {
-		id := atomic.AddInt64(&counter, 1)
+		ctx, cancel := context.WithTimeout(r.Context(), 2*time.Second)
+		defer cancel()
+
+		resp := client.Do(ctx, client.B().Incr().Key("notiflex:id").Build())
+		n, err := resp.AsInt64()
+		if err != nil {
+			http.Error(w, fmt.Sprintf("valkey error: %v", err), 500)
+			return
+		}
+
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(map[string]string{
-			"id":           fmt.Sprintf("%d", id),
+			"id":           fmt.Sprintf("%d", n),
 			"generated_by": hostname,
+			"source":       "valkey",
 		})
 	})
 
@@ -37,8 +71,6 @@ func main() {
 		})
 	})
 
-	fmt.Printf("Starting server %s on :8080\n", version)
+	log.Printf("Starting server %s on :8080", version)
 	http.ListenAndServe(":8080", nil)
 }
-// ch3.4 CI trigger
-// ch3.5 CI-CD trigger
