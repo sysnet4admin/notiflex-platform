@@ -1,0 +1,27 @@
+# grafana/fluent-bit (deprecated) chart notes:
+# - config.outputs is NOT rendered into the fluent-bit.conf by this chart's template.
+# - Instead, the [Output] block is generated from the loki.* and config.* values below.
+# - Default loki.serviceName = "${RELEASE}-loki" → "fluent-bit-loki" which does not exist.
+# - Default servicePath = "/api/prom/push" (legacy API). Current Loki exposes /loki/api/v1/push.
+
+loki:
+  serviceName: loki
+  servicePort: 3100
+  serviceScheme: http
+  servicePath: /loki/api/v1/push
+
+config:
+  loglevel: warn
+  labels: '{job="fluent-bit"}'
+  autoKubernetesLabels: true
+  memBufLimit: "50MB"
+  bufChunkSize: "256k"
+  bufMaxSize: "256k"
+
+resources:
+  requests:
+    cpu: 10m
+    memory: 64Mi
+  limits:
+    cpu: 100m
+    memory: 128Mi

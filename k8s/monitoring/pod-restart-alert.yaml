@@ -1,0 +1,19 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: pod-restart-alert
+  namespace: monitoring
+  labels:
+    release: kube-prometheus
+spec:
+  groups:
+    - name: notiflex-alerts
+      rules:
+        - alert: PodRestartTooMany
+          expr: increase(kube_pod_container_status_restarts_total{namespace="notiflex"}[5m]) > 2
+          for: 1m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Pod {{ $labels.pod }} 재시작 과다"
+            description: "네임스페이스 {{ $labels.namespace }}의 {{ $labels.pod }}가 5분 내 {{ $value }}회 재시작되었습니다."
