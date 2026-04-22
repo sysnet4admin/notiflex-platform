@@ -28,7 +28,8 @@ jobs:
 
       - name: Update manifest image tag
         run: |
-          sed -i "s|image: 192.168.1.10:30500/notiflex/api:.*|image: ${{ steps.build.outputs.image }}|" \
+          # macOS BSD sed 호환: -i 뒤에 빈 문자열 필수
+          sed -i '' "s|image: 192.168.1.10:30500/notiflex/api:.*|image: ${{ steps.build.outputs.image }}|" \
             k8s/smb/deployment.yaml
 
       - name: Configure git identity
