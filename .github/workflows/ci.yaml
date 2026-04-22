@@ -30,7 +30,7 @@ jobs:
         run: |
           # macOS BSD sed 호환: -i 뒤에 빈 문자열 필수
           sed -i '' "s|image: 192.168.1.10:30500/notiflex/api:.*|image: ${{ steps.build.outputs.image }}|" \
-            k8s/smb/deployment.yaml
+            k8s/smb/rollout.yaml
 
       - name: Configure git identity
         run: |
@@ -39,7 +39,7 @@ jobs:
 
       - name: Commit and push manifest
         run: |
-          git add k8s/smb/deployment.yaml
+          git add k8s/smb/rollout.yaml
           git diff --cached --quiet && echo "no changes" && exit 0
           git commit -m "ci: update image tag to sha-$(echo $GITHUB_SHA | cut -c1-7) [skip ci]"
           git push
