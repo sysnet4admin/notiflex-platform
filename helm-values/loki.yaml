@@ -1,0 +1,44 @@
+deploymentMode: SingleBinary
+
+loki:
+  useTestSchema: true
+  auth_enabled: false
+  storage:
+    type: filesystem
+    bucketNames:
+      chunks: chunks
+      ruler: ruler
+      admin: admin
+  commonConfig:
+    replication_factor: 1
+  limits_config:
+    max_label_names_per_series: 30
+
+singleBinary:
+  replicas: 1
+  resources:
+    requests:
+      cpu: 10m
+      memory: 128Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+
+read:
+  replicas: 0
+write:
+  replicas: 0
+backend:
+  replicas: 0
+
+gateway:
+  enabled: false
+
+chunksCache:
+  enabled: false
+resultsCache:
+  enabled: false
+
+grafana:
+  datasource:
+    isDefault: false

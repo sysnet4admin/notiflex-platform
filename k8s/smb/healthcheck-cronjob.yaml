@@ -1,0 +1,19 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: healthcheck
+  namespace: notiflex
+spec:
+  schedule: "*/5 * * * *"
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          nodeSelector:
+            workload: ops
+          restartPolicy: OnFailure
+          containers:
+          - name: healthcheck
+            image: curlimages/curl:latest
+            command: ["sh","-c","curl -fsS http://notiflex-api.notiflex.svc.cluster.local/health && echo OK"]
