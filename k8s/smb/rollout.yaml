@@ -23,6 +23,8 @@ spec:
       labels:
         app: notiflex-api
     spec:
+      nodeSelector:
+        workload: api
       containers:
       - name: api
         image: 192.168.1.10:30500/notiflex/api:v0.5.0
