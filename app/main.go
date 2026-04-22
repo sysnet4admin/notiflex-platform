@@ -43,3 +43,4 @@ func main() {
 	fmt.Println("Starting server on :8080 (CI trigger)")
 	http.ListenAndServe(":8080", nil)
 }
+// ch3.5 CI-ArgoCD 연결 테스트
