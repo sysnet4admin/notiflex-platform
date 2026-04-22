@@ -9,7 +9,7 @@ import (
 	"sync/atomic"
 )
 
-const appVersion = "v0.1.1"
+const appVersion = "v0.2.0"
 
 var counter int64
 

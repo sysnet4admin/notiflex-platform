@@ -22,7 +22,7 @@ spec:
     spec:
       containers:
       - name: api
-        image: 192.168.1.10:30500/notiflex/api:v0.1.1
+        image: 192.168.1.10:30500/notiflex/api:v0.2.0
         ports:
         - containerPort: 8080
         resources:
