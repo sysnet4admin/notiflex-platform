@@ -10,11 +10,14 @@ spec:
     matchLabels:
       app: notiflex-api
   strategy:
-    blueGreen:
-      activeService: notiflex-api
-      previewService: notiflex-api-preview
-      autoPromotionEnabled: true
-      autoPromotionSeconds: 30
+    canary:
+      steps:
+        - setWeight: 20
+        - pause: {duration: 30s}
+        - setWeight: 50
+        - pause: {duration: 30s}
+        - setWeight: 80
+        - pause: {duration: 30s}
   template:
     metadata:
       labels:
@@ -22,7 +25,7 @@ spec:
     spec:
       containers:
       - name: api
-        image: 192.168.1.10:30500/notiflex/api:v0.2.0
+        image: 192.168.1.10:30500/notiflex/api:v0.5.0
         ports:
         - containerPort: 8080
         resources:
