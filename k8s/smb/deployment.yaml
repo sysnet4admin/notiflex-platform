@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: api
-        image: 192.168.1.10:30500/notiflex/api:v0.1.0
+        image: 192.168.1.10:30500/notiflex/api:v0.1.1
         ports:
         - containerPort: 8080
         readinessProbe:
