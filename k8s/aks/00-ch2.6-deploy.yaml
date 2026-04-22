@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
       - name: api
-        image: notiflexacr.azurecr.io/notiflex/api:v0.5.0
+        image: notiflexacr.azurecr.io/notiflex/api:v0.5.1
         ports:
         - containerPort: 8080
         resources:
