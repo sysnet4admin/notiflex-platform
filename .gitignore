@@ -1,18 +1,3 @@
-# Go 빌드 산출물
-/app/app
-/app/*.out
-*.test
-
-# 환경 변수와 자격 증명
-.env
-.env.local
-service-account-*.json
-
-# IDE / 에디터
-.vscode/
-.idea/
-*.swp
-
-# OS
+*.pyc
 .DS_Store
-Thumbs.db
+node_modules/
