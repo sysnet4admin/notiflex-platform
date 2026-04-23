@@ -19,7 +19,7 @@ import (
 )
 
 const (
-	appVersion      = "v0.1.3"
+	appVersion      = "v0.1.4"
 	idCounterKey    = "notiflex:id:counter"
 	valkeyRetries   = 10
 	valkeyRetryWait = 3 * time.Second
