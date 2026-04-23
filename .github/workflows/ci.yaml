@@ -1,0 +1,57 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'app/**'
+  pull_request:
+    paths:
+      - 'app/**'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./app
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+
+      - name: Install dependencies
+        run: go mod download
+
+      - name: Vet
+        run: go vet ./...
+
+      - name: Run tests
+        run: go test -v ./...
+
+  build-and-push:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - id: 'auth'
+        uses: 'google-github-actions/auth@v2'
+        with:
+          credentials_json: '${{ secrets.GCP_SA_KEY }}'
+
+      - name: Set up Cloud SDK
+        uses: 'google-github-actions/setup-gcloud@v2'
+        with:
+          project_id: '${{ secrets.GCP_PROJECT_ID }}'
+
+      - name: Build and push image
+        run: |
+          IMAGE="asia-northeast3-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/notiflex/api:sha-${GITHUB_SHA::7}"
+          gcloud builds submit app/ --tag="$IMAGE" --project=${{ secrets.GCP_PROJECT_ID }}
