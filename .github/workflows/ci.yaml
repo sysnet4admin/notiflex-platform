@@ -69,20 +69,20 @@ jobs:
         shell: bash
         run: |
           echo "Using IMAGE_URI=$IMAGE_URI"
-          sed -i "s|^\([[:space:]]*image:[[:space:]]*\).*|\1$IMAGE_URI|" k8s/smb/deployment.yaml
-          echo "Updated deployment manifest image:"
-          grep -n "image:" k8s/smb/deployment.yaml
+          sed -i "s|^\([[:space:]]*image:[[:space:]]*\).*|\1$IMAGE_URI|" k8s/smb/rollout.yaml
+          echo "Updated rollout manifest image:"
+          grep -n "image:" k8s/smb/rollout.yaml
 
       - name: Commit and push manifest update
         shell: bash
         run: |
-          if git diff --quiet -- k8s/smb/deployment.yaml; then
+          if git diff --quiet -- k8s/smb/rollout.yaml; then
             echo "No manifest change detected. Skipping commit."
             exit 0
           fi
 
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add k8s/smb/deployment.yaml
+          git add k8s/smb/rollout.yaml
           git commit -m "ci: update image tag to sha-${GITHUB_SHA::7} [skip ci]"
           git push
