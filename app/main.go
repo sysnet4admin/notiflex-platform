@@ -11,6 +11,8 @@ import (
 
 var counter uint64
 
+const appVersion = "v0.1.1"
+
 func writeJSON(w http.ResponseWriter, status int, payload any) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
@@ -38,10 +40,24 @@ func idHandler(w http.ResponseWriter, _ *http.Request) {
 	})
 }
 
+func versionHandler(w http.ResponseWriter, _ *http.Request) {
+	podName := os.Getenv("HOSTNAME")
+	if podName == "" {
+		podName = "unknown"
+	}
+
+	writeJSON(w, http.StatusOK, map[string]string{
+		"service": "notiflex-api",
+		"version": appVersion,
+		"pod":     podName,
+	})
+}
+
 func main() {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/health", healthHandler)
 	mux.HandleFunc("/id", idHandler)
+	mux.HandleFunc("/version", versionHandler)
 
 	addr := ":8080"
 	log.Printf("notiflex api listening on %s", addr)
