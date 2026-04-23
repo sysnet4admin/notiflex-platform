@@ -15,7 +15,7 @@ var (
 )
 
 func main() {
-	// Another change to trigger CI
+	// Trigger CI one more time
 	if name, err := os.Hostname(); err == nil {
 		podName = name
 	}
