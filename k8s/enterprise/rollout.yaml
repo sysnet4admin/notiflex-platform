@@ -2,7 +2,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: Rollout
 metadata:
   name: notiflex-api
-  namespace: notiflex
+  namespace: enterprise
 spec:
   replicas: 1
   selector:
@@ -17,7 +17,7 @@ spec:
         cloud.google.com/gke-nodepool: api-pool
       containers:
         - name: api
-          image: asia-northeast3-docker.pkg.dev/project-75fce205-dfa5-4975-a56/notiflex/api:v0.1.3
+          image: asia-northeast3-docker.pkg.dev/project-75fce205-dfa5-4975-a56/notiflex/api:v0.1.2
           ports:
             - containerPort: 8080
           env:
@@ -28,8 +28,6 @@ spec:
                 secretKeyRef:
                   name: notiflex-valkey
                   key: valkey-password
-            - name: OTEL_EXPORTER_OTLP_ENDPOINT
-              value: tempo.monitoring.svc.cluster.local:4317
           resources:
             requests:
               cpu: 50m
