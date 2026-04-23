@@ -15,6 +15,7 @@ var (
 )
 
 func main() {
+	// A change to trigger CI
 	if name, err := os.Hostname(); err == nil {
 		podName = name
 	}
