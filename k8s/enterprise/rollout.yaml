@@ -1,0 +1,39 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: notiflex-api
+  namespace: notiflex-enterprise
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: notiflex-api
+      tier: enterprise
+  template:
+    metadata:
+      labels:
+        app: notiflex-api
+        tier: enterprise
+    spec:
+      nodeSelector:
+        workload: api
+      containers:
+      - name: api
+        image: asia-northeast3-docker.pkg.dev/project-75fce205-dfa5-4975-a56/notiflex/api:v0.3.0
+        ports:
+        - containerPort: 8080
+        env:
+        - name: VALKEY_ADDR
+          value: "valkey-primary.notiflex.svc.cluster.local:6379"
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            cpu: 200m
+            memory: 128Mi
+  strategy:
+    canary:
+      steps:
+      - setWeight: 50
+      - pause: {duration: 30s}
