@@ -8,6 +8,8 @@ import (
 	"sync/atomic"
 )
 
+const appVersion = "v0.1.1"
+
 var counter int64
 
 func main() {
@@ -24,6 +26,14 @@ func main() {
 		json.NewEncoder(w).Encode(map[string]string{
 			"id":           fmt.Sprintf("%d", id),
 			"generated_by": hostname,
+		})
+	})
+
+	http.HandleFunc("/version", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]string{
+			"version":  appVersion,
+			"hostname": hostname,
 		})
 	})
 
