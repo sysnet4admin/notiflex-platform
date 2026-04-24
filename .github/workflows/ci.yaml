@@ -1,0 +1,38 @@
+name: CI
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'app/**'
+      - '.github/workflows/ci.yaml'
+permissions:
+  contents: write
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+      - uses: google-github-actions/setup-gcloud@v2
+      - name: Build and push
+        run: |
+          TAG=sha-${GITHUB_SHA::7}
+          gcloud builds submit app/ --tag=asia-northeast3-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/notiflex/api:$TAG --async
+          for i in 1 2 3 4 5 6 7 8 9 10 11 12; do
+            sleep 30
+            STATE=$(gcloud builds list --filter="images:notiflex/api:$TAG" --limit=1 --format="value(status)")
+            [ "$STATE" = "SUCCESS" ] && break
+            echo "build state: $STATE"
+          done
+      - name: Update deployment.yaml + commit
+        run: |
+          TAG=sha-${GITHUB_SHA::7}
+          sed -i "s|notiflex/api:.*|notiflex/api:$TAG|" k8s/smb/deployment.yaml
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add k8s/smb/deployment.yaml
+          git diff --cached --quiet && exit 0
+          git commit -m "ci: image tag $TAG [skip ci]"
+          git push
