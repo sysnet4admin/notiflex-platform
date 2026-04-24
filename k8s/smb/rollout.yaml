@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: api
-        image: asia-northeast3-docker.pkg.dev/project-75fce205-dfa5-4975-a56/notiflex/api:v0.2.0
+        image: asia-northeast3-docker.pkg.dev/project-75fce205-dfa5-4975-a56/notiflex/api:v0.3.0
         ports:
         - containerPort: 8080
         readinessProbe:
@@ -34,7 +34,11 @@ spec:
             cpu: 200m
             memory: 128Mi
   strategy:
-    blueGreen:
-      activeService: notiflex-api
-      previewService: notiflex-api-preview
-      autoPromotionEnabled: false
+    canary:
+      steps:
+      - setWeight: 20
+      - pause: {duration: 30s}
+      - setWeight: 50
+      - pause: {duration: 30s}
+      - setWeight: 80
+      - pause: {duration: 30s}
