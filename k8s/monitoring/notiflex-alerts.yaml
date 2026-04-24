@@ -1,0 +1,28 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: notiflex-alerts
+  namespace: monitoring
+  labels:
+    release: kube-prometheus
+spec:
+  groups:
+  - name: notiflex
+    interval: 30s
+    rules:
+    - alert: NotiflexPodRestartTooMany
+      expr: rate(kube_pod_container_status_restarts_total{namespace="notiflex"}[5m]) * 300 > 3
+      for: 2m
+      labels:
+        severity: warning
+        service: notiflex
+      annotations:
+        summary: "Pod {{ $labels.pod }} restart rate high"
+    - alert: NotiflexPodDown
+      expr: up{namespace="notiflex"} == 0
+      for: 1m
+      labels:
+        severity: critical
+        service: notiflex
+      annotations:
+        summary: "Pod {{ $labels.pod }} is down"
