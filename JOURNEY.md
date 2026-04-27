@@ -27,9 +27,9 @@
 | ch7 | 7.2 멀티 노드풀 | ✅ | 2026-04-27 | api/worker/ops-pool (--node-labels 없이 GKE 자동 라벨 활용) |
 | ch7 | 7.3 App of Apps | ✅ | 2026-04-27 | root-app → notiflex-smb 자동 관리 |
 | ch7 | 7.4 멀티테넌시 | ✅ | 2026-04-27 | notiflex-enterprise namespace + api-pool 배치 |
-| ch8 | 8.1 메시징 | ⬜ | | |
-| ch8 | 8.2 트레이싱 | ⬜ | | |
-| ch8 | 8.3 CronJob | ⬜ | | |
+| ch8 | 8.1 메시징 | ✅ | 2026-04-28 | Kafka 4.1.0 KRaft (Strimzi 0.51.0 버전 호환성 조정) |
+| ch8 | 8.2 트레이싱 | ✅ | 2026-04-28 | Grafana Tempo |
+| ch8 | 8.3 CronJob | ✅ | 2026-04-28 | 5분 헬스체크, ops-pool nodeSelector |
 | ch9 | 9.1 저장소 분석 | ⬜ | | |
 | ch9 | 9.2 회고 | ⬜ | | |
 | ch9 | 9.3 온보딩 문서 | ⬜ | | |
@@ -51,6 +51,8 @@
 | 시크릿 | K8s Secret (WI 비활성 대안) | CSI+SecretManager, Sealed Secrets | WI 비활성 환경 |
 | 노드 스케줄링 | nodeSelector + 멀티노드풀 | taint/toleration, nodeAffinity | 가장 단순, GKE 자동 라벨 활용 |
 | 멀티앱 관리 | App of Apps | ApplicationSet | 직관적, 순수 YAML |
+| 메시징 | Kafka 4.1.0 KRaft | RabbitMQ, NATS | 업계 표준, Strimzi GitOps 호환 |
+| 트레이싱 | Grafana Tempo | Jaeger, Zipkin | Grafana 통합, 관측 3축 통합 |
 
 ## 현재 버전
 
