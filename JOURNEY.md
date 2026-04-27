@@ -16,9 +16,9 @@
 | ch3 | 3.3 기능 추가 | ✅ | 2026-04-27 | /version 엔드포인트 + v0.1.1 |
 | ch3 | 3.4 CI | ✅ | 2026-04-27 | SA 키 차단 → WIF 전환 |
 | ch3 | 3.5 CI-CD 연결 | ✅ | 2026-04-27 | CI→manifest→ArgoCD 파이프라인 완성 |
-| ch4 | 4.2 메트릭 모니터링 | ⬜ | | |
-| ch4 | 4.3 로그 수집 | ⬜ | | |
-| ch4 | 4.4 알림 | ⬜ | | |
+| ch4 | 4.2 메트릭 모니터링 | ✅ | 2026-04-27 | kube-prometheus-stack 설치 |
+| ch4 | 4.3 로그 수집 | ✅ | 2026-04-27 | loki-stack 설치 (loki 최신 차트 복잡성 우회) |
+| ch4 | 4.4 알림 | ✅ | 2026-04-27 | PrometheusRule + Alertmanager |
 | ch5 | 5.2 트래픽 관리 | ⬜ | | |
 | ch5 | 5.3 무중단 배포 | ⬜ | | |
 | ch6 | 6.1 캐시 | ⬜ | | |
@@ -42,6 +42,9 @@
 |------|------|-----------|----------|
 | GitOps | ArgoCD | Flux, Jenkins X, Spinnaker | Web UI + ArgoCD 생태계 통합 |
 | CI | GitHub Actions (WIF) | Cloud Build, GitLab CI, Jenkins | 저장소 일치 + SA 키 차단 환경에서 WIF가 적합 |
+| 메트릭 | Prometheus + Grafana | Datadog, Google Cloud Monitoring | 오픈소스 표준, Loki/Tempo 통합 |
+| 로그 | Loki + Promtail | ELK Stack, Google Cloud Logging | 경량, Grafana 통합 |
+| 알림 | PrometheusRule + Alertmanager | Grafana Alerting UI | GitOps 호환 (YAML→Git→ArgoCD) |
 
 ## 현재 버전
 
