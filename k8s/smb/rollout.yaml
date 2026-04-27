@@ -13,6 +13,8 @@ spec:
       labels:
         app: notiflex-api
     spec:
+      nodeSelector:
+        cloud.google.com/gke-nodepool: api-pool
       containers:
       - name: api
         image: asia-northeast3-docker.pkg.dev/project-75fce205-dfa5-4975-a56/notiflex/api:v0.3.0
