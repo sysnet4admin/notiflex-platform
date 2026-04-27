@@ -19,8 +19,8 @@
 | ch4 | 4.2 메트릭 모니터링 | ✅ | 2026-04-27 | kube-prometheus-stack 설치 |
 | ch4 | 4.3 로그 수집 | ✅ | 2026-04-27 | loki-stack 설치 (loki 최신 차트 복잡성 우회) |
 | ch4 | 4.4 알림 | ✅ | 2026-04-27 | PrometheusRule + Alertmanager |
-| ch5 | 5.2 트래픽 관리 | ⬜ | | |
-| ch5 | 5.3 무중단 배포 | ⬜ | | |
+| ch5 | 5.2 트래픽 관리 | ✅ | 2026-04-27 | Gateway API (gke-l7-regional) |
+| ch5 | 5.3 무중단 배포 | ✅ | 2026-04-27 | Argo Rollouts Blue/Green |
 | ch6 | 6.1 캐시 | ⬜ | | |
 | ch6 | 6.2 시크릿 관리 | ⬜ | | |
 | ch6 | 6.3 Canary 전환 | ⬜ | | |
@@ -45,6 +45,8 @@
 | 메트릭 | Prometheus + Grafana | Datadog, Google Cloud Monitoring | 오픈소스 표준, Loki/Tempo 통합 |
 | 로그 | Loki + Promtail | ELK Stack, Google Cloud Logging | 경량, Grafana 통합 |
 | 알림 | PrometheusRule + Alertmanager | Grafana Alerting UI | GitOps 호환 (YAML→Git→ArgoCD) |
+| 외부 트래픽 | Gateway API | Ingress NGINX, Istio | GKE 네이티브, 별도 설치 불필요 |
+| 배포 전략 | Argo Rollouts Blue/Green | Flagger, Rolling Update | ArgoCD 동일 생태계, preview 검증 |
 
 ## 현재 버전
 
