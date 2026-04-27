@@ -12,10 +12,10 @@
 | ch2 | 2.5 GKE 클러스터 | ✅ | 2026-04-27 | GatewayClass 초기화 지연 → clusters update 재실행 |
 | ch2 | 2.6 빌드/배포 | ✅ | 2026-04-27 | |
 | ch2 | 2.7 첫 커밋 | ✅ | 2026-04-27 | |
-| ch3 | 3.2 GitOps 도구 | ⬜ | | |
-| ch3 | 3.3 기능 추가 | ⬜ | | |
-| ch3 | 3.4 CI | ⬜ | | |
-| ch3 | 3.5 CI-CD 연결 | ⬜ | | |
+| ch3 | 3.2 GitOps 도구 | ✅ | 2026-04-27 | ArgoCD v3 repo-server 인증 → GitHub Token |
+| ch3 | 3.3 기능 추가 | ✅ | 2026-04-27 | /version 엔드포인트 + v0.1.1 |
+| ch3 | 3.4 CI | ✅ | 2026-04-27 | SA 키 차단 → WIF 전환 |
+| ch3 | 3.5 CI-CD 연결 | ✅ | 2026-04-27 | CI→manifest→ArgoCD 파이프라인 완성 |
 | ch4 | 4.2 메트릭 모니터링 | ⬜ | | |
 | ch4 | 4.3 로그 수집 | ⬜ | | |
 | ch4 | 4.4 알림 | ⬜ | | |
@@ -40,24 +40,28 @@
 
 | 영역 | 선택 | 검토한 대안 | 선택 이유 |
 |------|------|-----------|----------|
-| | | | |
+| GitOps | ArgoCD | Flux, Jenkins X, Spinnaker | Web UI + ArgoCD 생태계 통합 |
+| CI | GitHub Actions (WIF) | Cloud Build, GitLab CI, Jenkins | 저장소 일치 + SA 키 차단 환경에서 WIF가 적합 |
 
 ## 현재 버전
 
 | 컴포넌트 | 버전 |
 |---------|------|
 | Go | 1.25 |
-| Notiflex 이미지 | v0.1.0 |
+| Notiflex 이미지 | sha-f18aa61 (CI 자동 태그) |
 | GKE | 1.35.1-gke.1396002 |
+| ArgoCD | v2.14.x (stable) |
 
 ## 현재 리소스
 
 | 노드풀 | 머신 타입 | 노드 수 | 주요 워크로드 |
 |--------|----------|---------|-------------|
-| default-pool | e2-medium | 2 | API, 기타 |
+| default-pool | e2-medium | 2 | API, ArgoCD |
 
 ## 트러블슈팅 이력
 
 | 챕터 | 문제 | 해결 |
 |------|------|------|
 | ch2.5 | GatewayClass가 클러스터 생성 후 즉시 나타나지 않음 | `gcloud container clusters update --gateway-api=standard` 재실행 후 30초 대기 |
+| ch3.2 | ArgoCD v3 "authentication required: Repository not found" | GitHub Token을 repo secret password로 등록 (forceHttpBasicAuth 단독 불충분) |
+| ch3.4 | SA 키 생성 iam.disableServiceAccountKeyCreation 정책 차단 | Workload Identity Federation(WIF)으로 전환 |
