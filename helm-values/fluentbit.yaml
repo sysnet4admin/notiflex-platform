@@ -1,0 +1,12 @@
+config:
+  outputs: |
+    [OUTPUT]
+        Name loki
+        Match kube.*
+        Host loki.logging.svc.cluster.local
+        Port 3100
+        Labels job=fluentbit
+resources:
+  requests:
+    cpu: 10m
+    memory: 32Mi
