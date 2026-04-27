@@ -24,9 +24,9 @@
 | ch6 | 6.1 캐시 | ✅ | 2026-04-27 | Valkey standalone |
 | ch6 | 6.2 시크릿 관리 | ✅ | 2026-04-27 | K8s Secret (WI 비활성화로 CSI 우회) |
 | ch6 | 6.3 Canary 전환 | ✅ | 2026-04-27 | Blue/Green → Canary (20→50→80%) |
-| ch7 | 7.2 멀티 노드풀 | ⬜ | | |
-| ch7 | 7.3 App of Apps | ⬜ | | |
-| ch7 | 7.4 멀티테넌시 | ⬜ | | |
+| ch7 | 7.2 멀티 노드풀 | ✅ | 2026-04-27 | api/worker/ops-pool (--node-labels 없이 GKE 자동 라벨 활용) |
+| ch7 | 7.3 App of Apps | ✅ | 2026-04-27 | root-app → notiflex-smb 자동 관리 |
+| ch7 | 7.4 멀티테넌시 | ✅ | 2026-04-27 | notiflex-enterprise namespace + api-pool 배치 |
 | ch8 | 8.1 메시징 | ⬜ | | |
 | ch8 | 8.2 트레이싱 | ⬜ | | |
 | ch8 | 8.3 CronJob | ⬜ | | |
@@ -49,6 +49,8 @@
 | 배포 전략 | Argo Rollouts Canary | Blue/Green, Flagger | ch5 Blue/Green 경험 후 ch6에서 Canary로 진화 |
 | 캐시 | Valkey | Redis, Memcached | BSD 라이선스, Redis 호환 |
 | 시크릿 | K8s Secret (WI 비활성 대안) | CSI+SecretManager, Sealed Secrets | WI 비활성 환경 |
+| 노드 스케줄링 | nodeSelector + 멀티노드풀 | taint/toleration, nodeAffinity | 가장 단순, GKE 자동 라벨 활용 |
+| 멀티앱 관리 | App of Apps | ApplicationSet | 직관적, 순수 YAML |
 
 ## 현재 버전
 
