@@ -21,9 +21,9 @@
 | ch4 | 4.4 알림 | ✅ | 2026-04-27 | PrometheusRule + Alertmanager |
 | ch5 | 5.2 트래픽 관리 | ✅ | 2026-04-27 | Gateway API (gke-l7-regional) |
 | ch5 | 5.3 무중단 배포 | ✅ | 2026-04-27 | Argo Rollouts Blue/Green |
-| ch6 | 6.1 캐시 | ⬜ | | |
-| ch6 | 6.2 시크릿 관리 | ⬜ | | |
-| ch6 | 6.3 Canary 전환 | ⬜ | | |
+| ch6 | 6.1 캐시 | ✅ | 2026-04-27 | Valkey standalone |
+| ch6 | 6.2 시크릿 관리 | ✅ | 2026-04-27 | K8s Secret (WI 비활성화로 CSI 우회) |
+| ch6 | 6.3 Canary 전환 | ✅ | 2026-04-27 | Blue/Green → Canary (20→50→80%) |
 | ch7 | 7.2 멀티 노드풀 | ⬜ | | |
 | ch7 | 7.3 App of Apps | ⬜ | | |
 | ch7 | 7.4 멀티테넌시 | ⬜ | | |
@@ -46,7 +46,9 @@
 | 로그 | Loki + Promtail | ELK Stack, Google Cloud Logging | 경량, Grafana 통합 |
 | 알림 | PrometheusRule + Alertmanager | Grafana Alerting UI | GitOps 호환 (YAML→Git→ArgoCD) |
 | 외부 트래픽 | Gateway API | Ingress NGINX, Istio | GKE 네이티브, 별도 설치 불필요 |
-| 배포 전략 | Argo Rollouts Blue/Green | Flagger, Rolling Update | ArgoCD 동일 생태계, preview 검증 |
+| 배포 전략 | Argo Rollouts Canary | Blue/Green, Flagger | ch5 Blue/Green 경험 후 ch6에서 Canary로 진화 |
+| 캐시 | Valkey | Redis, Memcached | BSD 라이선스, Redis 호환 |
+| 시크릿 | K8s Secret (WI 비활성 대안) | CSI+SecretManager, Sealed Secrets | WI 비활성 환경 |
 
 ## 현재 버전
 
