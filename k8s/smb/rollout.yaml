@@ -4,7 +4,7 @@ metadata:
   name: notiflex-api
   namespace: notiflex
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: notiflex-api
@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: api
-        image: asia-northeast3-docker.pkg.dev/project-75fce205-dfa5-4975-a56/notiflex/api:v0.1.1
+        image: asia-northeast3-docker.pkg.dev/project-75fce205-dfa5-4975-a56/notiflex/api:v0.2.0
         ports:
         - containerPort: 8080
         env:
@@ -23,6 +23,13 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.name
+        - name: VALKEY_ADDR
+          value: valkey-primary.notiflex.svc.cluster.local:6379
+        - name: VALKEY_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: valkey
+              key: valkey-password
         readinessProbe:
           httpGet:
             path: /health
