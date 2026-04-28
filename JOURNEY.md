@@ -64,16 +64,19 @@
 | 컴포넌트 | 버전 | 변경 이력 |
 |---------|------|----------|
 | Go | 1.25 | |
-| Notiflex 이미지 | v0.1.0 | |
-| ArgoCD | | |
-| Kafka | | |
-| OTel SDK | | |
+| Notiflex 이미지 | sha-b7e0c5e (v0.2.0 기반) | v0.1.0 → v0.1.1 → v0.2.0(Valkey) → CI sha 태그 |
+| ArgoCD | v3.3.8 | |
+| Kafka | 4.1.0 (Strimzi 0.51.0, KRaft) | |
+| OTel SDK | - (ch8.2 Tempo 설치, SDK 미적용) | |
 
 ## 현재 리소스
 
 | 노드풀 | 머신 타입 | 노드 수 | 주요 워크로드 |
 |--------|----------|---------|-------------|
-| default-pool | e2-medium | 2 | 모든 워크로드 |
+| default-pool | e2-medium | 2 | ArgoCD, monitoring, kube-system |
+| api-pool | e2-medium | 1 | notiflex-api (smb, enterprise) |
+| worker-pool | e2-standard-2 | 1 | Kafka (Strimzi, KRaft) |
+| ops-pool | e2-small | 1 | Tempo, CronJob |
 
 ## 트러블슈팅 이력
 
