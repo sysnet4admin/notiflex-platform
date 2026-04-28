@@ -88,7 +88,15 @@
 - 워크로드 분리 — api/worker/ops 3풀로 비용·성능 최적화
 - 커스텀 라벨 금지 — `workload: api` 등 임의 키는 영구 Pending의 원인
 
-## ADR-012: 메시징 — Kafka (ch8.1)
+## ADR-012: 멀티앱 관리 — App of Apps (ch7.3)
+**시점**: 2026-04 / **결정**: ArgoCD App of Apps + sync-wave 채택 (vs ApplicationSet)
+**이유**:
+- 단순 구조 — root-app이 `argocd/apps/` 감시, YAML 추가만으로 앱 추가
+- 설치 순서 보장 — sync-wave (0:인프라, 1:플랫폼, 2:앱) 3단계 의존성 처리
+- 기존 ArgoCD 확장 — 추가 컨트롤러 불필요
+- `directory.recurse: true` 필수 — 서브디렉터리 YAML도 자동 감지
+
+## ADR-013: 메시징 — Kafka (ch8.1)
 **시점**: 2026-04 / **결정**: Kafka (Strimzi 0.51.0, KRaft 4.1.0) 채택
 **이유**:
 - 고처리량 + 영속 메시지 — 알림 데이터 유실 없이 비동기 처리
@@ -96,7 +104,7 @@
 - Strimzi Operator — K8s CRD로 Kafka 클러스터 선언적 관리
 - worker-pool 배치 — 브로커 전용 노드로 리소스 격리
 
-## ADR-013: 분산 트레이싱 — Tempo (ch8.2)
+## ADR-014: 분산 트레이싱 — Tempo (ch8.2)
 **시점**: 2026-04 / **결정**: Grafana Tempo 채택
 **이유**:
 - Grafana 통합 — 메트릭·로그·트레이스를 동일 UI에서 조회
