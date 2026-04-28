@@ -79,3 +79,27 @@
 - Blue/Green보다 리소스 효율 — 2배 복제 불필요
 - 동일 Argo Rollouts 생태계 — 전략 전환 시 컨트롤러 유지
 - 30초 간격 단계적 승격
+
+## ADR-011: 노드 스케줄링 — nodeSelector (ch7.2)
+**시점**: 2026-04 / **결정**: nodeSelector + `cloud.google.com/gke-nodepool` 채택
+**이유**:
+- GKE 자동 라벨 기반 — `--node-labels` 불필요
+- 단순 선언 — `spec.nodeSelector` 필드 1줄로 완료
+- 워크로드 분리 — api/worker/ops 3풀로 비용·성능 최적화
+- 커스텀 라벨 금지 — `workload: api` 등 임의 키는 영구 Pending의 원인
+
+## ADR-012: 메시징 — Kafka (ch8.1)
+**시점**: 2026-04 / **결정**: Kafka (Strimzi 0.51.0, KRaft 4.1.0) 채택
+**이유**:
+- 고처리량 + 영속 메시지 — 알림 데이터 유실 없이 비동기 처리
+- KRaft 모드 — ZooKeeper 없이 단순화된 구조
+- Strimzi Operator — K8s CRD로 Kafka 클러스터 선언적 관리
+- worker-pool 배치 — 브로커 전용 노드로 리소스 격리
+
+## ADR-013: 분산 트레이싱 — Tempo (ch8.2)
+**시점**: 2026-04 / **결정**: Grafana Tempo 채택
+**이유**:
+- Grafana 통합 — 메트릭·로그·트레이스를 동일 UI에서 조회
+- 단일 바이너리 — ops-pool 1 Pod로 동작
+- OTLP 표준 — OTel SDK와 직접 연동, 벤더 종속 없음
+- ops-pool 배치 — 운영 도구 전용 노드로 분리
