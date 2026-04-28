@@ -27,14 +27,14 @@
 | ch7 | 7.2 멀티 노드풀 | ✅ | 2026-04-28 | |
 | ch7 | 7.3 App of Apps | ✅ | 2026-04-28 | |
 | ch7 | 7.4 멀티테넌시 | ✅ | 2026-04-28 | |
-| ch8 | 8.1 메시징 | ⬜ | | |
-| ch8 | 8.2 트레이싱 | ⬜ | | |
-| ch8 | 8.3 CronJob | ⬜ | | |
-| ch9 | 9.1 저장소 분석 | ⬜ | | |
-| ch9 | 9.2 회고 | ⬜ | | |
-| ch9 | 9.3 온보딩 문서 | ⬜ | | |
-| ch9 | 9.4 GitAIOps 분석 | ⬜ | | |
-| ch9 | 9.5 마무리 | ⬜ | | |
+| ch8 | 8.1 메시징 | ✅ | 2026-04-29 | Kafka 4.1.0 KRaft |
+| ch8 | 8.2 트레이싱 | ✅ | 2026-04-29 | Tempo (ops-pool) |
+| ch8 | 8.3 CronJob | ✅ | 2026-04-29 | |
+| ch9 | 9.1 저장소 분석 | ✅ | 2026-04-29 | |
+| ch9 | 9.2 회고 | ✅ | 2026-04-29 | |
+| ch9 | 9.3 온보딩 문서 | ✅ | 2026-04-29 | |
+| ch9 | 9.4 GitAIOps 분석 | ✅ | 2026-04-29 | |
+| ch9 | 9.5 마무리 | ✅ | 2026-04-29 | |
 
 ## 도구 선택 기록
 
@@ -52,6 +52,8 @@
 | 배포 전략 전환 (ch6.3) | Argo Rollouts Canary | Blue/Green | 점진적 트래픽 이동 (20%→50%→80%), 리소스 효율적 |
 | 노드 스케줄링 (ch7.2) | nodeSelector (cloud.google.com/gke-nodepool) | Taint/Toleration, Affinity | GKE 자동 라벨 기반, 단순, 효과적 |
 | 멀티앱 관리 (ch7.3) | App of Apps + sync-wave | ApplicationSet | 단순 구조, 설치 순서 보장, 기존 ArgoCD 확장 |
+| 메시징 (ch8.1) | Kafka (Strimzi 0.51, KRaft 4.1.0) | RabbitMQ, NATS, Pulsar | 고처리량, 순서 보장, Strimzi로 K8s 네이티브 관리 |
+| 트레이싱 (ch8.2) | Tempo | Jaeger, Zipkin | Grafana 통합, 단일 바이너리, 경량 설치 |
 
 ## 현재 버전
 
@@ -60,8 +62,8 @@
 | Go | 1.25 | |
 | Notiflex 이미지 | v0.1.1 | v0.1.0 → v0.1.1 (/version 추가) |
 | ArgoCD | v3.3.8 | |
-| Kafka | | |
-| OTel SDK | | |
+| Kafka | 4.1.0 (Strimzi 0.51.0, KRaft) | |
+| OTel SDK | - (Tempo 설치, SDK 미적용) | |
 
 ## 현재 리소스
 
