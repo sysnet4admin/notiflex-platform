@@ -31,9 +31,9 @@ jobs:
     - name: Update manifest
       run: |
         IMAGE="asia-northeast3-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/notiflex/api:sha-${GITHUB_SHA::7}"
-        sed -i "s|image: .*|image: $IMAGE|" k8s/smb/deployment.yaml
+        sed -i "s|image: .*|image: $IMAGE|" k8s/smb/rollout.yaml
         git config user.email "github-actions[bot]@users.noreply.github.com"
         git config user.name "github-actions[bot]"
-        git add k8s/smb/deployment.yaml
+        git add k8s/smb/rollout.yaml
         git commit -m "ci: update image to sha-${GITHUB_SHA::7}" || echo "no changes"
         git push
