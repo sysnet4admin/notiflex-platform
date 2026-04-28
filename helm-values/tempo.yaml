@@ -1,7 +1,0 @@
-tempo:
-  resources:
-    requests:
-      cpu: 50m
-      memory: 128Mi
-service:
-  type: ClusterIP
