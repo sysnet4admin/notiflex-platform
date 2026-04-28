@@ -55,3 +55,27 @@
 - YAML 선언적 — `strategy.blueGreen` 필드로 배포 전략을 git에 기록
 - preview Pod으로 프로덕션 배포 전 사전 검증 가능
 - autoPromotionSeconds로 자동 프로모션
+
+## ADR-008: 캐시 — Valkey (ch6.1)
+**시점**: 2026-04 / **결정**: Valkey 채택 (vs Redis, Memcached)
+**이유**:
+- Redis fork — API 완전 호환, 라이선스 자유(BSD-3)
+- bitnami Helm 차트 지원 — 단순 설치
+- INCR 명령으로 분산 ID 카운터 구현
+- e2-medium 환경에서 50m CPU로 구동 가능
+
+## ADR-009: 시크릿 관리 — GKE Secret Manager CSI + WI (ch6.2)
+**시점**: 2026-04 / **결정**: GKE Secret Manager CSI + Workload Identity 채택
+**이유**:
+- GCP 네이티브 — Secret Manager와 GKE 완전 통합
+- Workload Identity — SA 키 없이 Pod이 GCP API 직접 인증
+- 파일 마운트 방식 — 메모리에 Secret 노출 없음
+- GKE managed CSI (addon) — 별도 헬름 설치 불필요
+
+## ADR-010: 배포 전략 전환 — Canary (ch6.3)
+**시점**: 2026-04 / **결정**: Argo Rollouts Canary (20%→50%→80% 점진) 채택
+**이유**:
+- 점진적 트래픽 이동 — 문제 발생 시 영향 범위 최소화
+- Blue/Green보다 리소스 효율
+- 동일 Argo Rollouts 생태계 — 전략 전환 시 컨트롤러 유지
+- 30초 간격 단계적 승격

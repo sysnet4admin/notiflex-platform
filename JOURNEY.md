@@ -20,10 +20,10 @@
 | ch5 | 5.2 트래픽 관리 | ✅ | 2026-04-28 | |
 | ch5 | 5.3 무중단 배포 | ✅ | 2026-04-28 | |
 | ch5 | 5.4 ADR | ✅ | 2026-04-28 | ADR-001~007 |
-| ch6 | 6.1 캐시 | ⬜ | | |
-| ch6 | 6.2 시크릿 관리 | ⬜ | | |
-| ch6 | 6.3 Canary 전환 | ⬜ | | |
-| ch6 | 6.4 아키텍처 컨텍스트 | ⬜ | | |
+| ch6 | 6.1 캐시 | ✅ | 2026-04-28 | |
+| ch6 | 6.2 시크릿 관리 | ✅ | 2026-04-28 | |
+| ch6 | 6.3 Canary 전환 | ✅ | 2026-04-28 | |
+| ch6 | 6.4 아키텍처 컨텍스트 | ✅ | 2026-04-28 | |
 | ch7 | 7.2 멀티 노드풀 | ⬜ | | |
 | ch7 | 7.3 App of Apps | ⬜ | | |
 | ch7 | 7.4 멀티테넌시 | ⬜ | | |
@@ -47,6 +47,9 @@
 | 알림 (ch4.4) | PrometheusRule + Alertmanager | Grafana Alert | Prometheus와 네이티브 연동, git 버전 관리 |
 | 외부 트래픽 (ch5.2) | GKE Gateway API (gke-l7-regional-external-managed) | Ingress, NGINX, Istio | GKE 네이티브, 별도 Ingress Controller 불필요 |
 | 배포 전략 (ch5.3) | Argo Rollouts Blue/Green | Flagger, Istio | ArgoCD 동일 생태계, YAML 선언적, preview Pod으로 사전 검증 가능 |
+| 캐시 (ch6.1) | Valkey | Redis, Memcached | Redis fork, OSS, bitnami 차트 지원, INCR으로 분산 ID 카운터 구현 |
+| 시크릿 관리 (ch6.2) | GKE Secret Manager CSI + WI | K8s Secret, HashiCorp Vault | GCP 네이티브, 키 노출 없음, 파일 마운트 방식 |
+| 배포 전략 전환 (ch6.3) | Argo Rollouts Canary | Blue/Green | 점진적 트래픽 이동 (20%→50%→80%), 리소스 효율적 |
 
 ## 현재 버전
 
