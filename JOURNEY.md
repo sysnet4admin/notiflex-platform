@@ -19,9 +19,9 @@
 | ch4 | 4.2 메트릭 모니터링 | ✅ | 2026-04-28 | kube-prometheus-stack |
 | ch4 | 4.3 로그 수집 | ✅ | 2026-04-28 | loki 최신 차트 bucket 문제 → loki-stack 우회 |
 | ch4 | 4.4 알림 | ✅ | 2026-04-28 | PrometheusRule 적용 |
-| ch5 | 5.2 트래픽 관리 | ⬜ | | |
-| ch5 | 5.3 무중단 배포 | ⬜ | | |
-| ch5 | 5.4 ADR | ⬜ | | |
+| ch5 | 5.2 트래픽 관리 | ✅ | 2026-04-28 | |
+| ch5 | 5.3 무중단 배포 | ✅ | 2026-04-28 | Deployment→Rollout 전환 |
+| ch5 | 5.4 ADR | ✅ | 2026-04-28 | |
 | ch6 | 6.1 캐시 | ⬜ | | |
 | ch6 | 6.2 시크릿 관리 | ⬜ | | |
 | ch6 | 6.3 Canary 전환 | ⬜ | | |
@@ -49,6 +49,8 @@
 | 메트릭 (ch4.2) | Prometheus + Grafana | Datadog, New Relic | GKE 네이티브, 오픈소스, kube-prometheus-stack으로 통합 설치 |
 | 로깅 (ch4.3) | Loki + Fluent Bit | ELK Stack, Datadog | Grafana와 통합, 경량, 인덱싱 없이 로그 저장 |
 | 알림 (ch4.4) | PrometheusRule + Alertmanager | Grafana Alert | Prometheus와 네이티브 연동, git 버전 관리 |
+| 외부 트래픽 (ch5.2) | GKE Gateway API (gke-l7-regional-external-managed) | Ingress, NGINX, Istio | GKE 네이티브, 별도 Ingress Controller 불필요, ch2.5에서 이미 활성화 |
+| 배포 전략 (ch5.3) | Argo Rollouts Blue/Green | Flagger, Istio | ArgoCD 동일 생태계, YAML 선언적, preview Pod으로 사전 검증 가능 |
 
 ## 현재 버전
 
