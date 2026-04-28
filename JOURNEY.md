@@ -43,6 +43,8 @@
 | 영역 | 선택 | 검토한 대안 | 선택 이유 |
 |------|------|-----------|----------|
 | GitOps (ch3.2) | ArgoCD | Flux, Jenkins X | Web UI 배포 상태 시각화, e2-medium 환경 구동 가능, CNCF Graduated |
+| 노드 스케줄링 (ch7.2) | nodeSelector (cloud.google.com/gke-nodepool) | Taint/Toleration, Affinity | GKE 자동 라벨 기반, 단순, 효과적 |
+| 멀티앱 관리 (ch7.3) | App of Apps + sync-wave | ApplicationSet | 단순 구조, 설치 순서 보장, 기존 ArgoCD 확장 |
 | CI (ch3.4) | GitHub Actions + WIF | Jenkins, GitLab CI | 저장소 네이티브, SA 키 조직 정책 차단 환경에서 WIF가 유일한 선택 |
 | 메트릭 (ch4.2) | Prometheus + Grafana | Datadog, New Relic | GKE 네이티브, 오픈소스, kube-prometheus-stack으로 통합 설치 |
 | 로깅 (ch4.3) | Loki + Fluent Bit | ELK Stack, Datadog | Grafana와 통합, 경량, 인덱싱 없이 로그 저장 |
