@@ -26,9 +26,9 @@
 | ch6 | 6.2 시크릿 관리 | ✅ | 2026-04-28 | WI + CSI Secret Manager |
 | ch6 | 6.3 Canary 전환 | ✅ | 2026-04-28 | BG→Canary 전환 |
 | ch6 | 6.4 아키텍처 컨텍스트 | ✅ | 2026-04-28 | claude-context/ 생성 |
-| ch7 | 7.2 멀티 노드풀 | ⬜ | | |
-| ch7 | 7.3 App of Apps | ⬜ | | |
-| ch7 | 7.4 멀티테넌시 | ⬜ | | |
+| ch7 | 7.2 멀티 노드풀 | ✅ | 2026-04-28 | api/worker/ops 3개 풀 생성 |
+| ch7 | 7.3 App of Apps | ✅ | 2026-04-28 | root-app + sync-wave |
+| ch7 | 7.4 멀티테넌시 | ✅ | 2026-04-28 | enterprise ns, api-pool 배치 |
 | ch8 | 8.1 메시징 | ⬜ | | |
 | ch8 | 8.2 트레이싱 | ⬜ | | |
 | ch8 | 8.3 CronJob | ⬜ | | |
@@ -52,6 +52,8 @@
 | 캐시 (ch6.1) | Valkey | Redis, Memcached | Redis fork, OSS, bitnami 차트 지원, INCR으로 분산 ID 카운터 구현 |
 | 시크릿 관리 (ch6.2) | GKE Secret Manager CSI + WI | K8s Secret, HashiCorp Vault | GCP 네이티브, 키 노출 없음, 파일 마운트 방식 |
 | 배포 전략 전환 (ch6.3) | Argo Rollouts Canary | Blue/Green | 점진적 트래픽 이동 (20%→50%→80%), 리소스 효율적 |
+| 노드 스케줄링 (ch7.2) | nodeSelector (cloud.google.com/gke-nodepool) | Taint/Toleration, Affinity | GKE 자동 라벨 기반, 단순, 효과적 |
+| 멀티앱 관리 (ch7.3) | App of Apps + sync-wave | ApplicationSet | 단순 구조, 설치 순서 보장, 기존 ArgoCD 확장 |
 
 ## 현재 버전
 
@@ -67,7 +69,10 @@
 
 | 노드풀 | 머신 타입 | 노드 수 | 주요 워크로드 |
 |--------|----------|---------|-------------|
-| default-pool | e2-medium | 2 | 모든 워크로드 |
+| default-pool | e2-medium | 2 | ArgoCD, monitoring, kube-system |
+| api-pool | e2-medium | 1 | notiflex-api (smb, enterprise) |
+| worker-pool | e2-standard-2 | 1 | Kafka (Strimzi, KRaft) |
+| ops-pool | e2-small | 1 | Tempo, CronJob |
 
 ## 트러블슈팅 이력
 
