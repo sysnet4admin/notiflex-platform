@@ -79,3 +79,19 @@
 - Blue/Green보다 리소스 효율 — active + preview 2배 복제 불필요
 - 동일 Argo Rollouts 생태계 — 전략 전환 시 컨트롤러 유지
 - 30초 간격 단계적 승격 — 각 단계에서 메트릭 확인 가능
+
+## ADR-011: 노드 스케줄링 — nodeSelector (ch7.2)
+**시점**: 2026-04 / **결정**: nodeSelector + `cloud.google.com/gke-nodepool` 채택 (vs Taint/Toleration, Node Affinity)
+**이유**:
+- GKE 자동 라벨 기반 — `--node-labels` 불필요, GKE가 `cloud.google.com/gke-nodepool` 자동 부여
+- 단순 선언 — `spec.nodeSelector` 필드 1줄로 완료
+- 워크로드 분리 효과 — api/worker/ops 3풀로 비용·성능 최적화
+- 커스텀 라벨 사용 금지 — `workload: api` 등 임의 키는 영구 Pending의 원인
+
+## ADR-012: 멀티앱 관리 — App of Apps (ch7.3)
+**시점**: 2026-04 / **결정**: ArgoCD App of Apps + sync-wave 채택 (vs ApplicationSet)
+**이유**:
+- 단순 구조 — root-app이 `argocd/apps/` 디렉터리 감시, YAML 추가만으로 앱 추가
+- 설치 순서 보장 — sync-wave (0:인프라, 1:플랫폼, 2:앱) 3단계 의존성 처리
+- 기존 ArgoCD 확장 — 추가 컨트롤러 불필요, 기존 Application 구조 재사용
+- `directory.recurse: true` 필수 — 서브디렉터리 내 YAML도 자동 감지
