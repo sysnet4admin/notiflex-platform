@@ -14,6 +14,9 @@ func main() {
 		w.WriteHeader(http.StatusOK)
 		fmt.Fprintln(w, "ok")
 	})
+	http.HandleFunc("/version", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintln(w, `{"version":"v0.1.1"}`)
+	})
 	http.HandleFunc("/id", func(w http.ResponseWriter, r *http.Request) {
 		id := counter.Add(1)
 		pod := os.Getenv("POD_NAME")
