@@ -71,3 +71,19 @@
 - 설치 순서 보장 — sync-wave (0:인프라, 1:플랫폼, 2:앱) 3단계 처리
 - 기존 ArgoCD 확장 — 추가 컨트롤러 불필요
 - `directory.recurse: true` 필수 — 서브디렉터리 YAML도 자동 감지
+
+## ADR-010: 메시징 — Kafka (ch8.1)
+**시점**: 2026-04 / **결정**: Kafka (Strimzi 0.51.0, KRaft 4.1.0) 채택 (vs RabbitMQ, NATS, Pulsar)
+**이유**:
+- 고처리량 + 영속 메시지 — 알림 데이터 유실 없이 비동기 처리
+- KRaft 모드 — ZooKeeper 없이 단순화된 구조
+- Strimzi Operator — K8s CRD로 Kafka 클러스터 선언적 관리
+- worker-pool 배치 — 브로커 전용 노드로 리소스 격리
+
+## ADR-011: 분산 트레이싱 — Tempo (ch8.2)
+**시점**: 2026-04 / **결정**: Grafana Tempo 채택 (vs Jaeger, Zipkin)
+**이유**:
+- Grafana 통합 — 메트릭·로그·트레이스를 동일 UI에서 조회
+- 단일 바이너리 — ops-pool 1 Pod로 동작
+- OTLP 표준 — OTel SDK와 직접 연동, 벤더 종속 없음
+- ops-pool 배치 — 운영 도구 전용 노드로 분리

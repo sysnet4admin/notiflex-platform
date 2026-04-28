@@ -51,6 +51,8 @@
 | 알림 (ch4.4) | PrometheusRule + Alertmanager | Grafana Alert | Prometheus와 네이티브 연동, git 버전 관리 |
 | 외부 트래픽 (ch5.2) | GKE Gateway API (gke-l7-regional-external-managed) | Ingress, NGINX, Istio | GKE 네이티브, 별도 Ingress Controller 불필요 |
 | 배포 전략 (ch5.3) | Argo Rollouts Blue/Green | Flagger, Istio | ArgoCD 동일 생태계, YAML 선언적, preview Pod으로 사전 검증 가능 |
+| 메시징 (ch8.1) | Kafka (Strimzi 0.51, KRaft 4.1.0) | RabbitMQ, NATS, Pulsar | 고처리량, 순서 보장, Strimzi로 K8s 네이티브 관리 |
+| 트레이싱 (ch8.2) | Tempo | Jaeger, Zipkin | Grafana 통합, 단일 바이너리, 경량 설치 |
 
 ## 현재 버전
 
@@ -59,7 +61,7 @@
 | Go | 1.25 | |
 | Notiflex 이미지 | v0.2.0 | v0.1.0 → v0.1.1 → v0.2.0 (Valkey 연동) |
 | ArgoCD | v3.3.8 | |
-| Kafka | | |
+| Kafka | 4.1.0 (Strimzi 0.51.0, KRaft) | |
 | OTel SDK | | |
 
 ## 현재 리소스
