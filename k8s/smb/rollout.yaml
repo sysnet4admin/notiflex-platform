@@ -1,5 +1,5 @@
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
 metadata:
   name: notiflex-api
   namespace: notiflex
@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: api
-        image: asia-northeast3-docker.pkg.dev/project-75fce205-dfa5-4975-a56/notiflex/api:sha-2889c66
+        image: asia-northeast3-docker.pkg.dev/project-75fce205-dfa5-4975-a56/notiflex/api:v0.1.1
         ports:
         - containerPort: 8080
         env:
@@ -38,3 +38,9 @@ spec:
           limits:
             cpu: 200m
             memory: 128Mi
+  strategy:
+    blueGreen:
+      activeService: notiflex-api
+      previewService: notiflex-api-preview
+      autoPromotionEnabled: true
+      autoPromotionSeconds: 30
