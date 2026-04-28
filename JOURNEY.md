@@ -16,9 +16,9 @@
 | ch3 | 3.3 기능 추가 | ✅ | 2026-04-28 | |
 | ch3 | 3.4 CI | ✅ | 2026-04-28 | SA Key 차단 → WIF 사용 |
 | ch3 | 3.5 CI-CD 연결 | ✅ | 2026-04-28 | E2E 파이프라인 확인 |
-| ch4 | 4.2 메트릭 모니터링 | ⬜ | | |
-| ch4 | 4.3 로그 수집 | ⬜ | | |
-| ch4 | 4.4 알림 | ⬜ | | |
+| ch4 | 4.2 메트릭 모니터링 | ✅ | 2026-04-28 | kube-prometheus-stack |
+| ch4 | 4.3 로그 수집 | ✅ | 2026-04-28 | loki 최신 차트 bucket 문제 → loki-stack 우회 |
+| ch4 | 4.4 알림 | ✅ | 2026-04-28 | PrometheusRule 적용 |
 | ch5 | 5.2 트래픽 관리 | ⬜ | | |
 | ch5 | 5.3 무중단 배포 | ⬜ | | |
 | ch5 | 5.4 ADR | ⬜ | | |
@@ -46,6 +46,9 @@
 |------|------|-----------|----------|
 | GitOps (ch3.2) | ArgoCD | Flux, Jenkins X | Web UI 배포 상태 시각화, e2-medium 환경 구동 가능, CNCF Graduated |
 | CI (ch3.4) | GitHub Actions + WIF | Jenkins, GitLab CI | 저장소 네이티브, SA 키 조직 정책 차단 환경에서 WIF가 유일한 선택 |
+| 메트릭 (ch4.2) | Prometheus + Grafana | Datadog, New Relic | GKE 네이티브, 오픈소스, kube-prometheus-stack으로 통합 설치 |
+| 로깅 (ch4.3) | Loki + Fluent Bit | ELK Stack, Datadog | Grafana와 통합, 경량, 인덱싱 없이 로그 저장 |
+| 알림 (ch4.4) | PrometheusRule + Alertmanager | Grafana Alert | Prometheus와 네이티브 연동, git 버전 관리 |
 
 ## 현재 버전
 

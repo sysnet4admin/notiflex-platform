@@ -1,0 +1,13 @@
+# loki-stack 차트 사용 (단순, bucket 설정 불필요)
+loki:
+  enabled: true
+  resources:
+    requests:
+      cpu: 10m
+      memory: 128Mi
+
+fluent-bit:
+  enabled: false
+
+promtail:
+  enabled: false
