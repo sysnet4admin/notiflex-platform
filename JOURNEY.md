@@ -55,7 +55,7 @@
 | 컴포넌트 | 버전 | 변경 이력 |
 |---------|------|----------|
 | Go | 1.25 | 2026-04-29: 초기 버전 설정 |
-| Notiflex 이미지 | `asia-northeast3-docker.pkg.dev/project-75fce205-dfa5-4975-a56/notiflex/api:sha-7380ee4` | 2026-04-29: CI가 매니페스트를 자동 갱신해 배포, 현재 실행 이미지 digest `sha256:528b11ab3781e47d58764448a5fbde3044b31352600c3cd03d258fa7016e1e86` |
+| Notiflex 이미지 | `asia-northeast3-docker.pkg.dev/project-75fce205-dfa5-4975-a56/notiflex/api:sha-70a662d` | 2026-04-29: CI가 매니페스트를 자동 갱신해 배포, 현재 실행 이미지 digest `sha256:7d8fc9e5593264f0c7a408151977dbb21d8c6db794068133718bcfc848c58bcc` |
 | ArgoCD | quay.io/argoproj/argocd:v3.3.8 | 2026-04-29: gke-sysnet4admin_book_gitaiops 클러스터에 설치 및 notiflex-platform 저장소 연결 |
 | Prometheus | quay.io/prometheus/prometheus:v3.11.3 | 2026-04-29: `kube-prometheus-stack-84.3.0`으로 monitoring namespace에 설치 |
 | Grafana | docker.io/grafana/grafana:13.0.1 | 2026-04-29: `kube-prometheus-grafana` 배포, Notiflex 대시보드 ConfigMap(`notiflex-grafana-dashboard`) 추가 |
