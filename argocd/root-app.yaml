@@ -1,17 +1,19 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: notiflex-smb
+  name: root-app
   namespace: argocd
 spec:
   project: default
   source:
     repoURL: https://github.com/sysnet4admin/notiflex-platform.git
     targetRevision: main
-    path: k8s/smb
+    path: argocd/apps
+    directory:
+      recurse: true
   destination:
     server: https://kubernetes.default.svc
-    namespace: notiflex
+    namespace: argocd
   syncPolicy:
     automated:
       prune: true

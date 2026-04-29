@@ -27,7 +27,7 @@
 | ch6 | 6.3 Canary 전환 | ✅ | 2026-04-30 | Argo Rollouts 전략을 Blue/Green에서 Canary(20→50→80→100, 30초 pause)로 전환 |
 | ch6 | 6.4 아키텍처 컨텍스트 | ✅ | 2026-04-30 | `claude-context/architecture.md` 스냅샷 생성, 3층 지식 구조와 현재 클러스터 토폴로지 반영 |
 | ch7 | 7.2 멀티 노드풀 | ✅ | 2026-04-30 | api/worker/ops 역할별 노드풀 생성 + notiflex-api를 `api-pool`로 스케줄링 |
-| ch7 | 7.3 App of Apps | ⬜ | | |
+| ch7 | 7.3 App of Apps | ✅ | 2026-04-30 | `argocd/root-app.yaml` 추가, `argocd/apps/` 하위 Application 관리 + sync-wave 적용 |
 | ch7 | 7.4 멀티테넌시 | ⬜ | | |
 | ch8 | 8.1 메시징 | ⬜ | | |
 | ch8 | 8.2 트레이싱 | ⬜ | | |
@@ -57,6 +57,7 @@
 | ch6.2 시크릿 관리 | GKE Secret Manager CSI Driver + Workload Identity | Kubernetes Secret, HashiCorp Vault | Secret 값을 클러스터 밖 Google Secret Manager에서 중앙 관리하고, Pod에는 CSI 파일 마운트로만 주입해 노출면을 줄일 수 있음 |
 | ch6.3 배포 전략 전환 | Argo Rollouts Canary (`canaryService`/`stableService`, 20→50→80→100, `pause: 30s`) | Blue/Green 유지 | 점진 트래픽 전환으로 새 버전 리스크를 단계별로 관찰하고 이상 시 중간 단계에서 제어하기 용이 |
 | ch7.2 노드 스케줄링 | GKE 멀티 노드풀 + `nodeSelector(cloud.google.com/gke-nodepool)` | taint/toleration, nodeAffinity | 학습 환경에서 가장 단순하게 워크로드 역할 분리를 적용할 수 있고, GKE 노드풀 라벨을 그대로 사용해 설정 오류 가능성을 낮춤 |
+| ch7.3 멀티 앱 관리 | ArgoCD App of Apps (`root-app` + `argocd/apps/` + `directory.recurse`) | Application 단건 수동 관리, ApplicationSet | 하위 Application 선언을 Git 디렉터리 기준으로 일괄 관리하고 sync-wave(인프라→플랫폼→앱)로 설치 순서를 통제하기 쉬움 |
 
 ## 현재 버전
 
@@ -97,3 +98,4 @@
 | ch3.5 | CI 인증 방식이 환경마다 달라 빌드 실패 (SA Key/WIF 시크릿 키 이름 불일치) | SA Key, 레거시 WIF, GCP WIF 3가지 입력 조합을 모두 지원하도록 워크플로 보완 |
 | ch4.3 | Loki 설치 시 기본 cache(chunks/results) Pod가 CPU 부족으로 Pending되어 Helm install timeout | `helm-values/loki.yaml`에서 `chunksCache.enabled=false`, `resultsCache.enabled=false`로 비활성화 후 `helm upgrade --install` 재실행 |
 | ch4.4 | `kube_pod_container_status_restarts_total` 기반 경보는 Pod 삭제만으로 즉시 증가하지 않아 Alert가 `firing`되지 않을 수 있음 | 규칙 로드/Alertmanager 연동 확인 후, 실제 재시작 카운트가 증가하는 장애 시나리오(예: CrashLoop)로 추가 검증 |
+| ch7.3 | `root-app` 적용 직후 `Sync Unknown (argocd/apps path does not exist)` | 로컬 App of Apps 변경(`argocd/apps/`)을 GitHub `main`에 커밋/푸시한 뒤 ArgoCD 재동기화하면 `Synced`로 전환 |
