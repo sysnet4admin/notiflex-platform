@@ -21,6 +21,7 @@
 | ch4 | 4.4 알림 | ✅ | 2026-04-29 | PrometheusRule(`pod-restart-alert`) 생성/적용 완료, Alertmanager 연동 확인 |
 | ch5 | 5.2 트래픽 관리 | ✅ | 2026-04-29 | Gateway API(Gateway/HTTPRoute) + HealthCheckPolicy 적용, 외부 IP 35.216.99.80 응답 확인 |
 | ch5 | 5.3 무중단 배포 | ✅ | 2026-04-29 | Argo Rollouts Blue/Green 적용(rollout + preview service), 30초 auto-promote 설정 완료 |
+| ch5 | 5.4 ADR 기록 | ✅ | 2026-04-29 | `docs/architecture-decisions.md` 생성, ch3~ch5 결정 ADR-001~007 누적 기록 |
 | ch6 | 6.1 캐시 | ⬜ | | |
 | ch6 | 6.2 시크릿 관리 | ⬜ | | |
 | ch6 | 6.3 Canary 전환 | ⬜ | | |
