@@ -55,3 +55,27 @@
 - preview 검증 후 자동 승격(`autoPromotionSeconds`)으로 운영 리스크를 낮출 수 있다
 - ArgoCD와 같은 생태계여서 GitOps 운영 및 상태 가시성이 높다
 - 현재 환경에서는 Blue/Green의 리소스 오버헤드가 감당 가능하다
+
+## ADR-008: 캐시는 Valkey (6장)
+**시점**: 2026-04 / **결정**: 애플리케이션 공유 카운터/캐시는 Valkey를 채택한다. Redis OSS와 Memcached는 기본 경로로 채택하지 않는다.
+**이유**:
+- Redis API 호환으로 앱 코드 변경을 최소화할 수 있다
+- standalone 배포로 e2-medium 실습 환경에서도 운영 복잡도를 낮출 수 있다
+- 오픈 거버넌스 기반(Valkey)으로 장기 운영 리스크를 줄일 수 있다
+- `/id` 카운터 시나리오를 빠르게 검증하기에 적합하다
+
+## ADR-009: 시크릿은 Google Secret Manager CSI + Workload Identity (6장)
+**시점**: 2026-04 / **결정**: 시크릿 주입은 GKE Secret Manager CSI Driver와 Workload Identity를 조합해 사용한다. Kubernetes Secret 직접 저장과 Vault 도입은 현재 단계에서 채택하지 않는다.
+**이유**:
+- 시크릿 원문을 클러스터 외부(Google Secret Manager)에서 중앙 관리할 수 있다
+- Pod에는 CSI 파일 마운트로만 노출되어 환경 변수 직접 주입 대비 노출면이 작다
+- Workload Identity로 정적 키 배포 없이 권한을 부여할 수 있다
+- GKE 네이티브 기능 조합으로 초기 운영 복잡도와 통합 비용이 낮다
+
+## ADR-010: 무중단 배포 전략은 Canary로 전환 (6장)
+**시점**: 2026-04 / **결정**: 배포 전략을 Argo Rollouts Blue/Green에서 Canary로 전환한다. Blue/Green은 기본 전략으로 유지하지 않는다.
+**이유**:
+- 20→50→80→100 단계별 트래픽 전환으로 리스크를 점진적으로 관찰할 수 있다
+- 각 단계 `pause`로 품질 지표/알림 확인 시간을 확보할 수 있다
+- 이상 징후 발생 시 100% 전환 전에 제어하기 유리하다
+- Argo Rollouts/ArgoCD 생태계를 유지하면서 전략만 변경해 운영 일관성을 확보한다

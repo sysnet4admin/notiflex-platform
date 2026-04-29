@@ -25,6 +25,7 @@
 | ch6 | 6.1 캐시 | ✅ | 2026-04-29 | Valkey standalone 설치 + notiflex-api `/id`를 Valkey INCR 기반으로 전환 완료 |
 | ch6 | 6.2 시크릿 관리 | ✅ | 2026-04-29 | Workload Identity + GKE Secret Manager CSI 활성화, `valkey-password`를 Google Secret Manager로 이관, SecretProviderClass/파일 마운트 패턴 적용 |
 | ch6 | 6.3 Canary 전환 | ✅ | 2026-04-30 | Argo Rollouts 전략을 Blue/Green에서 Canary(20→50→80→100, 30초 pause)로 전환 |
+| ch6 | 6.4 아키텍처 컨텍스트 | ✅ | 2026-04-30 | `claude-context/architecture.md` 스냅샷 생성, 3층 지식 구조와 현재 클러스터 토폴로지 반영 |
 | ch7 | 7.2 멀티 노드풀 | ⬜ | | |
 | ch7 | 7.3 App of Apps | ⬜ | | |
 | ch7 | 7.4 멀티테넌시 | ⬜ | | |
@@ -68,7 +69,7 @@
 | Prometheus | quay.io/prometheus/prometheus:v3.11.3 | 2026-04-29: `kube-prometheus-stack-84.3.0`으로 monitoring namespace에 설치 |
 | Grafana | docker.io/grafana/grafana:13.0.1 | 2026-04-29: `kube-prometheus-grafana` 배포, Notiflex 대시보드 ConfigMap(`notiflex-grafana-dashboard`) 추가 |
 | Loki | docker.io/grafana/loki:3.6.7 | 2026-04-29: `loki-7.0.0`(SingleBinary) 설치, `loki-datasource` ConfigMap으로 Grafana 데이터소스 등록(`isDefault: false`) |
-| Fluent Bit | grafana/fluent-bit-plugin-loki:2.1.0-amd64 | 2026-04-29: `fluent-bit-2.6.0` DaemonSet 설치, Loki Gateway(`/loki/api/v1/push`)로 로그 수집 연동 |
+| Fluent Bit | cr.fluentbit.io/fluent/fluent-bit:5.0.3 | 2026-04-30: 클러스터 DaemonSet 기준 실제 실행 이미지를 `cr.fluentbit.io/fluent/fluent-bit:5.0.3`으로 확인 |
 | GKE Secret Manager CSI | `secretManagerConfig.enabled=true`, `csi-secrets-store-gke`/`csi-secrets-store-provider-gke` DaemonSet | 2026-04-29: Workload Identity 활성화 후 Secret Manager addon 활성화, `notiflex-secrets` SecretProviderClass로 `valkey-password` 파일 마운트 구성 |
 | Kafka | 미설치 | 2026-04-29: ch8 이전 단계라 클러스터에 리소스 없음 |
 | OTel SDK | 미설치 | 2026-04-29: ch8.2 이전 단계 |

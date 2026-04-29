@@ -1,5 +1,6 @@
 # Notiflex Architecture Snapshot
 
+> 6장 완료 시점 아키텍처 스냅샷
 > 업데이트 기준: 2026-04-30 (KST)
 > 클러스터 조회 컨텍스트: `gke-sysnet4admin_book_gitaiops`
 
