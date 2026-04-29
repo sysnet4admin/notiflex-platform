@@ -15,19 +15,29 @@ import (
 
 	"github.com/IBM/sarama"
 	valkey "github.com/valkey-io/valkey-go"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
+	"go.opentelemetry.io/otel/propagation"
+	"go.opentelemetry.io/otel/sdk/resource"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	"go.opentelemetry.io/otel/trace"
 )
 
-const appVersion = "v0.2.0"
+const appVersion = "v0.3.0"
 const defaultValkeyAddr = "valkey-primary.notiflex.svc.cluster.local:6379"
 const defaultKafkaBroker = "notiflex-kafka-kafka-bootstrap.kafka.svc.cluster.local:9092"
+const defaultOTLPEndpoint = "tempo.monitoring.svc.cluster.local:4317"
 const idKey = "notiflex:id"
 const kafkaTopic = "notifications"
 const kafkaConsumerGroup = "notiflex-api"
 
 type server struct {
-	podName string
-	client  valkey.Client
+	podName  string
+	client   valkey.Client
 	producer sarama.SyncProducer
+	tracer   trace.Tracer
 }
 
 func newServer() (*server, error) {
@@ -90,11 +100,16 @@ func newServer() (*server, error) {
 		podName:  podName,
 		client:   client,
 		producer: producer,
+		tracer:   otel.Tracer("notiflex-api"),
 	}, nil
 }
 
 func (s *server) healthHandler(w http.ResponseWriter, r *http.Request) {
+	_, span := s.tracer.Start(r.Context(), "GET /health")
+	defer span.End()
+
 	if r.Method != http.MethodGet {
+		span.SetStatus(codes.Error, "method not allowed")
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
@@ -103,16 +118,22 @@ func (s *server) healthHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *server) idHandler(w http.ResponseWriter, r *http.Request) {
+	ctx, span := s.tracer.Start(r.Context(), "GET /id")
+	defer span.End()
+
 	if r.Method != http.MethodGet {
+		span.SetStatus(codes.Error, "method not allowed")
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(r.Context(), 2*time.Second)
+	ctx, cancel := context.WithTimeout(ctx, 2*time.Second)
 	defer cancel()
 
 	id, err := s.client.Do(ctx, s.client.B().Incr().Key(idKey).Build()).AsInt64()
 	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "valkey increment failed")
 		log.Printf("failed to increment id in valkey: %v", err)
 		http.Error(w, "failed to generate id", http.StatusInternalServerError)
 		return
@@ -125,6 +146,8 @@ func (s *server) idHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	body, err := json.Marshal(message)
 	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "marshal failed")
 		log.Printf("failed to marshal kafka message: %v", err)
 		http.Error(w, "failed to generate id", http.StatusInternalServerError)
 		return
@@ -135,11 +158,14 @@ func (s *server) idHandler(w http.ResponseWriter, r *http.Request) {
 		Value: sarama.ByteEncoder(body),
 	})
 	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "kafka publish failed")
 		log.Printf("failed to publish message to kafka: %v", err)
 		http.Error(w, "failed to publish event", http.StatusInternalServerError)
 		return
 	}
 
+	span.SetAttributes(attribute.String("notiflex.id", strconv.FormatInt(id, 10)))
 	writeJSON(w, http.StatusOK, map[string]string{
 		"id":           strconv.FormatInt(id, 10),
 		"generated_by": s.podName,
@@ -147,7 +173,11 @@ func (s *server) idHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *server) versionHandler(w http.ResponseWriter, r *http.Request) {
+	_, span := s.tracer.Start(r.Context(), "GET /version")
+	defer span.End()
+
 	if r.Method != http.MethodGet {
+		span.SetStatus(codes.Error, "method not allowed")
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
@@ -167,6 +197,23 @@ func writeJSON(w http.ResponseWriter, status int, payload any) {
 }
 
 func main() {
+	otelEndpoint := os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT")
+	if otelEndpoint == "" {
+		otelEndpoint = defaultOTLPEndpoint
+	}
+
+	tp, err := initTracerProvider(context.Background(), otelEndpoint)
+	if err != nil {
+		log.Fatal(fmt.Errorf("otel tracer provider init failed: %w", err))
+	}
+	defer func() {
+		shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		if shutdownErr := tp.Shutdown(shutdownCtx); shutdownErr != nil {
+			log.Printf("otel tracer provider shutdown failed: %v", shutdownErr)
+		}
+	}()
+
 	srv, err := newServer()
 	if err != nil {
 		log.Fatal(err)
@@ -198,6 +245,34 @@ func main() {
 	if err := http.ListenAndServe(addr, mux); err != nil {
 		log.Fatal(fmt.Errorf("server stopped: %w", err))
 	}
+}
+
+func initTracerProvider(ctx context.Context, endpoint string) (*sdktrace.TracerProvider, error) {
+	exporter, err := otlptracegrpc.New(ctx,
+		otlptracegrpc.WithEndpoint(endpoint),
+		otlptracegrpc.WithInsecure(),
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	res, err := resource.New(ctx,
+		resource.WithAttributes(
+			attribute.String("service.name", "notiflex-api"),
+			attribute.String("service.version", appVersion),
+		),
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	tp := sdktrace.NewTracerProvider(
+		sdktrace.WithBatcher(exporter),
+		sdktrace.WithResource(res),
+	)
+	otel.SetTracerProvider(tp)
+	otel.SetTextMapPropagator(propagation.TraceContext{})
+	return tp, nil
 }
 
 type consumerHandler struct{}

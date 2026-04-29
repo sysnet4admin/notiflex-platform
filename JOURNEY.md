@@ -30,7 +30,7 @@
 | ch7 | 7.3 App of Apps | ✅ | 2026-04-30 | `argocd/root-app.yaml` 추가, `argocd/apps/` 하위 Application 관리 + sync-wave 적용 |
 | ch7 | 7.4 멀티테넌시 | ✅ | 2026-04-30 | `k8s/enterprise` 테넌트 분리(rollout/service/secret) + `argocd/apps/notiflex-enterprise.yaml` 추가, cross-namespace Valkey DNS 적용 |
 | ch8 | 8.1 메시징 | ✅ | 2026-04-30 | Strimzi 0.51 + Kafka 4.1.0(KRaft) 설치, `notifications` 토픽 생성, notiflex-api Producer/Consumer 연동 완료 |
-| ch8 | 8.2 트레이싱 | ⬜ | | |
+| ch8 | 8.2 트레이싱 | ✅ | 2026-04-30 | Tempo(OTLP gRPC) 설치 + Notiflex OTel SDK 연동 + Grafana Tempo datasource 구성 |
 | ch8 | 8.3 CronJob | ⬜ | | |
 | ch9 | 9.1 저장소 분석 | ⬜ | | |
 | ch9 | 9.2 회고 | ⬜ | | |
@@ -60,23 +60,25 @@
 | ch7.3 멀티 앱 관리 | ArgoCD App of Apps (`root-app` + `argocd/apps/` + `directory.recurse`) | Application 단건 수동 관리, ApplicationSet | 하위 Application 선언을 Git 디렉터리 기준으로 일괄 관리하고 sync-wave(인프라→플랫폼→앱)로 설치 순서를 통제하기 쉬움 |
 | ch7.4 멀티테넌시 | Namespace 기반 테넌트 분리(`enterprise`) + ArgoCD Application(`notiflex-enterprise`) | vCluster, 테넌트별 별도 클러스터 | 단일 클러스터 비용을 유지하면서 RBAC/리소스 단위 격리와 GitOps(App of Apps) 운영 패턴을 그대로 확장 가능 |
 | ch8.1 메시징 | Strimzi Operator + Kafka 4.1.0(KRaft) + Sarama Producer/Consumer | RabbitMQ, NATS, Pulsar | 이벤트 스트림 중심 구조에서 토픽 기반 확장성이 좋고, Strimzi로 Kubernetes 운영 일관성을 유지하기 쉬움 |
+| ch8.2 분산 트레이싱 | Grafana Tempo(monolithic) + OpenTelemetry Go SDK(OTLP gRPC) | Jaeger, Zipkin | Grafana/Loki/Prometheus와 동일 스택으로 통합 운영이 쉽고, 현재 리소스 제약에서 단일 바이너리 Tempo로 최소 비용 트레이싱 구성이 가능 |
 
 ## 현재 버전
 
 | 컴포넌트 | 버전 | 변경 이력 |
 |---------|------|----------|
 | Go | 1.25 | 2026-04-29: 초기 버전 설정 |
-| Notiflex 이미지 | `asia-northeast3-docker.pkg.dev/project-75fce205-dfa5-4975-a56/notiflex/api:sha-20260430082337-kafka` | 2026-04-30: ch8.1 Kafka Producer/Consumer 코드 반영 이미지를 빌드/푸시하고 SMB/Enterprise Rollout에 반영 |
+| Notiflex 이미지 | `asia-northeast3-docker.pkg.dev/project-75fce205-dfa5-4975-a56/notiflex/api:sha-20260430083408-tempo` | 2026-04-30: ch8.2 OTel SDK/Tempo exporter 코드 반영 이미지를 빌드/푸시하고 SMB/Enterprise Rollout에 반영 |
 | ArgoCD | quay.io/argoproj/argocd:v3.3.8 | 2026-04-29: gke-sysnet4admin_book_gitaiops 클러스터에 설치 및 notiflex-platform 저장소 연결 |
 | Argo Rollouts | kubectl-argo-rollouts v1.8.4 / controller quay.io/argoproj/argo-rollouts:v1.9.0 | 2026-04-29: `argo-rollouts` namespace 생성 후 CRD/Controller 설치 완료 |
 | Valkey | bitnami/valkey chart 5.5.1 (app 9.0.3) | 2026-04-29: `notiflex` namespace에 standalone 배포(`valkey-primary`), Secret `valkey/valkey-password` 사용 |
 | Prometheus | quay.io/prometheus/prometheus:v3.11.3 | 2026-04-29: `kube-prometheus-stack-84.3.0`으로 monitoring namespace에 설치 |
 | Grafana | docker.io/grafana/grafana:13.0.1 | 2026-04-29: `kube-prometheus-grafana` 배포, Notiflex 대시보드 ConfigMap(`notiflex-grafana-dashboard`) 추가 |
 | Loki | docker.io/grafana/loki:3.6.7 | 2026-04-29: `loki-7.0.0`(SingleBinary) 설치, `loki-datasource` ConfigMap으로 Grafana 데이터소스 등록(`isDefault: false`) |
+| Tempo | docker.io/grafana/tempo:2.9.0 (chart `tempo-1.24.4`) | 2026-04-30: `monitoring` 네임스페이스에 Helm 설치, `role=ops` 노드 스케줄링 + OTLP gRPC(4317) 활성화 |
 | Fluent Bit | cr.fluentbit.io/fluent/fluent-bit:5.0.3 | 2026-04-30: 클러스터 DaemonSet 기준 실제 실행 이미지를 `cr.fluentbit.io/fluent/fluent-bit:5.0.3`으로 확인 |
 | GKE Secret Manager CSI | `secretManagerConfig.enabled=true`, `csi-secrets-store-gke`/`csi-secrets-store-provider-gke` DaemonSet | 2026-04-29: Workload Identity 활성화 후 Secret Manager addon 활성화, `notiflex-secrets` SecretProviderClass로 `valkey-password` 파일 마운트 구성 |
 | Kafka | 4.1.0 (Strimzi 0.51.0, KRaft, single broker) | 2026-04-30: `kafka` namespace에 Strimzi operator 설치, `notiflex-kafka` 클러스터 및 `notifications` 토픽 생성 |
-| OTel SDK | 미설치 | 2026-04-29: ch8.2 이전 단계 |
+| OTel SDK | 1.43.0 | 2026-04-30: `go.opentelemetry.io/otel` + `otlptracegrpc` 추가, `/health` `/id` `/version` span 계측 |
 
 ## 현재 리소스
 
@@ -85,7 +87,7 @@
 | default-pool | e2-medium (Spot) | 2 | argocd, monitoring(kube-prometheus-stack + loki + fluent-bit), valkey |
 | api-pool | e2-medium (Spot) | 1 | notiflex-api (Rollout nodeSelector) |
 | worker-pool | e2-standard-2 (Spot) | 1 | strimzi-cluster-operator, notiflex-kafka-kafka-0, notiflex-kafka-entity-operator |
-| ops-pool | e2-small (Spot) | 1 | (ch8.3에서 CronJob/운영성 워크로드 예정) |
+| ops-pool | e2-small (Spot) | 1 | tempo(statefulset), (ch8.3에서 CronJob/운영성 워크로드 예정) |
 
 ## 트러블슈팅 이력
 
@@ -102,3 +104,4 @@
 | ch4.4 | `kube_pod_container_status_restarts_total` 기반 경보는 Pod 삭제만으로 즉시 증가하지 않아 Alert가 `firing`되지 않을 수 있음 | 규칙 로드/Alertmanager 연동 확인 후, 실제 재시작 카운트가 증가하는 장애 시나리오(예: CrashLoop)로 추가 검증 |
 | ch7.3 | `root-app` 적용 직후 `Sync Unknown (argocd/apps path does not exist)` | 로컬 App of Apps 변경(`argocd/apps/`)을 GitHub `main`에 커밋/푸시한 뒤 ArgoCD 재동기화하면 `Synced`로 전환 |
 | ch8.1 | Strimzi `KafkaNodePool`에 `spec.template.pod.nodeSelector`를 넣으면 strict decoding 에러 발생 | `spec.template.pod.affinity.nodeAffinity`로 worker-pool 고정 방식 변경 후 재적용 |
+| ch8.2 | Tempo를 `nodeSelector.role=ops`로 설치했지만 `role` 노드 라벨이 없어 Pending 발생 가능 | `kubectl label node <ops-node> role=ops --overwrite`로 라벨을 추가한 뒤 Helm 배포하면 ops-pool에 정상 스케줄링 |
