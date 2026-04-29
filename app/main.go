@@ -10,6 +10,8 @@ import (
 	"sync"
 )
 
+const appVersion = "v0.1.1"
+
 type server struct {
 	mu      sync.Mutex
 	counter int64
@@ -51,6 +53,18 @@ func (s *server) idHandler(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+func (s *server) versionHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	writeJSON(w, http.StatusOK, map[string]string{
+		"version":      appVersion,
+		"generated_by": s.podName,
+	})
+}
+
 func writeJSON(w http.ResponseWriter, status int, payload any) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
@@ -64,6 +78,7 @@ func main() {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/health", srv.healthHandler)
 	mux.HandleFunc("/id", srv.idHandler)
+	mux.HandleFunc("/version", srv.versionHandler)
 
 	addr := ":8080"
 	log.Printf("notiflex-api listening on %s", addr)
