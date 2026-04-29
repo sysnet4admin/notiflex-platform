@@ -10,6 +10,7 @@ on:
 
 permissions:
   contents: write
+  id-token: write
 
 jobs:
   build-and-push:
@@ -21,10 +22,33 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Authenticate to Google Cloud
+      - name: Authenticate to Google Cloud (SA Key)
+        if: ${{ secrets.GCP_SA_KEY != '' }}
         uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Authenticate to Google Cloud (WIF)
+        if: ${{ secrets.GCP_SA_KEY == '' && secrets.GCP_WORKLOAD_IDENTITY_PROVIDER != '' && secrets.GCP_SERVICE_ACCOUNT != '' }}
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+      - name: Validate GCP auth inputs
+        run: |
+          if [ -z "${{ secrets.GCP_PROJECT_ID }}" ]; then
+            echo "GCP_PROJECT_ID secret is required"
+            exit 1
+          fi
+
+          if [ -n "${{ secrets.GCP_SA_KEY }}" ] || { [ -n "${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}" ] && [ -n "${{ secrets.GCP_SERVICE_ACCOUNT }}" ]; }; then
+            echo "GCP auth input detected"
+            exit 0
+          fi
+
+          echo "Either GCP_SA_KEY or (GCP_WORKLOAD_IDENTITY_PROVIDER + GCP_SERVICE_ACCOUNT) is required"
+          exit 1
 
       - name: Set up gcloud SDK
         uses: google-github-actions/setup-gcloud@v2
