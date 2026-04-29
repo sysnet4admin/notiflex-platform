@@ -1,0 +1,31 @@
+prometheus:
+  prometheusSpec:
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+
+grafana:
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+
+alertmanager:
+  alertmanagerSpec:
+    resources:
+      requests:
+        cpu: 25m
+        memory: 64Mi
+
+prometheusOperator:
+  resources:
+    requests:
+      cpu: 25m
+      memory: 64Mi
+
+kubeStateMetrics:
+  resources:
+    requests:
+      cpu: 10m
+      memory: 64Mi

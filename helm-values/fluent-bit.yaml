@@ -1,0 +1,30 @@
+loki:
+  serviceName: loki-gateway
+  servicePort: 80
+  serviceScheme: http
+  servicePath: /loki/api/v1/push
+
+config:
+  loglevel: warn
+  lineFormat: json
+  k8sLoggingExclude: "Off"
+  k8sLoggingParser: "Off"
+  autoKubernetesLabels: false
+  labels: '{job="fluent-bit"}'
+  labelMap:
+    kubernetes:
+      namespace_name: namespace
+      labels:
+        app: app
+        release: release
+      host: node
+      container_name: container
+      pod_name: instance
+    stream: stream
+
+resources:
+  requests:
+    cpu: 25m
+    memory: 64Mi
+  limits:
+    memory: 128Mi
