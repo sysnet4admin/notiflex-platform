@@ -22,7 +22,7 @@
 | ch5 | 5.2 트래픽 관리 | ✅ | 2026-04-29 | Gateway API(Gateway/HTTPRoute) + HealthCheckPolicy 적용, 외부 IP 35.216.99.80 응답 확인 |
 | ch5 | 5.3 무중단 배포 | ✅ | 2026-04-29 | Argo Rollouts Blue/Green 적용(rollout + preview service), 30초 auto-promote 설정 완료 |
 | ch5 | 5.4 ADR 기록 | ✅ | 2026-04-29 | `docs/architecture-decisions.md` 생성, ch3~ch5 결정 ADR-001~007 누적 기록 |
-| ch6 | 6.1 캐시 | ⬜ | | |
+| ch6 | 6.1 캐시 | ✅ | 2026-04-29 | Valkey standalone 설치 + notiflex-api `/id`를 Valkey INCR 기반으로 전환 완료 |
 | ch6 | 6.2 시크릿 관리 | ⬜ | | |
 | ch6 | 6.3 Canary 전환 | ⬜ | | |
 | ch7 | 7.2 멀티 노드풀 | ⬜ | | |
@@ -52,15 +52,17 @@
 | ch4.4 알림 | PrometheusRule + Alertmanager | Grafana Alerting, Cloud Monitoring Alert | GitOps(YAML/PR)로 이력 관리가 가능하고 기존 kube-prometheus-stack과 네이티브로 통합됨 |
 | ch5.2 트래픽 관리 | GKE Gateway API(Regional External Managed) + HealthCheckPolicy | Ingress Controller(NGINX), Istio Gateway | GKE 네이티브 L7 관리형 경로를 단순하게 구성하고 `/health:8080` 헬스체크를 명시해 무중단 라우팅 안정성 확보 |
 | ch5.3 무중단 배포 | Argo Rollouts Blue/Green (`activeService`/`previewService`, `autoPromotionSeconds: 30`) | Deployment RollingUpdate, Flagger+Istio | 트래픽 전환 시점을 명시적으로 제어하고 preview를 분리해 검증 후 자동 승격할 수 있어 운영 리스크를 낮춤 |
+| ch6.1 캐시 | Valkey (`bitnami/valkey`, standalone) | Redis OSS, Memcached | Redis API 호환성으로 앱 변경을 최소화하면서도 오픈 거버넌스(Valkey) 기반으로 캐시/카운터 공유를 단순하게 구성 가능 |
 
 ## 현재 버전
 
 | 컴포넌트 | 버전 | 변경 이력 |
 |---------|------|----------|
 | Go | 1.25 | 2026-04-29: 초기 버전 설정 |
-| Notiflex 이미지 | `asia-northeast3-docker.pkg.dev/project-75fce205-dfa5-4975-a56/notiflex/api:sha-6d023b6` | 2026-04-29: CI가 매니페스트를 자동 갱신해 배포, 현재 실행 이미지 digest `sha256:004ae43de8edeb378ee01151b4cce0f6d5d8362f73a50a0de5ac81c70642cd8f` |
+| Notiflex 이미지 | `asia-northeast3-docker.pkg.dev/project-75fce205-dfa5-4975-a56/notiflex/api:sha-4486a72` | 2026-04-29: `/id`를 Valkey INCR 기반으로 전환한 릴리스 적용 |
 | ArgoCD | quay.io/argoproj/argocd:v3.3.8 | 2026-04-29: gke-sysnet4admin_book_gitaiops 클러스터에 설치 및 notiflex-platform 저장소 연결 |
 | Argo Rollouts | kubectl-argo-rollouts v1.8.4 / controller quay.io/argoproj/argo-rollouts:v1.9.0 | 2026-04-29: `argo-rollouts` namespace 생성 후 CRD/Controller 설치 완료 |
+| Valkey | bitnami/valkey chart 5.5.1 (app 9.0.3) | 2026-04-29: `notiflex` namespace에 standalone 배포(`valkey-primary`), Secret `valkey/valkey-password` 사용 |
 | Prometheus | quay.io/prometheus/prometheus:v3.11.3 | 2026-04-29: `kube-prometheus-stack-84.3.0`으로 monitoring namespace에 설치 |
 | Grafana | docker.io/grafana/grafana:13.0.1 | 2026-04-29: `kube-prometheus-grafana` 배포, Notiflex 대시보드 ConfigMap(`notiflex-grafana-dashboard`) 추가 |
 | Loki | docker.io/grafana/loki:3.6.7 | 2026-04-29: `loki-7.0.0`(SingleBinary) 설치, `loki-datasource` ConfigMap으로 Grafana 데이터소스 등록(`isDefault: false`) |
