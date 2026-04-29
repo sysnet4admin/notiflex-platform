@@ -15,12 +15,12 @@
 | ch3 | 3.2 GitOps 도구 | ✅ | 2026-04-29 | ArgoCD 설치 + private GitHub 저장소 연동 완료 |
 | ch3 | 3.3 기능 추가 | ✅ | 2026-04-29 | `/version` 엔드포인트 추가 및 v0.1.1 롤링 업데이트 완료 |
 | ch3 | 3.4 CI | ✅ | 2026-04-29 | GitHub Actions CI 추가 (push to main, app 변경 시 빌드/푸시) |
-| ch3 | 3.5 CI-CD 연결 | ✅ | 2026-04-29 | CI에서 k8s/smb/deployment.yaml 이미지 태그 자동 갱신 + git push로 ArgoCD 자동 배포 연결 완료 |
+| ch3 | 3.5 CI-CD 연결 | ✅ | 2026-04-29 | CI에서 GitOps 매니페스트 이미지 태그 자동 갱신 + git push로 ArgoCD 자동 배포 연결 완료 |
 | ch4 | 4.2 메트릭 모니터링 | ✅ | 2026-04-29 | kube-prometheus-stack(Helm) 설치 + Notiflex Grafana 대시보드 ConfigMap 적용 |
 | ch4 | 4.3 로그 수집 | ✅ | 2026-04-29 | Loki + Fluent Bit 설치, Grafana Loki 데이터소스 추가, `{job="fluent-bit",namespace="notiflex"}` 로그 조회 확인 |
 | ch4 | 4.4 알림 | ✅ | 2026-04-29 | PrometheusRule(`pod-restart-alert`) 생성/적용 완료, Alertmanager 연동 확인 |
 | ch5 | 5.2 트래픽 관리 | ✅ | 2026-04-29 | Gateway API(Gateway/HTTPRoute) + HealthCheckPolicy 적용, 외부 IP 35.216.99.80 응답 확인 |
-| ch5 | 5.3 무중단 배포 | ⬜ | | |
+| ch5 | 5.3 무중단 배포 | ✅ | 2026-04-29 | Argo Rollouts Blue/Green 적용(rollout + preview service), 30초 auto-promote 설정 완료 |
 | ch6 | 6.1 캐시 | ⬜ | | |
 | ch6 | 6.2 시크릿 관리 | ⬜ | | |
 | ch6 | 6.3 Canary 전환 | ⬜ | | |
@@ -50,6 +50,7 @@
 | ch4.3 로그 수집 | Loki + Fluent Bit | ELK Stack, Cloud Logging | e2-medium 리소스 제약에서 경량 운영 가능하고 Grafana Explore와 즉시 연계 가능 |
 | ch4.4 알림 | PrometheusRule + Alertmanager | Grafana Alerting, Cloud Monitoring Alert | GitOps(YAML/PR)로 이력 관리가 가능하고 기존 kube-prometheus-stack과 네이티브로 통합됨 |
 | ch5.2 트래픽 관리 | GKE Gateway API(Regional External Managed) + HealthCheckPolicy | Ingress Controller(NGINX), Istio Gateway | GKE 네이티브 L7 관리형 경로를 단순하게 구성하고 `/health:8080` 헬스체크를 명시해 무중단 라우팅 안정성 확보 |
+| ch5.3 무중단 배포 | Argo Rollouts Blue/Green (`activeService`/`previewService`, `autoPromotionSeconds: 30`) | Deployment RollingUpdate, Flagger+Istio | 트래픽 전환 시점을 명시적으로 제어하고 preview를 분리해 검증 후 자동 승격할 수 있어 운영 리스크를 낮춤 |
 
 ## 현재 버전
 
@@ -58,6 +59,7 @@
 | Go | 1.25 | 2026-04-29: 초기 버전 설정 |
 | Notiflex 이미지 | `asia-northeast3-docker.pkg.dev/project-75fce205-dfa5-4975-a56/notiflex/api:sha-70a662d` | 2026-04-29: CI가 매니페스트를 자동 갱신해 배포, 현재 실행 이미지 digest `sha256:7d8fc9e5593264f0c7a408151977dbb21d8c6db794068133718bcfc848c58bcc` |
 | ArgoCD | quay.io/argoproj/argocd:v3.3.8 | 2026-04-29: gke-sysnet4admin_book_gitaiops 클러스터에 설치 및 notiflex-platform 저장소 연결 |
+| Argo Rollouts | kubectl-argo-rollouts v1.8.4 / controller install.yaml(latest) | 2026-04-29: `argo-rollouts` namespace 생성 후 CRD/Controller 설치 완료 |
 | Prometheus | quay.io/prometheus/prometheus:v3.11.3 | 2026-04-29: `kube-prometheus-stack-84.3.0`으로 monitoring namespace에 설치 |
 | Grafana | docker.io/grafana/grafana:13.0.1 | 2026-04-29: `kube-prometheus-grafana` 배포, Notiflex 대시보드 ConfigMap(`notiflex-grafana-dashboard`) 추가 |
 | Loki | docker.io/grafana/loki:3.6.7 | 2026-04-29: `loki-7.0.0`(SingleBinary) 설치, `loki-datasource` ConfigMap으로 Grafana 데이터소스 등록(`isDefault: false`) |
