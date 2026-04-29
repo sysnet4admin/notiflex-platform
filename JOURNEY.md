@@ -28,7 +28,7 @@
 | ch6 | 6.4 아키텍처 컨텍스트 | ✅ | 2026-04-30 | `claude-context/architecture.md` 스냅샷 생성, 3층 지식 구조와 현재 클러스터 토폴로지 반영 |
 | ch7 | 7.2 멀티 노드풀 | ✅ | 2026-04-30 | api/worker/ops 역할별 노드풀 생성 + notiflex-api를 `api-pool`로 스케줄링 |
 | ch7 | 7.3 App of Apps | ✅ | 2026-04-30 | `argocd/root-app.yaml` 추가, `argocd/apps/` 하위 Application 관리 + sync-wave 적용 |
-| ch7 | 7.4 멀티테넌시 | ⬜ | | |
+| ch7 | 7.4 멀티테넌시 | ✅ | 2026-04-30 | `k8s/enterprise` 테넌트 분리(rollout/service/secret) + `argocd/apps/notiflex-enterprise.yaml` 추가, cross-namespace Valkey DNS 적용 |
 | ch8 | 8.1 메시징 | ⬜ | | |
 | ch8 | 8.2 트레이싱 | ⬜ | | |
 | ch8 | 8.3 CronJob | ⬜ | | |
@@ -58,6 +58,7 @@
 | ch6.3 배포 전략 전환 | Argo Rollouts Canary (`canaryService`/`stableService`, 20→50→80→100, `pause: 30s`) | Blue/Green 유지 | 점진 트래픽 전환으로 새 버전 리스크를 단계별로 관찰하고 이상 시 중간 단계에서 제어하기 용이 |
 | ch7.2 노드 스케줄링 | GKE 멀티 노드풀 + `nodeSelector(cloud.google.com/gke-nodepool)` | taint/toleration, nodeAffinity | 학습 환경에서 가장 단순하게 워크로드 역할 분리를 적용할 수 있고, GKE 노드풀 라벨을 그대로 사용해 설정 오류 가능성을 낮춤 |
 | ch7.3 멀티 앱 관리 | ArgoCD App of Apps (`root-app` + `argocd/apps/` + `directory.recurse`) | Application 단건 수동 관리, ApplicationSet | 하위 Application 선언을 Git 디렉터리 기준으로 일괄 관리하고 sync-wave(인프라→플랫폼→앱)로 설치 순서를 통제하기 쉬움 |
+| ch7.4 멀티테넌시 | Namespace 기반 테넌트 분리(`enterprise`) + ArgoCD Application(`notiflex-enterprise`) | vCluster, 테넌트별 별도 클러스터 | 단일 클러스터 비용을 유지하면서 RBAC/리소스 단위 격리와 GitOps(App of Apps) 운영 패턴을 그대로 확장 가능 |
 
 ## 현재 버전
 
