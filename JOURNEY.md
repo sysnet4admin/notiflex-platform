@@ -26,7 +26,7 @@
 | ch6 | 6.2 시크릿 관리 | ✅ | 2026-04-29 | Workload Identity + GKE Secret Manager CSI 활성화, `valkey-password`를 Google Secret Manager로 이관, SecretProviderClass/파일 마운트 패턴 적용 |
 | ch6 | 6.3 Canary 전환 | ✅ | 2026-04-30 | Argo Rollouts 전략을 Blue/Green에서 Canary(20→50→80→100, 30초 pause)로 전환 |
 | ch6 | 6.4 아키텍처 컨텍스트 | ✅ | 2026-04-30 | `claude-context/architecture.md` 스냅샷 생성, 3층 지식 구조와 현재 클러스터 토폴로지 반영 |
-| ch7 | 7.2 멀티 노드풀 | ⬜ | | |
+| ch7 | 7.2 멀티 노드풀 | ✅ | 2026-04-30 | api/worker/ops 역할별 노드풀 생성 + notiflex-api를 `api-pool`로 스케줄링 |
 | ch7 | 7.3 App of Apps | ⬜ | | |
 | ch7 | 7.4 멀티테넌시 | ⬜ | | |
 | ch8 | 8.1 메시징 | ⬜ | | |
@@ -56,6 +56,7 @@
 | ch6.1 캐시 | Valkey (`bitnami/valkey`, standalone) | Redis OSS, Memcached | Redis API 호환성으로 앱 변경을 최소화하면서도 오픈 거버넌스(Valkey) 기반으로 캐시/카운터 공유를 단순하게 구성 가능 |
 | ch6.2 시크릿 관리 | GKE Secret Manager CSI Driver + Workload Identity | Kubernetes Secret, HashiCorp Vault | Secret 값을 클러스터 밖 Google Secret Manager에서 중앙 관리하고, Pod에는 CSI 파일 마운트로만 주입해 노출면을 줄일 수 있음 |
 | ch6.3 배포 전략 전환 | Argo Rollouts Canary (`canaryService`/`stableService`, 20→50→80→100, `pause: 30s`) | Blue/Green 유지 | 점진 트래픽 전환으로 새 버전 리스크를 단계별로 관찰하고 이상 시 중간 단계에서 제어하기 용이 |
+| ch7.2 노드 스케줄링 | GKE 멀티 노드풀 + `nodeSelector(cloud.google.com/gke-nodepool)` | taint/toleration, nodeAffinity | 학습 환경에서 가장 단순하게 워크로드 역할 분리를 적용할 수 있고, GKE 노드풀 라벨을 그대로 사용해 설정 오류 가능성을 낮춤 |
 
 ## 현재 버전
 
@@ -78,7 +79,10 @@
 
 | 노드풀 | 머신 타입 | 노드 수 | 주요 워크로드 |
 |--------|----------|---------|-------------|
-| default-pool | e2-medium | 2 | notiflex-api, argocd, monitoring(kube-prometheus-stack + loki + fluent-bit) |
+| default-pool | e2-medium (Spot) | 2 | argocd, monitoring(kube-prometheus-stack + loki + fluent-bit), valkey |
+| api-pool | e2-medium (Spot) | 1 | notiflex-api (Rollout nodeSelector) |
+| worker-pool | e2-standard-2 (Spot) | 1 | (ch8.1에서 Kafka 예정) |
+| ops-pool | e2-small (Spot) | 1 | (ch8.3에서 CronJob/운영성 워크로드 예정) |
 
 ## 트러블슈팅 이력
 
