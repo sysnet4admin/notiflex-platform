@@ -1,0 +1,8 @@
+loki:
+  enabled: true
+  resources:
+    requests: {cpu: 10m, memory: 128Mi}
+fluent-bit:
+  enabled: false
+promtail:
+  enabled: false
