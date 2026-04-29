@@ -17,11 +17,13 @@ spec:
         cloud.google.com/gke-nodepool: api-pool
       containers:
         - name: api
-          image: asia-northeast3-docker.pkg.dev/project-75fce205-dfa5-4975-a56/notiflex/api:sha-5a5e0c6
+          image: asia-northeast3-docker.pkg.dev/project-75fce205-dfa5-4975-a56/notiflex/api:sha-20260430082337-kafka
           imagePullPolicy: IfNotPresent
           env:
             - name: VALKEY_ADDR
               value: valkey-primary.notiflex.svc.cluster.local:6379
+            - name: KAFKA_BROKER
+              value: notiflex-kafka-kafka-bootstrap.kafka.svc.cluster.local:9092
             - name: VALKEY_PASSWORD
               valueFrom:
                 secretKeyRef:
