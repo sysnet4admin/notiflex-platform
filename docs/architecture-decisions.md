@@ -39,3 +39,11 @@
 ## ADR-010: 배포 전략 전환 — Canary (ch6.3)
 **시점**: 2026-04 / **결정**: Argo Rollouts Canary 채택 (Blue/Green 대체)
 **이유**: 점진적 트래픽 이동, 리소스 효율, 동일 Argo Rollouts 생태계
+
+## ADR-011: 노드 스케줄링 — nodeSelector (ch7.2)
+**시점**: 2026-04 / **결정**: nodeSelector + `cloud.google.com/gke-nodepool` 채택
+**이유**: GKE 자동 라벨 기반, 단순 선언, 워크로드 분리, 커스텀 라벨 금지
+
+## ADR-012: 멀티앱 관리 — App of Apps (ch7.3)
+**시점**: 2026-04 / **결정**: ArgoCD App of Apps + sync-wave 채택 (vs ApplicationSet)
+**이유**: 단순 구조, 설치 순서 보장, 기존 ArgoCD 확장, directory.recurse: true 필수
