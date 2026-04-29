@@ -11,7 +11,7 @@
 | ch2 | 2.4 GitHub 저장소 | ⬜ | | |
 | ch2 | 2.5 GKE 클러스터 | ⬜ | | |
 | ch2 | 2.6 빌드/배포 | ✅ | 2026-04-29 | notiflex-api v0.1.0 배포 완료 |
-| ch2 | 2.7 첫 커밋 | ⬜ | | |
+| ch2 | 2.7 첫 커밋 | ✅ | 2026-04-29 | 초기 커밋 및 `/update-docs` 커스텀 스킬 추가 |
 | ch3 | 3.2 GitOps 도구 | ✅ | 2026-04-29 | ArgoCD 설치 + private GitHub 저장소 연동 완료 |
 | ch3 | 3.3 기능 추가 | ✅ | 2026-04-29 | `/version` 엔드포인트 추가 및 v0.1.1 롤링 업데이트 완료 |
 | ch3 | 3.4 CI | ✅ | 2026-04-29 | GitHub Actions CI 추가 (push to main, app 변경 시 빌드/푸시) |
@@ -45,16 +45,17 @@
 | ch2.6 컨테이너 베이스 이미지 | scratch + 멀티스테이지 빌드 | alpine, distroless | 최소 공격면과 작은 이미지 크기 |
 | ch3.2 GitOps 도구 | ArgoCD | Flux | UI/자동 동기화 기반 학습 흐름에 적합 |
 | ch3.4 CI 도구 | GitHub Actions + docker build/push (방식 A) | gcloud builds submit (방식 B) | 권한 구성이 단순하고 학습 흐름에 적합 |
+| ch3.5 CI-CD 연결 | GitHub Actions에서 GitOps 매니페스트 자동 갱신 후 ArgoCD 자동 동기화 | CI 내 직접 `kubectl apply`, 별도 CD 파이프라인 분리 | Git 단일 소스 오브 트루스 유지 + 변경 이력 추적 용이 |
 
 ## 현재 버전
 
 | 컴포넌트 | 버전 | 변경 이력 |
 |---------|------|----------|
 | Go | 1.25 | 2026-04-29: 초기 버전 설정 |
-| Notiflex 이미지 | v0.1.1 | 2026-04-29: `/version` 엔드포인트 포함 이미지 업로드 (sha256:2a8ad8a5bfc28e7d758085d05a88887551186375c97effe634fbcb2e8d8d5d88) |
+| Notiflex 이미지 | `asia-northeast3-docker.pkg.dev/project-75fce205-dfa5-4975-a56/notiflex/api:sha-7380ee4` | 2026-04-29: CI가 매니페스트를 자동 갱신해 배포, 현재 실행 이미지 digest `sha256:528b11ab3781e47d58764448a5fbde3044b31352600c3cd03d258fa7016e1e86` |
 | ArgoCD | quay.io/argoproj/argocd:v3.3.8 | 2026-04-29: gke-sysnet4admin_book_gitaiops 클러스터에 설치 및 notiflex-platform 저장소 연결 |
-| Kafka | | |
-| OTel SDK | | |
+| Kafka | 미설치 | 2026-04-29: ch8 이전 단계라 클러스터에 리소스 없음 |
+| OTel SDK | 미설치 | 2026-04-29: ch8.2 이전 단계 |
 
 ## 현재 리소스
 
@@ -71,3 +72,5 @@
 | ch2.6 | Artifact Registry 리포지토리 미존재 | notiflex 리포지토리를 생성한 뒤 이미지 푸시 |
 | ch3.2 | ArgoCD Application이 `Sync Unknown` (`Repository not found`) | repo Secret에 GitHub 토큰(`forceHttpBasicAuth: "true"`) 등록 후 ArgoCD 전체 rollout restart |
 | ch3.3 | ArgoCD가 최신 커밋(`a08e25a`)을 즉시 반영하지 않음 | `kubectl --context gke-sysnet4admin_book_gitaiops -n argocd annotate application notiflex-smb argocd.argoproj.io/refresh=hard --overwrite`로 강제 재동기화 |
+| ch3.5 | GitHub Actions `if` 조건에서 `secrets.*` 직접 참조 시 워크플로 문법 오류 | 인증 관련 시크릿을 `env`로 옮기고 `if`는 `env` 기반으로 분기 |
+| ch3.5 | CI 인증 방식이 환경마다 달라 빌드 실패 (SA Key/WIF 시크릿 키 이름 불일치) | SA Key, 레거시 WIF, GCP WIF 3가지 입력 조합을 모두 지원하도록 워크플로 보완 |
