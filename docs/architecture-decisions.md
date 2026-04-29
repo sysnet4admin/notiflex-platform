@@ -103,3 +103,27 @@
 - RBAC/리소스쿼터/네임스페이스 단위 정책을 그대로 재사용할 수 있다
 - App of Apps 구조에서 테넌트별 배포 단위를 독립적으로 운영할 수 있다
 - 학습 단계에서 운영 복잡도를 크게 늘리지 않고 멀티테넌시 패턴을 검증할 수 있다
+
+## ADR-014: 메시징은 Strimzi 기반 Kafka (8장)
+**시점**: 2026-04 / **결정**: 비동기 메시징은 Strimzi Operator + Kafka 4.1.0(KRaft)을 채택한다. RabbitMQ, NATS, Pulsar는 현재 기본 경로로 채택하지 않는다.
+**이유**:
+- 이벤트 스트림 기반 토픽 모델이 Notiflex 알림 워크로드 확장에 적합하다
+- Strimzi로 Kubernetes 네이티브 선언형 운영(CRD/Helm)을 유지할 수 있다
+- KRaft 단일 브로커 구성으로 실습 환경 리소스 제약에서 운영 복잡도를 낮출 수 있다
+- Producer/Consumer를 앱 코드(Sarama)와 자연스럽게 통합할 수 있다
+
+## ADR-015: 분산 트레이싱은 Tempo + OpenTelemetry (8장)
+**시점**: 2026-04 / **결정**: 트레이싱 스택은 Grafana Tempo(monolithic)와 OpenTelemetry Go SDK(OTLP gRPC)를 채택한다. Jaeger와 Zipkin은 현재 기본 경로로 채택하지 않는다.
+**이유**:
+- Grafana/Loki/Prometheus와 동일한 관측 스택으로 통합 운영이 쉽다
+- 단일 바이너리 Tempo 구성이 학습 클러스터 리소스에서 운영 부담이 작다
+- OTel 표준 계측으로 `/health`, `/id`, `/version` 요청 흐름을 일관되게 추적할 수 있다
+- OTLP gRPC 경로를 사용해 향후 벤더/백엔드 변경 시 이식성을 확보할 수 있다
+
+## ADR-016: 주기 작업은 Kubernetes CronJob (8장)
+**시점**: 2026-04 / **결정**: 정기 헬스체크 배치는 Kubernetes CronJob으로 운영한다. Argo Workflows, Airflow, 외부 VM cron은 현재 기본 경로로 채택하지 않는다.
+**이유**:
+- 단순 반복 작업에는 K8s 기본 리소스만으로 가장 빠르게 구현할 수 있다
+- GitOps(YAML/ArgoCD) 흐름 안에서 정의/배포/이력 추적을 일관되게 유지할 수 있다
+- `ops-pool` 스케줄링으로 운영성 워크로드를 애플리케이션 노드와 분리할 수 있다
+- 실패 재시도/히스토리 보존 등 기본 배치 제어 기능으로 요구사항을 충족한다

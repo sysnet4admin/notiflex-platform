@@ -1,6 +1,6 @@
 # Notiflex Architecture Snapshot
 
-> 7장 완료 시점 아키텍처 스냅샷
+> 8장 완료 시점 아키텍처 스냅샷
 > 업데이트 기준: 2026-04-30 (KST)
 > 클러스터 조회 컨텍스트: `gke-sysnet4admin_book_gitaiops`
 
@@ -91,7 +91,7 @@
 | replicas | `2` |
 | stable service | `notiflex-api` |
 | canary service | `notiflex-api-preview` |
-| 현재 이미지 | `asia-northeast3-docker.pkg.dev/project-75fce205-dfa5-4975-a56/notiflex/api:sha-5a5e0c6` |
+| 현재 이미지 | `asia-northeast3-docker.pkg.dev/project-75fce205-dfa5-4975-a56/notiflex/api:sha-fb79ab9` |
 | probe | `/health` (readiness/liveness) |
 
 ## 5) 관측 가능성
@@ -105,7 +105,7 @@
 | Alertmanager | `monitoring` (`alertmanager-kube-prometheus-kube-prome-alertmanager`) | 알림 라우팅 |
 | Argo Rollouts Metrics | `argo-rollouts` svc (`argo-rollouts-metrics`) | 배포 관련 지표 노출 |
 
-현재 클러스터 조회 결과 기준으로 Tempo 워크로드는 배포되어 있지 않다(Tracing은 향후/별도 단계 관리).
+현재 클러스터 조회 결과 기준으로 Tempo 워크로드는 `monitoring` 네임스페이스에 배포되어 있으며(이미지 `docker.io/grafana/tempo:2.9.0`), OTel OTLP gRPC(4317) 수집 경로가 활성화돼 있다.
 
 ## 6) 주요 네임스페이스
 
