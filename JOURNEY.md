@@ -61,7 +61,7 @@
 | 컴포넌트 | 버전 | 변경 이력 |
 |---------|------|----------|
 | Go | 1.25 | 2026-04-29: 초기 버전 설정 |
-| Notiflex 이미지 | `asia-northeast3-docker.pkg.dev/project-75fce205-dfa5-4975-a56/notiflex/api:sha-4486a72` | 2026-04-29: `/id`를 Valkey INCR 기반으로 전환한 릴리스 적용 |
+| Notiflex 이미지 | `asia-northeast3-docker.pkg.dev/project-75fce205-dfa5-4975-a56/notiflex/api:sha-5a5e0c6` | 2026-04-30: CI가 GitOps 매니페스트 태그를 `sha-5a5e0c6`로 갱신했고 Canary 전환 후 해당 이미지가 stable로 반영됨 |
 | ArgoCD | quay.io/argoproj/argocd:v3.3.8 | 2026-04-29: gke-sysnet4admin_book_gitaiops 클러스터에 설치 및 notiflex-platform 저장소 연결 |
 | Argo Rollouts | kubectl-argo-rollouts v1.8.4 / controller quay.io/argoproj/argo-rollouts:v1.9.0 | 2026-04-29: `argo-rollouts` namespace 생성 후 CRD/Controller 설치 완료 |
 | Valkey | bitnami/valkey chart 5.5.1 (app 9.0.3) | 2026-04-29: `notiflex` namespace에 standalone 배포(`valkey-primary`), Secret `valkey/valkey-password` 사용 |
