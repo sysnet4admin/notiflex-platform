@@ -1,30 +1,62 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
 	"strconv"
-	"sync"
+	"time"
+
+	valkey "github.com/valkey-io/valkey-go"
 )
 
-const appVersion = "v0.1.1"
+const appVersion = "v0.2.0"
+const defaultValkeyAddr = "valkey-primary.notiflex.svc.cluster.local:6379"
+const idKey = "notiflex:id"
 
 type server struct {
-	mu      sync.Mutex
-	counter int64
 	podName string
+	client  valkey.Client
 }
 
-func newServer() *server {
+func newServer() (*server, error) {
 	podName := os.Getenv("HOSTNAME")
 	if podName == "" {
 		podName = "unknown-pod"
 	}
 
-	return &server{podName: podName}
+	valkeyAddr := os.Getenv("VALKEY_ADDR")
+	if valkeyAddr == "" {
+		valkeyAddr = defaultValkeyAddr
+	}
+	valkeyPassword := os.Getenv("VALKEY_PASSWORD")
+
+	var (
+		client valkey.Client
+		err    error
+	)
+	for i := 0; i < 10; i++ {
+		client, err = valkey.NewClient(valkey.ClientOption{
+			InitAddress: []string{valkeyAddr},
+			Password:    valkeyPassword,
+		})
+		if err == nil {
+			break
+		}
+		log.Printf("Valkey 연결 재시도 %d/10: %v", i+1, err)
+		time.Sleep(3 * time.Second)
+	}
+	if err != nil {
+		return nil, fmt.Errorf("valkey 연결 실패: %w", err)
+	}
+
+	return &server{
+		podName: podName,
+		client:  client,
+	}, nil
 }
 
 func (s *server) healthHandler(w http.ResponseWriter, r *http.Request) {
@@ -42,10 +74,15 @@ func (s *server) idHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s.mu.Lock()
-	s.counter++
-	id := s.counter
-	s.mu.Unlock()
+	ctx, cancel := context.WithTimeout(r.Context(), 2*time.Second)
+	defer cancel()
+
+	id, err := s.client.Do(ctx, s.client.B().Incr().Key(idKey).Build()).AsInt64()
+	if err != nil {
+		log.Printf("failed to increment id in valkey: %v", err)
+		http.Error(w, "failed to generate id", http.StatusInternalServerError)
+		return
+	}
 
 	writeJSON(w, http.StatusOK, map[string]string{
 		"id":           strconv.FormatInt(id, 10),
@@ -74,7 +111,12 @@ func writeJSON(w http.ResponseWriter, status int, payload any) {
 }
 
 func main() {
-	srv := newServer()
+	srv, err := newServer()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer srv.client.Close()
+
 	mux := http.NewServeMux()
 	mux.HandleFunc("/health", srv.healthHandler)
 	mux.HandleFunc("/id", srv.idHandler)

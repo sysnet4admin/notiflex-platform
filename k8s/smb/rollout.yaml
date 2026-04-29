@@ -15,8 +15,16 @@ spec:
     spec:
       containers:
         - name: api
-          image: asia-northeast3-docker.pkg.dev/project-75fce205-dfa5-4975-a56/notiflex/api:sha-6d023b6
+          image: asia-northeast3-docker.pkg.dev/project-75fce205-dfa5-4975-a56/notiflex/api:sha-1598f21-valkey
           imagePullPolicy: IfNotPresent
+          env:
+            - name: VALKEY_ADDR
+              value: valkey-primary.notiflex.svc.cluster.local:6379
+            - name: VALKEY_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: valkey
+                  key: valkey-password
           ports:
             - containerPort: 8080
           readinessProbe:
