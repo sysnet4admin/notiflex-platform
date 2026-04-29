@@ -24,7 +24,7 @@
 | ch5 | 5.4 ADR 기록 | ✅ | 2026-04-29 | `docs/architecture-decisions.md` 생성, ch3~ch5 결정 ADR-001~007 누적 기록 |
 | ch6 | 6.1 캐시 | ✅ | 2026-04-29 | Valkey standalone 설치 + notiflex-api `/id`를 Valkey INCR 기반으로 전환 완료 |
 | ch6 | 6.2 시크릿 관리 | ✅ | 2026-04-29 | Workload Identity + GKE Secret Manager CSI 활성화, `valkey-password`를 Google Secret Manager로 이관, SecretProviderClass/파일 마운트 패턴 적용 |
-| ch6 | 6.3 Canary 전환 | ⬜ | | |
+| ch6 | 6.3 Canary 전환 | ✅ | 2026-04-30 | Argo Rollouts 전략을 Blue/Green에서 Canary(20→50→80→100, 30초 pause)로 전환 |
 | ch7 | 7.2 멀티 노드풀 | ⬜ | | |
 | ch7 | 7.3 App of Apps | ⬜ | | |
 | ch7 | 7.4 멀티테넌시 | ⬜ | | |
@@ -54,6 +54,7 @@
 | ch5.3 무중단 배포 | Argo Rollouts Blue/Green (`activeService`/`previewService`, `autoPromotionSeconds: 30`) | Deployment RollingUpdate, Flagger+Istio | 트래픽 전환 시점을 명시적으로 제어하고 preview를 분리해 검증 후 자동 승격할 수 있어 운영 리스크를 낮춤 |
 | ch6.1 캐시 | Valkey (`bitnami/valkey`, standalone) | Redis OSS, Memcached | Redis API 호환성으로 앱 변경을 최소화하면서도 오픈 거버넌스(Valkey) 기반으로 캐시/카운터 공유를 단순하게 구성 가능 |
 | ch6.2 시크릿 관리 | GKE Secret Manager CSI Driver + Workload Identity | Kubernetes Secret, HashiCorp Vault | Secret 값을 클러스터 밖 Google Secret Manager에서 중앙 관리하고, Pod에는 CSI 파일 마운트로만 주입해 노출면을 줄일 수 있음 |
+| ch6.3 배포 전략 전환 | Argo Rollouts Canary (`canaryService`/`stableService`, 20→50→80→100, `pause: 30s`) | Blue/Green 유지 | 점진 트래픽 전환으로 새 버전 리스크를 단계별로 관찰하고 이상 시 중간 단계에서 제어하기 용이 |
 
 ## 현재 버전
 
