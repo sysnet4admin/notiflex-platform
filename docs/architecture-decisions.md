@@ -27,3 +27,15 @@
 ## ADR-007: 배포 전략 — Argo Rollouts Blue/Green (ch5.3)
 **시점**: 2026-04 / **결정**: Argo Rollouts Blue/Green (autoPromotionSeconds: 30) 채택
 **이유**: ArgoCD와 동일 생태계, YAML 선언적, preview Pod으로 사전 검증 가능
+
+## ADR-008: 캐시 — Valkey (ch6.1)
+**시점**: 2026-04 / **결정**: Valkey 채택 (vs Redis, Memcached)
+**이유**: Redis fork, bitnami 차트, INCR으로 분산 ID 카운터, 50m CPU로 구동 가능
+
+## ADR-009: 시크릿 관리 — GKE Secret Manager CSI + WI (ch6.2)
+**시점**: 2026-04 / **결정**: GKE Secret Manager CSI + Workload Identity 채택
+**이유**: GCP 네이티브, SA 키 없이 인증, 파일 마운트, GKE managed addon
+
+## ADR-010: 배포 전략 전환 — Canary (ch6.3)
+**시점**: 2026-04 / **결정**: Argo Rollouts Canary 채택 (Blue/Green 대체)
+**이유**: 점진적 트래픽 이동, 리소스 효율, 동일 Argo Rollouts 생태계

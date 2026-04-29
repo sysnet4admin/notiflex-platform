@@ -4,7 +4,7 @@ metadata:
   name: notiflex-api
   namespace: notiflex
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: notiflex-api
@@ -35,8 +35,13 @@ spec:
           requests: {cpu: 50m, memory: 64Mi}
           limits: {cpu: 200m, memory: 128Mi}
   strategy:
-    blueGreen:
-      activeService: notiflex-api
-      previewService: notiflex-api-preview
-      autoPromotionEnabled: true
-      autoPromotionSeconds: 30
+    canary:
+      canaryService: notiflex-api-preview
+      stableService: notiflex-api
+      steps:
+      - setWeight: 20
+      - pause: {duration: 30s}
+      - setWeight: 50
+      - pause: {duration: 30s}
+      - setWeight: 80
+      - pause: {duration: 30s}
