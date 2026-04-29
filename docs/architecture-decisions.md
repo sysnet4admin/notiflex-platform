@@ -79,3 +79,27 @@
 - 각 단계 `pause`로 품질 지표/알림 확인 시간을 확보할 수 있다
 - 이상 징후 발생 시 100% 전환 전에 제어하기 유리하다
 - Argo Rollouts/ArgoCD 생태계를 유지하면서 전략만 변경해 운영 일관성을 확보한다
+
+## ADR-011: 워크로드 역할별 노드풀 분리 (7장)
+**시점**: 2026-04 / **결정**: GKE 멀티 노드풀과 `nodeSelector(cloud.google.com/gke-nodepool)`로 워크로드를 역할별(api/worker/ops)로 분리한다. taint/toleration과 nodeAffinity는 기본 경로로 채택하지 않는다.
+**이유**:
+- 학습 환경에서 설정 난이도가 가장 낮고 적용 결과를 즉시 확인하기 쉽다
+- GKE가 제공하는 노드풀 라벨을 그대로 사용해 스케줄링 규칙을 단순화할 수 있다
+- API/운영성/비동기 워크로드를 물리적으로 분리해 리소스 간섭을 줄일 수 있다
+- 이후 taint/toleration이나 affinity로 확장할 때도 기반 토폴로지를 그대로 재사용할 수 있다
+
+## ADR-012: 다중 애플리케이션 관리는 App of Apps (7장)
+**시점**: 2026-04 / **결정**: ArgoCD `root-app`과 `argocd/apps/` 디렉터리 기반 App of Apps 패턴을 채택한다. Application 단건 수동 관리와 ApplicationSet은 현 단계 기본 경로로 채택하지 않는다.
+**이유**:
+- 하위 Application 선언을 Git 디렉터리 기준으로 일괄 관리할 수 있다
+- sync-wave를 통해 인프라/플랫폼/앱의 설치 순서를 명시적으로 통제할 수 있다
+- 구성 요소가 늘어나도 root-app 단일 진입점으로 운영 가시성을 유지할 수 있다
+- 기존 ArgoCD/GitOps 흐름을 바꾸지 않고 구조만 확장할 수 있다
+
+## ADR-013: 멀티테넌시는 Namespace 분리로 확장 (7장)
+**시점**: 2026-04 / **결정**: 단일 클러스터 내 Namespace 기반 테넌트 분리(`enterprise`)와 전용 ArgoCD Application(`notiflex-enterprise`)을 채택한다. vCluster 및 테넌트별 별도 클러스터는 현재 기본 경로로 채택하지 않는다.
+**이유**:
+- 추가 클러스터 없이 비용을 통제하면서 테넌트 격리를 빠르게 적용할 수 있다
+- RBAC/리소스쿼터/네임스페이스 단위 정책을 그대로 재사용할 수 있다
+- App of Apps 구조에서 테넌트별 배포 단위를 독립적으로 운영할 수 있다
+- 학습 단계에서 운영 복잡도를 크게 늘리지 않고 멀티테넌시 패턴을 검증할 수 있다

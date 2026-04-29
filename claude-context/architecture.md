@@ -1,6 +1,6 @@
 # Notiflex Architecture Snapshot
 
-> 6장 완료 시점 아키텍처 스냅샷
+> 7장 완료 시점 아키텍처 스냅샷
 > 업데이트 기준: 2026-04-30 (KST)
 > 클러스터 조회 컨텍스트: `gke-sysnet4admin_book_gitaiops`
 
@@ -15,11 +15,11 @@
 | 클러스터 | `notiflex-cluster` |
 | Kubernetes 버전 | `v1.35.1-gke.1396002` (노드 기준) |
 | 리전/존 | `asia-northeast3` / `asia-northeast3-a` |
-| 노드 수 | 2 |
-| 노드풀 | `default-pool` (Spot, `e2-medium`, 2노드) |
+| 노드 수 | 5 |
+| 노드풀 | `default-pool`(2), `api-pool`(1), `worker-pool`(1), `ops-pool`(1) |
 | 노드 프로비저닝 | `cloud.google.com/gke-provisioning=spot` |
 | 외부 트래픽 진입 | Gateway API (`gke-l7-regional-external-managed`) |
-| GitOps | ArgoCD (`argocd` namespace, auto sync/prune/selfHeal) |
+| GitOps | ArgoCD App of Apps (`root-app` + `notiflex-smb` + `notiflex-enterprise`) |
 | 배포 컨트롤러 | Argo Rollouts (`argo-rollouts` namespace) |
 | 시크릿 연동 | Secrets Store CSI Driver (`secrets-store-gke.csi.k8s.io`) + `SecretProviderClass:notiflex-secrets` |
 | 캐시 | Valkey StatefulSet (`notiflex/valkey-primary`) |
@@ -30,8 +30,11 @@
 
 | 노드 | 존 | 노드풀 | Spot | 인스턴스 타입 |
 |---|---|---|---|---|
+| `gke-notiflex-cluster-api-pool-6f140622-cwt8` | `asia-northeast3-a` | `api-pool` | `true` | `e2-medium` |
 | `gke-notiflex-cluster-default-pool-783b2e9a-13pv` | `asia-northeast3-a` | `default-pool` | `true` | `e2-medium` |
 | `gke-notiflex-cluster-default-pool-783b2e9a-uof4` | `asia-northeast3-a` | `default-pool` | `true` | `e2-medium` |
+| `gke-notiflex-cluster-ops-pool-5bdb76fd-c956` | `asia-northeast3-a` | `ops-pool` | `true` | `e2-small` |
+| `gke-notiflex-cluster-worker-pool-93827d65-wxjm` | `asia-northeast3-a` | `worker-pool` | `true` | `e2-standard-2` |
 
 ## 3) 컴포넌트 다이어그램
 
@@ -73,7 +76,7 @@
 2. GitHub Actions (`.github/workflows/ci.yaml`)가 GCP 인증(SA Key 또는 WIF) 후 Docker 빌드/푸시.
 3. 이미지가 Artifact Registry에 업로드됨: `asia-northeast3-docker.pkg.dev/<PROJECT_ID>/notiflex/api:sha-<7자리>`.
 4. 같은 워크플로가 `k8s/smb/rollout.yaml`의 `image:`를 새 SHA 태그로 갱신하고 커밋/푸시.
-5. ArgoCD Application(`notiflex-smb`)가 `k8s/smb` 경로를 자동 동기화(`prune: true`, `selfHeal: true`).
+5. ArgoCD `root-app`이 `argocd/apps/` 하위 Application들을 동기화하고, `notiflex-smb`/`notiflex-enterprise`가 각 경로를 배포한다.
 6. Argo Rollouts가 `notiflex-api`를 Canary 전략으로 배포:
    - `setWeight: 20` -> `pause 30s`
    - `setWeight: 50` -> `pause 30s`
@@ -108,8 +111,9 @@
 
 | Namespace | 주요 워크로드 | 역할 |
 |---|---|---|
-| `notiflex` | `Rollout/notiflex-api`, `Service/notiflex-api`, `Service/notiflex-api-preview`, `StatefulSet/valkey-primary`, `Gateway/notiflex-gateway`, `HTTPRoute/notiflex-route`, `SecretProviderClass/notiflex-secrets` | 애플리케이션 본체, 캐시, 트래픽 진입점 |
-| `argocd` | `Application/notiflex-smb`, `argocd-server`, `argocd-repo-server`, `argocd-application-controller` | GitOps 동기화/선언적 배포 |
+| `notiflex` | `Rollout/notiflex-api`, `Service/notiflex-api`, `Service/notiflex-api-preview`, `StatefulSet/valkey-primary`, `Gateway/notiflex-gateway`, `HTTPRoute/notiflex-route`, `SecretProviderClass/notiflex-secrets` | SMB 테넌트 애플리케이션 본체, 캐시, 트래픽 진입점 |
+| `enterprise` | `Rollout/notiflex-api`, `Service/notiflex-api`, `Secret/notiflex-api-secret` | Enterprise 테넌트 워크로드 분리 네임스페이스 |
+| `argocd` | `Application/root-app`, `Application/notiflex-smb`, `Application/notiflex-enterprise`, `argocd-server`, `argocd-repo-server`, `argocd-application-controller` | App of Apps 기반 GitOps 동기화/선언적 배포 |
 | `argo-rollouts` | `deployment/argo-rollouts` | Canary/Blue-Green 배포 컨트롤러 |
 | `monitoring` | `prometheus-*`, `grafana`, `loki*`, `fluent-bit`, `alertmanager-*` | 메트릭/로그/알림 |
 | `kube-system` | `csi-secrets-store-gke`, `csi-secrets-store-provider-gke`, `kube-dns`, `metrics-server` | 클러스터 핵심 애드온 및 CSI 드라이버 |
