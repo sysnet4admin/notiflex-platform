@@ -31,7 +31,7 @@
 | ch7 | 7.4 멀티테넌시 | ✅ | 2026-04-30 | `k8s/enterprise` 테넌트 분리(rollout/service/secret) + `argocd/apps/notiflex-enterprise.yaml` 추가, cross-namespace Valkey DNS 적용 |
 | ch8 | 8.1 메시징 | ✅ | 2026-04-30 | Strimzi 0.51 + Kafka 4.1.0(KRaft) 설치, `notifications` 토픽 생성, notiflex-api Producer/Consumer 연동 완료 |
 | ch8 | 8.2 트레이싱 | ✅ | 2026-04-30 | Tempo(OTLP gRPC) 설치 + Notiflex OTel SDK 연동 + Grafana Tempo datasource 구성 |
-| ch8 | 8.3 CronJob | ⬜ | | |
+| ch8 | 8.3 CronJob | ✅ | 2026-04-30 | `k8s/smb/healthcheck-cronjob.yaml` 추가, `*/5 * * * *` 헬스체크 자동화 + ops-pool 배치 확인 |
 | ch9 | 9.1 저장소 분석 | ⬜ | | |
 | ch9 | 9.2 회고 | ⬜ | | |
 | ch9 | 9.3 온보딩 문서 | ⬜ | | |
@@ -61,6 +61,7 @@
 | ch7.4 멀티테넌시 | Namespace 기반 테넌트 분리(`enterprise`) + ArgoCD Application(`notiflex-enterprise`) | vCluster, 테넌트별 별도 클러스터 | 단일 클러스터 비용을 유지하면서 RBAC/리소스 단위 격리와 GitOps(App of Apps) 운영 패턴을 그대로 확장 가능 |
 | ch8.1 메시징 | Strimzi Operator + Kafka 4.1.0(KRaft) + Sarama Producer/Consumer | RabbitMQ, NATS, Pulsar | 이벤트 스트림 중심 구조에서 토픽 기반 확장성이 좋고, Strimzi로 Kubernetes 운영 일관성을 유지하기 쉬움 |
 | ch8.2 분산 트레이싱 | Grafana Tempo(monolithic) + OpenTelemetry Go SDK(OTLP gRPC) | Jaeger, Zipkin | Grafana/Loki/Prometheus와 동일 스택으로 통합 운영이 쉽고, 현재 리소스 제약에서 단일 바이너리 Tempo로 최소 비용 트레이싱 구성이 가능 |
+| ch8.3 배치 자동화 | Kubernetes CronJob (`notiflex-healthcheck`, `*/5 * * * *`) | Argo Workflows, Airflow, 외부 VM cron | 단순 주기 헬스체크에는 K8s 기본 리소스가 가장 간단하고 GitOps(YAML/ArgoCD) 이력 관리에 직접 연결됨 |
 
 ## 현재 버전
 
@@ -87,7 +88,7 @@
 | default-pool | e2-medium (Spot) | 2 | argocd, monitoring(kube-prometheus-stack + loki + fluent-bit), valkey |
 | api-pool | e2-medium (Spot) | 1 | notiflex-api (Rollout nodeSelector) |
 | worker-pool | e2-standard-2 (Spot) | 1 | strimzi-cluster-operator, notiflex-kafka-kafka-0, notiflex-kafka-entity-operator |
-| ops-pool | e2-small (Spot) | 1 | tempo(statefulset), (ch8.3에서 CronJob/운영성 워크로드 예정) |
+| ops-pool | e2-small (Spot) | 1 | tempo(statefulset), notiflex-healthcheck CronJob/Job |
 
 ## 트러블슈팅 이력
 
