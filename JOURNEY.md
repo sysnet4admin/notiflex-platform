@@ -19,7 +19,7 @@
 | ch4 | 4.2 메트릭 모니터링 | ✅ | 2026-04-29 | kube-prometheus-stack(Helm) 설치 + Notiflex Grafana 대시보드 ConfigMap 적용 |
 | ch4 | 4.3 로그 수집 | ✅ | 2026-04-29 | Loki + Fluent Bit 설치, Grafana Loki 데이터소스 추가, `{job="fluent-bit",namespace="notiflex"}` 로그 조회 확인 |
 | ch4 | 4.4 알림 | ✅ | 2026-04-29 | PrometheusRule(`pod-restart-alert`) 생성/적용 완료, Alertmanager 연동 확인 |
-| ch5 | 5.2 트래픽 관리 | ⬜ | | |
+| ch5 | 5.2 트래픽 관리 | ✅ | 2026-04-29 | Gateway API(Gateway/HTTPRoute) + HealthCheckPolicy 적용, 외부 IP 35.216.99.80 응답 확인 |
 | ch5 | 5.3 무중단 배포 | ⬜ | | |
 | ch6 | 6.1 캐시 | ⬜ | | |
 | ch6 | 6.2 시크릿 관리 | ⬜ | | |
@@ -49,6 +49,7 @@
 | ch4.2 메트릭 모니터링 | kube-prometheus-stack (Prometheus + Grafana + Alertmanager) | Datadog, New Relic, VictoriaMetrics | Helm 기반으로 실습 환경에서 빠르게 설치 가능하고 Grafana 대시보드 연계가 쉬움 |
 | ch4.3 로그 수집 | Loki + Fluent Bit | ELK Stack, Cloud Logging | e2-medium 리소스 제약에서 경량 운영 가능하고 Grafana Explore와 즉시 연계 가능 |
 | ch4.4 알림 | PrometheusRule + Alertmanager | Grafana Alerting, Cloud Monitoring Alert | GitOps(YAML/PR)로 이력 관리가 가능하고 기존 kube-prometheus-stack과 네이티브로 통합됨 |
+| ch5.2 트래픽 관리 | GKE Gateway API(Regional External Managed) + HealthCheckPolicy | Ingress Controller(NGINX), Istio Gateway | GKE 네이티브 L7 관리형 경로를 단순하게 구성하고 `/health:8080` 헬스체크를 명시해 무중단 라우팅 안정성 확보 |
 
 ## 현재 버전
 
