@@ -58,9 +58,9 @@
 | 컴포넌트 | 버전 | 변경 이력 |
 |---------|------|----------|
 | Go | 1.25 | 2026-04-29: 초기 버전 설정 |
-| Notiflex 이미지 | `asia-northeast3-docker.pkg.dev/project-75fce205-dfa5-4975-a56/notiflex/api:sha-70a662d` | 2026-04-29: CI가 매니페스트를 자동 갱신해 배포, 현재 실행 이미지 digest `sha256:7d8fc9e5593264f0c7a408151977dbb21d8c6db794068133718bcfc848c58bcc` |
+| Notiflex 이미지 | `asia-northeast3-docker.pkg.dev/project-75fce205-dfa5-4975-a56/notiflex/api:sha-6d023b6` | 2026-04-29: CI가 매니페스트를 자동 갱신해 배포, 현재 실행 이미지 digest `sha256:004ae43de8edeb378ee01151b4cce0f6d5d8362f73a50a0de5ac81c70642cd8f` |
 | ArgoCD | quay.io/argoproj/argocd:v3.3.8 | 2026-04-29: gke-sysnet4admin_book_gitaiops 클러스터에 설치 및 notiflex-platform 저장소 연결 |
-| Argo Rollouts | kubectl-argo-rollouts v1.8.4 / controller install.yaml(latest) | 2026-04-29: `argo-rollouts` namespace 생성 후 CRD/Controller 설치 완료 |
+| Argo Rollouts | kubectl-argo-rollouts v1.8.4 / controller quay.io/argoproj/argo-rollouts:v1.9.0 | 2026-04-29: `argo-rollouts` namespace 생성 후 CRD/Controller 설치 완료 |
 | Prometheus | quay.io/prometheus/prometheus:v3.11.3 | 2026-04-29: `kube-prometheus-stack-84.3.0`으로 monitoring namespace에 설치 |
 | Grafana | docker.io/grafana/grafana:13.0.1 | 2026-04-29: `kube-prometheus-grafana` 배포, Notiflex 대시보드 ConfigMap(`notiflex-grafana-dashboard`) 추가 |
 | Loki | docker.io/grafana/loki:3.6.7 | 2026-04-29: `loki-7.0.0`(SingleBinary) 설치, `loki-datasource` ConfigMap으로 Grafana 데이터소스 등록(`isDefault: false`) |
