@@ -15,6 +15,11 @@ permissions:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
+    env:
+      PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+      GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
+      GCP_WIF_PROVIDER: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+      GCP_WIF_SERVICE_ACCOUNT: ${{ secrets.GCP_SERVICE_ACCOUNT }}
 
     steps:
       - name: Checkout
@@ -23,26 +28,26 @@ jobs:
           fetch-depth: 0
 
       - name: Authenticate to Google Cloud (SA Key)
-        if: ${{ secrets.GCP_SA_KEY != '' }}
+        if: ${{ env.GCP_SA_KEY != '' }}
         uses: google-github-actions/auth@v2
         with:
-          credentials_json: ${{ secrets.GCP_SA_KEY }}
+          credentials_json: ${{ env.GCP_SA_KEY }}
 
       - name: Authenticate to Google Cloud (WIF)
-        if: ${{ secrets.GCP_SA_KEY == '' && secrets.GCP_WORKLOAD_IDENTITY_PROVIDER != '' && secrets.GCP_SERVICE_ACCOUNT != '' }}
+        if: ${{ env.GCP_SA_KEY == '' && env.GCP_WIF_PROVIDER != '' && env.GCP_WIF_SERVICE_ACCOUNT != '' }}
         uses: google-github-actions/auth@v2
         with:
-          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
-          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+          workload_identity_provider: ${{ env.GCP_WIF_PROVIDER }}
+          service_account: ${{ env.GCP_WIF_SERVICE_ACCOUNT }}
 
       - name: Validate GCP auth inputs
         run: |
-          if [ -z "${{ secrets.GCP_PROJECT_ID }}" ]; then
+          if [ -z "${PROJECT_ID}" ]; then
             echo "GCP_PROJECT_ID secret is required"
             exit 1
           fi
 
-          if [ -n "${{ secrets.GCP_SA_KEY }}" ] || { [ -n "${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}" ] && [ -n "${{ secrets.GCP_SERVICE_ACCOUNT }}" ]; }; then
+          if [ -n "${GCP_SA_KEY}" ] || { [ -n "${GCP_WIF_PROVIDER}" ] && [ -n "${GCP_WIF_SERVICE_ACCOUNT}" ]; }; then
             echo "GCP auth input detected"
             exit 0
           fi
@@ -53,14 +58,12 @@ jobs:
       - name: Set up gcloud SDK
         uses: google-github-actions/setup-gcloud@v2
         with:
-          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          project_id: ${{ env.PROJECT_ID }}
 
       - name: Configure Docker for Artifact Registry
         run: gcloud auth configure-docker asia-northeast3-docker.pkg.dev --quiet
 
       - name: Build and push image
-        env:
-          PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
         run: |
           SHORT_SHA="${GITHUB_SHA::7}"
           IMAGE="asia-northeast3-docker.pkg.dev/${PROJECT_ID}/notiflex/api:sha-${SHORT_SHA}"
