@@ -18,6 +18,8 @@ jobs:
     env:
       PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
       GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
+      LEGACY_WIF_PROVIDER: ${{ secrets.WIF_PROVIDER }}
+      LEGACY_WIF_SERVICE_ACCOUNT: ${{ secrets.WIF_SERVICE_ACCOUNT }}
       GCP_WIF_PROVIDER: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
       GCP_WIF_SERVICE_ACCOUNT: ${{ secrets.GCP_SERVICE_ACCOUNT }}
 
@@ -33,8 +35,15 @@ jobs:
         with:
           credentials_json: ${{ env.GCP_SA_KEY }}
 
-      - name: Authenticate to Google Cloud (WIF)
-        if: ${{ env.GCP_SA_KEY == '' && env.GCP_WIF_PROVIDER != '' && env.GCP_WIF_SERVICE_ACCOUNT != '' }}
+      - name: Authenticate to Google Cloud (WIF legacy secrets)
+        if: ${{ env.GCP_SA_KEY == '' && env.LEGACY_WIF_PROVIDER != '' && env.LEGACY_WIF_SERVICE_ACCOUNT != '' }}
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ env.LEGACY_WIF_PROVIDER }}
+          service_account: ${{ env.LEGACY_WIF_SERVICE_ACCOUNT }}
+
+      - name: Authenticate to Google Cloud (WIF GCP secrets)
+        if: ${{ env.GCP_SA_KEY == '' && env.LEGACY_WIF_PROVIDER == '' && env.GCP_WIF_PROVIDER != '' && env.GCP_WIF_SERVICE_ACCOUNT != '' }}
         uses: google-github-actions/auth@v2
         with:
           workload_identity_provider: ${{ env.GCP_WIF_PROVIDER }}
@@ -47,12 +56,12 @@ jobs:
             exit 1
           fi
 
-          if [ -n "${GCP_SA_KEY}" ] || { [ -n "${GCP_WIF_PROVIDER}" ] && [ -n "${GCP_WIF_SERVICE_ACCOUNT}" ]; }; then
+          if [ -n "${GCP_SA_KEY}" ] || { [ -n "${LEGACY_WIF_PROVIDER}" ] && [ -n "${LEGACY_WIF_SERVICE_ACCOUNT}" ]; } || { [ -n "${GCP_WIF_PROVIDER}" ] && [ -n "${GCP_WIF_SERVICE_ACCOUNT}" ]; }; then
             echo "GCP auth input detected"
             exit 0
           fi
 
-          echo "Either GCP_SA_KEY or (GCP_WORKLOAD_IDENTITY_PROVIDER + GCP_SERVICE_ACCOUNT) is required"
+          echo "Either GCP_SA_KEY, (WIF_PROVIDER + WIF_SERVICE_ACCOUNT), or (GCP_WORKLOAD_IDENTITY_PROVIDER + GCP_SERVICE_ACCOUNT) is required"
           exit 1
 
       - name: Set up gcloud SDK
