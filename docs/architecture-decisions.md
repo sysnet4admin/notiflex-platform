@@ -47,3 +47,11 @@
 ## ADR-012: 멀티앱 관리 — App of Apps (ch7.3)
 **시점**: 2026-04 / **결정**: ArgoCD App of Apps + sync-wave 채택 (vs ApplicationSet)
 **이유**: 단순 구조, 설치 순서 보장, 기존 ArgoCD 확장, directory.recurse: true 필수
+
+## ADR-013: 메시징 — Kafka (ch8.1)
+**시점**: 2026-04 / **결정**: Kafka (Strimzi 0.51.0, KRaft 4.1.0) 채택
+**이유**: 고처리량 + 영속 메시지, KRaft 모드, Strimzi Operator, worker-pool 배치
+
+## ADR-014: 분산 트레이싱 — Tempo (ch8.2)
+**시점**: 2026-04 / **결정**: Grafana Tempo 채택
+**이유**: Grafana 통합, 단일 바이너리, OTLP 표준, ops-pool 배치
