@@ -18,7 +18,7 @@
 | ch3 | 3.5 CI-CD 연결 | ✅ | 2026-04-29 | CI에서 k8s/smb/deployment.yaml 이미지 태그 자동 갱신 + git push로 ArgoCD 자동 배포 연결 완료 |
 | ch4 | 4.2 메트릭 모니터링 | ✅ | 2026-04-29 | kube-prometheus-stack(Helm) 설치 + Notiflex Grafana 대시보드 ConfigMap 적용 |
 | ch4 | 4.3 로그 수집 | ✅ | 2026-04-29 | Loki + Fluent Bit 설치, Grafana Loki 데이터소스 추가, `{job="fluent-bit",namespace="notiflex"}` 로그 조회 확인 |
-| ch4 | 4.4 알림 | ⬜ | | |
+| ch4 | 4.4 알림 | ✅ | 2026-04-29 | PrometheusRule(`pod-restart-alert`) 생성/적용 완료, Alertmanager 연동 확인 |
 | ch5 | 5.2 트래픽 관리 | ⬜ | | |
 | ch5 | 5.3 무중단 배포 | ⬜ | | |
 | ch6 | 6.1 캐시 | ⬜ | | |
@@ -48,6 +48,7 @@
 | ch3.5 CI-CD 연결 | GitHub Actions에서 GitOps 매니페스트 자동 갱신 후 ArgoCD 자동 동기화 | CI 내 직접 `kubectl apply`, 별도 CD 파이프라인 분리 | Git 단일 소스 오브 트루스 유지 + 변경 이력 추적 용이 |
 | ch4.2 메트릭 모니터링 | kube-prometheus-stack (Prometheus + Grafana + Alertmanager) | Datadog, New Relic, VictoriaMetrics | Helm 기반으로 실습 환경에서 빠르게 설치 가능하고 Grafana 대시보드 연계가 쉬움 |
 | ch4.3 로그 수집 | Loki + Fluent Bit | ELK Stack, Cloud Logging | e2-medium 리소스 제약에서 경량 운영 가능하고 Grafana Explore와 즉시 연계 가능 |
+| ch4.4 알림 | PrometheusRule + Alertmanager | Grafana Alerting, Cloud Monitoring Alert | GitOps(YAML/PR)로 이력 관리가 가능하고 기존 kube-prometheus-stack과 네이티브로 통합됨 |
 
 ## 현재 버전
 
@@ -81,3 +82,4 @@
 | ch3.5 | GitHub Actions `if` 조건에서 `secrets.*` 직접 참조 시 워크플로 문법 오류 | 인증 관련 시크릿을 `env`로 옮기고 `if`는 `env` 기반으로 분기 |
 | ch3.5 | CI 인증 방식이 환경마다 달라 빌드 실패 (SA Key/WIF 시크릿 키 이름 불일치) | SA Key, 레거시 WIF, GCP WIF 3가지 입력 조합을 모두 지원하도록 워크플로 보완 |
 | ch4.3 | Loki 설치 시 기본 cache(chunks/results) Pod가 CPU 부족으로 Pending되어 Helm install timeout | `helm-values/loki.yaml`에서 `chunksCache.enabled=false`, `resultsCache.enabled=false`로 비활성화 후 `helm upgrade --install` 재실행 |
+| ch4.4 | `kube_pod_container_status_restarts_total` 기반 경보는 Pod 삭제만으로 즉시 증가하지 않아 Alert가 `firing`되지 않을 수 있음 | 규칙 로드/Alertmanager 연동 확인 후, 실제 재시작 카운트가 증가하는 장애 시나리오(예: CrashLoop)로 추가 검증 |
