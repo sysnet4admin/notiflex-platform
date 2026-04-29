@@ -23,7 +23,7 @@
 | ch5 | 5.3 무중단 배포 | ✅ | 2026-04-29 | Argo Rollouts Blue/Green 적용(rollout + preview service), 30초 auto-promote 설정 완료 |
 | ch5 | 5.4 ADR 기록 | ✅ | 2026-04-29 | `docs/architecture-decisions.md` 생성, ch3~ch5 결정 ADR-001~007 누적 기록 |
 | ch6 | 6.1 캐시 | ✅ | 2026-04-29 | Valkey standalone 설치 + notiflex-api `/id`를 Valkey INCR 기반으로 전환 완료 |
-| ch6 | 6.2 시크릿 관리 | ⬜ | | |
+| ch6 | 6.2 시크릿 관리 | ✅ | 2026-04-29 | Workload Identity + GKE Secret Manager CSI 활성화, `valkey-password`를 Google Secret Manager로 이관, SecretProviderClass/파일 마운트 패턴 적용 |
 | ch6 | 6.3 Canary 전환 | ⬜ | | |
 | ch7 | 7.2 멀티 노드풀 | ⬜ | | |
 | ch7 | 7.3 App of Apps | ⬜ | | |
@@ -53,6 +53,7 @@
 | ch5.2 트래픽 관리 | GKE Gateway API(Regional External Managed) + HealthCheckPolicy | Ingress Controller(NGINX), Istio Gateway | GKE 네이티브 L7 관리형 경로를 단순하게 구성하고 `/health:8080` 헬스체크를 명시해 무중단 라우팅 안정성 확보 |
 | ch5.3 무중단 배포 | Argo Rollouts Blue/Green (`activeService`/`previewService`, `autoPromotionSeconds: 30`) | Deployment RollingUpdate, Flagger+Istio | 트래픽 전환 시점을 명시적으로 제어하고 preview를 분리해 검증 후 자동 승격할 수 있어 운영 리스크를 낮춤 |
 | ch6.1 캐시 | Valkey (`bitnami/valkey`, standalone) | Redis OSS, Memcached | Redis API 호환성으로 앱 변경을 최소화하면서도 오픈 거버넌스(Valkey) 기반으로 캐시/카운터 공유를 단순하게 구성 가능 |
+| ch6.2 시크릿 관리 | GKE Secret Manager CSI Driver + Workload Identity | Kubernetes Secret, HashiCorp Vault | Secret 값을 클러스터 밖 Google Secret Manager에서 중앙 관리하고, Pod에는 CSI 파일 마운트로만 주입해 노출면을 줄일 수 있음 |
 
 ## 현재 버전
 
@@ -67,6 +68,7 @@
 | Grafana | docker.io/grafana/grafana:13.0.1 | 2026-04-29: `kube-prometheus-grafana` 배포, Notiflex 대시보드 ConfigMap(`notiflex-grafana-dashboard`) 추가 |
 | Loki | docker.io/grafana/loki:3.6.7 | 2026-04-29: `loki-7.0.0`(SingleBinary) 설치, `loki-datasource` ConfigMap으로 Grafana 데이터소스 등록(`isDefault: false`) |
 | Fluent Bit | grafana/fluent-bit-plugin-loki:2.1.0-amd64 | 2026-04-29: `fluent-bit-2.6.0` DaemonSet 설치, Loki Gateway(`/loki/api/v1/push`)로 로그 수집 연동 |
+| GKE Secret Manager CSI | `secretManagerConfig.enabled=true`, `csi-secrets-store-gke`/`csi-secrets-store-provider-gke` DaemonSet | 2026-04-29: Workload Identity 활성화 후 Secret Manager addon 활성화, `notiflex-secrets` SecretProviderClass로 `valkey-password` 파일 마운트 구성 |
 | Kafka | 미설치 | 2026-04-29: ch8 이전 단계라 클러스터에 리소스 없음 |
 | OTel SDK | 미설치 | 2026-04-29: ch8.2 이전 단계 |
 

@@ -25,6 +25,12 @@ spec:
                 secretKeyRef:
                   name: valkey
                   key: valkey-password
+            - name: VALKEY_PASSWORD_FILE
+              value: /mnt/secrets/valkey-password
+          volumeMounts:
+            - name: secrets
+              mountPath: /mnt/secrets
+              readOnly: true
           ports:
             - containerPort: 8080
           readinessProbe:
@@ -43,6 +49,13 @@ spec:
             periodSeconds: 10
             timeoutSeconds: 2
             failureThreshold: 3
+      volumes:
+        - name: secrets
+          csi:
+            driver: secrets-store-gke.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: notiflex-secrets
   strategy:
     blueGreen:
       activeService: notiflex-api

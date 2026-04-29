@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	valkey "github.com/valkey-io/valkey-go"
@@ -33,6 +34,13 @@ func newServer() (*server, error) {
 		valkeyAddr = defaultValkeyAddr
 	}
 	valkeyPassword := os.Getenv("VALKEY_PASSWORD")
+	if valkeyPasswordFile := os.Getenv("VALKEY_PASSWORD_FILE"); valkeyPasswordFile != "" {
+		if data, err := os.ReadFile(valkeyPasswordFile); err == nil {
+			valkeyPassword = strings.TrimSpace(string(data))
+		} else {
+			log.Printf("VALKEY_PASSWORD_FILE 읽기 실패, 환경변수 VALKEY_PASSWORD 사용: %v", err)
+		}
+	}
 
 	var (
 		client valkey.Client
