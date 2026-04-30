@@ -9,10 +9,12 @@ import (
 	"os"
 	"time"
 
+	"github.com/IBM/sarama"
 	"github.com/valkey-io/valkey-go"
 )
 
-var client valkey.Client
+var valkeyClient valkey.Client
+var kafkaProducer sarama.SyncProducer
 
 func main() {
 	addr := os.Getenv("VALKEY_ADDR")
@@ -28,7 +30,7 @@ func main() {
 
 	var err error
 	for i := 0; i < 10; i++ {
-		client, err = valkey.NewClient(valkey.ClientOption{
+		valkeyClient, err = valkey.NewClient(valkey.ClientOption{
 			InitAddress: []string{addr},
 			Password:    password,
 		})
@@ -41,7 +43,21 @@ func main() {
 	if err != nil {
 		log.Fatalf("Valkey 연결 실패: %v", err)
 	}
-	defer client.Close()
+	defer valkeyClient.Close()
+
+	broker := os.Getenv("KAFKA_BROKER")
+	if broker != "" {
+		cfg := sarama.NewConfig()
+		cfg.Producer.Return.Successes = true
+		cfg.Version = sarama.V4_1_0_0
+		kafkaProducer, err = sarama.NewSyncProducer([]string{broker}, cfg)
+		if err != nil {
+			log.Printf("Kafka 연결 실패 (계속): %v", err)
+		} else {
+			defer kafkaProducer.Close()
+			go consumeKafka(broker)
+		}
+	}
 
 	http.HandleFunc("/health", healthHandler)
 	http.HandleFunc("/id", idHandler)
@@ -49,14 +65,36 @@ func main() {
 	http.ListenAndServe(":8080", nil)
 }
 
+func consumeKafka(broker string) {
+	cfg := sarama.NewConfig()
+	cfg.Version = sarama.V4_1_0_0
+	consumer, err := sarama.NewConsumer([]string{broker}, cfg)
+	if err != nil {
+		log.Printf("Kafka consumer 생성 실패: %v", err)
+		return
+	}
+	defer consumer.Close()
+
+	pc, err := consumer.ConsumePartition("notifications", 0, sarama.OffsetNewest)
+	if err != nil {
+		log.Printf("Kafka partition consumer 생성 실패: %v", err)
+		return
+	}
+	defer pc.Close()
+
+	for msg := range pc.Messages() {
+		log.Printf("[Kafka] 수신: key=%s value=%s", string(msg.Key), string(msg.Value))
+	}
+}
+
 func healthHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]string{"status": "ok", "version": "v0.2.0"})
+	json.NewEncoder(w).Encode(map[string]string{"status": "ok", "version": "v0.3.0"})
 }
 
 func idHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := context.Background()
-	result, err := client.Do(ctx, client.B().Incr().Key("notiflex:id").Build()).AsInt64()
+	result, err := valkeyClient.Do(ctx, valkeyClient.B().Incr().Key("notiflex:id").Build()).AsInt64()
 	if err != nil {
 		http.Error(w, "Valkey error: "+err.Error(), http.StatusInternalServerError)
 		return
@@ -65,6 +103,18 @@ func idHandler(w http.ResponseWriter, r *http.Request) {
 	if pod == "" {
 		pod = "unknown"
 	}
+
+	if kafkaProducer != nil {
+		msg := &sarama.ProducerMessage{
+			Topic: "notifications",
+			Key:   sarama.StringEncoder(fmt.Sprintf("id-%d", result)),
+			Value: sarama.StringEncoder(fmt.Sprintf(`{"id":%d,"pod":"%s"}`, result, pod)),
+		}
+		if _, _, err := kafkaProducer.SendMessage(msg); err != nil {
+			log.Printf("[Kafka] 전송 실패: %v", err)
+		}
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]interface{}{"id": result, "pod": pod})
 }
