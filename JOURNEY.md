@@ -24,9 +24,9 @@
 | ch6 | 6.1 캐시 | ✅ | 2026-04-30 | Valkey INCR 연동 |
 | ch6 | 6.2 시크릿 관리 | ✅ | 2026-04-30 | GKE Secret Manager CSI+WI |
 | ch6 | 6.3 Canary 전환 | ✅ | 2026-04-30 | Blue/Green -> Canary |
-| ch7 | 7.2 멀티 노드풀 | ⬜ | | |
-| ch7 | 7.3 App of Apps | ⬜ | | |
-| ch7 | 7.4 멀티테넌시 | ⬜ | | |
+| ch7 | 7.2 멀티 노드풀 | ✅ | 2026-04-30 | api/worker/ops 노드풀 생성 |
+| ch7 | 7.3 App of Apps | ✅ | 2026-04-30 | Root-app, App of Apps 패턴 적용 |
+| ch7 | 7.4 멀티테넌시 | ✅ | 2026-04-30 | enterprise 네임스페이스 분리 |
 | ch8 | 8.1 메시징 | ⬜ | | |
 | ch8 | 8.2 트레이싱 | ⬜ | | |
 | ch8 | 8.3 CronJob | ⬜ | | |
