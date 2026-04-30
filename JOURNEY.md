@@ -26,9 +26,9 @@
 | ch6 | 6.2 시크릿 관리 | ✅ | 2026-04-30 | |
 | ch6 | 6.3 Canary 전환 | ✅ | 2026-04-30 | |
 | ch6 | 6.4 아키텍처 스냅샷 | ✅ | 2026-04-30 | |
-| ch7 | 7.2 멀티 노드풀 | ⬜ | | |
-| ch7 | 7.3 App of Apps | ⬜ | | |
-| ch7 | 7.4 멀티테넌시 | ⬜ | | |
+| ch7 | 7.2 멀티 노드풀 | ✅ | 2026-04-30 | |
+| ch7 | 7.3 App of Apps | ✅ | 2026-04-30 | |
+| ch7 | 7.4 멀티테넌시 | ✅ | 2026-04-30 | |
 | ch8 | 8.1 메시징 | ⬜ | | |
 | ch8 | 8.2 트레이싱 | ⬜ | | |
 | ch8 | 8.3 CronJob | ⬜ | | |
@@ -54,6 +54,7 @@
 | 캐시 (ch6.1) | Valkey (Bitnami, standalone) | Redis, Memcached | Redis fork, BSD-3 라이선스, INCR 분산 ID |
 | 시크릿 관리 (ch6.2) | GKE Secret Manager CSI + WI | K8s Secret, Vault | GKE 네이티브, SA 키 불필요, 파일 마운트 |
 | 배포 전략 전환 (ch6.3) | Argo Rollouts Canary | Blue/Green 유지 | 트래픽 점진 이동, 운영 위험 최소화 |
+| 멀티테넌시 (ch7.4) | Namespace 분리 + per-tenant Rollout | 단일 namespace + 라벨 격리, vCluster | 강한 격리, ArgoCD App of Apps와 자연 결합, 테넌트별 독립 배포 |
 
 ## 현재 버전
 

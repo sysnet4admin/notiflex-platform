@@ -1,0 +1,63 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: notiflex-api
+  namespace: enterprise
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: notiflex-api
+  template:
+    metadata:
+      labels:
+        app: notiflex-api
+    spec:
+      nodeSelector:
+        cloud.google.com/gke-nodepool: api-pool
+      serviceAccountName: notiflex-sa
+      volumes:
+      - name: secrets
+        csi:
+          driver: secrets-store-gke.csi.k8s.io
+          readOnly: true
+          volumeAttributes:
+            secretProviderClass: notiflex-secrets
+      containers:
+      - name: api
+        image: asia-northeast3-docker.pkg.dev/project-75fce205-dfa5-4975-a56/notiflex/api:v0.2.1
+        ports:
+        - containerPort: 8080
+        env:
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: VALKEY_ADDR
+          value: valkey-primary.notiflex.svc.cluster.local:6379
+        - name: VALKEY_PASSWORD_FILE
+          value: /mnt/secrets/valkey-password
+        volumeMounts:
+        - name: secrets
+          mountPath: /mnt/secrets
+          readOnly: true
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 20
+  strategy:
+    canary:
+      canaryService: notiflex-api-preview
+      stableService: notiflex-api
+      steps:
+      - setWeight: 20
+      - pause: {duration: 30s}
+      - setWeight: 100
