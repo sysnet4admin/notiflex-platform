@@ -9,7 +9,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/sysnet4admin/notiflex-platform.git
-    targetRevision: claude
+    targetRevision: main
     path: k8s/smb
   destination:
     server: https://kubernetes.default.svc

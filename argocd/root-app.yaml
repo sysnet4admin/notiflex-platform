@@ -7,7 +7,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/sysnet4admin/notiflex-platform.git
-    targetRevision: claude
+    targetRevision: main
     path: argocd/apps
     directory:
       recurse: true
