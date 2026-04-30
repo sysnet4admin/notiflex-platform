@@ -22,10 +22,10 @@
 | ch5 | 5.2 트래픽 관리 | ✅ | 2026-04-30 | |
 | ch5 | 5.3 무중단 배포 | ✅ | 2026-04-30 | |
 | ch5 | 5.4 ADR 기록 | ✅ | 2026-04-30 | |
-| ch6 | 6.1 캐시 | ⬜ | | |
-| ch6 | 6.2 시크릿 관리 | ⬜ | | |
-| ch6 | 6.3 Canary 전환 | ⬜ | | |
-| ch6 | 6.4 아키텍처 스냅샷 | ⬜ | | |
+| ch6 | 6.1 캐시 | ✅ | 2026-04-30 | |
+| ch6 | 6.2 시크릿 관리 | ✅ | 2026-04-30 | |
+| ch6 | 6.3 Canary 전환 | ✅ | 2026-04-30 | |
+| ch6 | 6.4 아키텍처 스냅샷 | ✅ | 2026-04-30 | |
 | ch7 | 7.2 멀티 노드풀 | ⬜ | | |
 | ch7 | 7.3 App of Apps | ⬜ | | |
 | ch7 | 7.4 멀티테넌시 | ⬜ | | |
@@ -51,13 +51,16 @@
 | 알림 (ch4.4) | PrometheusRule | Grafana Alert | Prometheus 네이티브, PromQL 표현식 |
 | 트래픽 관리 (ch5.2) | Gateway API (gke-l7-regional-external-managed) | Ingress, NGINX | GKE 네이티브, K8s 표준, HealthCheckPolicy |
 | 배포 전략 (ch5.3) | Argo Rollouts Blue/Green | Flagger, Istio | ArgoCD 통합, 즉각 롤백, autoPromotion |
+| 캐시 (ch6.1) | Valkey (Bitnami, standalone) | Redis, Memcached | Redis fork, BSD-3 라이선스, INCR 분산 ID |
+| 시크릿 관리 (ch6.2) | GKE Secret Manager CSI + WI | K8s Secret, Vault | GKE 네이티브, SA 키 불필요, 파일 마운트 |
+| 배포 전략 전환 (ch6.3) | Argo Rollouts Canary | Blue/Green 유지 | 트래픽 점진 이동, 운영 위험 최소화 |
 
 ## 현재 버전
 
 | 컴포넌트 | 버전 | 변경 이력 |
 |---------|------|----------|
 | Go | 1.25 | |
-| Notiflex 이미지 | v0.1.0 | |
+| Notiflex 이미지 | v0.2.1 | v0.1.0→v0.1.1(롤링)→v0.2.0(Valkey)→v0.2.1(CSI) |
 | ArgoCD | v3.3.8 | |
 | Kafka | | |
 | OTel SDK | | |
