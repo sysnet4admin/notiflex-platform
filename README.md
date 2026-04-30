@@ -9,7 +9,7 @@
 동일한 가드레일을 서로 다른 AI 에이전트가 실행한 결과가 브랜치별로 보존되어 있습니다.
 
 ```mermaid
-flowchart LR
+flowchart TD
     CC["Claude Code\n(가드레일 실행)"]
     CC --> claude["claude\nClaude · Anthropic"]
     CC --> codex["codex\nCodex · OpenAI"]
