@@ -48,6 +48,30 @@
 - HealthCheckPolicy — `/health` 경로·포트를 직접 지정하여 정확한 헬스체크
 - K8s 표준 API — 벤더 종속성 최소화
 
+## ADR-008: 캐시 — Valkey (ch6.1)
+**시점**: 2026-04 / **결정**: Valkey (Bitnami standalone) 채택 (vs Redis, Memcached)
+**이유**:
+- Redis fork — API 완전 호환, 라이선스 자유(BSD-3)
+- bitnami Helm 차트 지원 — 단순 설치, Secret 자동 생성
+- INCR 명령으로 분산 ID 카운터 구현
+- e2-medium 환경에서 50m CPU로 구동 가능
+
+## ADR-009: 시크릿 관리 — GKE Secret Manager CSI + WI (ch6.2)
+**시점**: 2026-04 / **결정**: GKE managed CSI + Workload Identity 채택 (vs K8s Secret, Vault)
+**이유**:
+- 서비스 계정 키 불필요 — Workload Identity로 GCP IAM 직접 연동
+- 파일 마운트 패턴 — 환경변수 노출 없이 /mnt/secrets/로 안전하게 전달
+- Secret Manager 버전 관리 — 비밀번호 교체 시 새 버전 추가
+- GKE managed addon — 오픈소스 CSI 설치 없이 클러스터 업데이트만으로 활성화
+
+## ADR-010: 배포 전략 전환 — Canary (ch6.3)
+**시점**: 2026-04 / **결정**: Argo Rollouts Canary로 전환 (Blue/Green에서)
+**이유**:
+- 트래픽 점진 이동(20%→50%→80%→100%) — 운영 위험 최소화
+- canaryService/stableService 분리 — 문제 발생 시 즉각 rollback
+- pause 단계 — 각 단계에서 모니터링 후 다음 단계로
+- Prometheus 메트릭 기반 자동 판단 확장 가능
+
 ## ADR-007: 배포 전략 — Blue/Green (ch5.3)
 **시점**: 2026-04 / **결정**: Argo Rollouts Blue/Green 채택 (vs Flagger, Istio)
 **이유**:
