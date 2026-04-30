@@ -1,29 +1,5 @@
 # Architecture Decision Records
 
-## ADR-014: 메시징 — Kafka (ch8.1)
-**시점**: 2026-04 / **결정**: Strimzi Kafka (KRaft 모드, v4.1.0) 채택 (vs RabbitMQ, NATS, Pulsar)
-**이유**:
-- 고처리량 + 순서 보장 — 알림 이벤트의 파티션별 순서 유지
-- Strimzi로 K8s 네이티브 관리 — KafkaNodePool CRD로 브로커 사양 선언적 관리
-- KRaft 모드 — ZooKeeper 없이 단일 구성요소로 운영 단순화
-- worker-pool 전용 배치 — e2-standard-2로 브로커 성능 격리
-
-## ADR-015: 분산 트레이싱 — Tempo (ch8.2)
-**시점**: 2026-04 / **결정**: Tempo (grafana/tempo 단일 바이너리) 채택 (vs Jaeger, Zipkin)
-**이유**:
-- Grafana 통합 — 메트릭(Prometheus)·로그(Loki)·트레이스(Tempo)를 같은 UI에서 확인
-- OTLP gRPC 수신 — OTel SDK와 표준 프로토콜로 연동, 벤더 종속성 없음
-- 단일 바이너리 모드 — ops-pool 한 노드에서 경량 운영
-- OTel SDK (Go) — 표준 계측으로 향후 다른 백엔드 전환 가능
-
-## ADR-016: 배치 자동화 — K8s CronJob (ch8.3)
-**시점**: 2026-04 / **결정**: K8s CronJob 채택 (vs 외부 cron, Argo Workflows)
-**이유**:
-- 쿠버네티스 네이티브 — 별도 스케줄러 없이 클러스터 내장 CronJob 활용
-- ops-pool 배치 — 배치 워크로드를 운영 전용 노드에 격리
-- ArgoCD가 매니페스트로 관리 — git에서 스케줄 변경 시 ArgoCD가 자동 반영
-- Job 히스토리 보존 — successfulJobsHistoryLimit/failedJobsHistoryLimit으로 실행 이력 추적
-
 ## ADR-001: GitOps 도구 — ArgoCD (ch3.2)
 **시점**: 2026-04 / **결정**: ArgoCD v3.3.8 채택 (vs Flux, Jenkins X)
 **이유**:
@@ -72,29 +48,13 @@
 - HealthCheckPolicy — `/health` 경로·포트를 직접 지정하여 정확한 헬스체크
 - K8s 표준 API — 벤더 종속성 최소화
 
-## ADR-011: 노드 스케줄링 — nodeSelector (ch7.2)
-**시점**: 2026-04 / **결정**: GKE 자동 라벨 `cloud.google.com/gke-nodepool` 기반 nodeSelector 채택 (vs nodeAffinity, Taint/Toleration)
+## ADR-007: 배포 전략 — Blue/Green (ch5.3)
+**시점**: 2026-04 / **결정**: Argo Rollouts Blue/Green 채택 (vs Flagger, Istio)
 **이유**:
-- GKE가 노드풀 이름을 자동으로 라벨로 부여 — 커스텀 라벨 관리 불필요
-- 단순한 YAML 표현 — `cloud.google.com/gke-nodepool: api-pool` 한 줄로 배치 결정
-- api-pool/worker-pool/ops-pool 역할 분리 — 워크로드 특성에 맞는 머신 타입 배치
-- Spot VM 비용 절감 — 역할별 노드풀에 적합한 VM 크기 선택
-
-## ADR-012: 멀티앱 관리 — App of Apps (ch7.3)
-**시점**: 2026-04 / **결정**: Argo CD App of Apps 패턴 채택 (vs 개별 Application 수동 관리, ApplicationSet)
-**이유**:
-- root-app이 argocd/apps/ 디렉터리를 감시 — 새 Application 파일 추가만으로 자동 배포
-- Sync Wave 어노테이션 — 인프라(0)→플랫폼(1)→앱(2) 순서 보장
-- git이 Application 목록의 단일 진실 소스 — kubectl apply 없이 PR만으로 앱 추가/삭제
-- ArgoCD selfHeal — git 상태와 클러스터 상태 자동 동기화
-
-## ADR-013: 멀티테넌시 — Namespace 분리 (ch7.4)
-**시점**: 2026-04 / **결정**: Namespace 분리 + per-tenant Rollout 채택 (vs 단일 namespace + 라벨 격리, vCluster)
-**이유**:
-- 강한 격리 — RBAC, NetworkPolicy, ResourceQuota를 네임스페이스 단위로 독립 적용
-- ArgoCD App of Apps와 자연 결합 — 테넌트별 Application을 apps/ 디렉터리에 추가만 하면 됨
-- 테넌트별 독립 배포 — smb/enterprise가 각자의 Rollout으로 독립적인 배포 이력 유지
-- 운영 가시성 — kubectl get pods -n enterprise로 테넌트별 상태 즉시 확인
+- 즉각 롤백 — active/preview 서비스 전환으로 이전 버전 즉시 복귀
+- ArgoCD 통합 — Rollout 상태를 ArgoCD UI에서 확인
+- autoPromotionSeconds: 30 — 자동 승격으로 학습 환경에서 빠른 검증
+- Deployment API 호환 — kubectl argo rollouts 플러그인으로 상태 확인
 
 ## ADR-008: 캐시 — Valkey (ch6.1)
 **시점**: 2026-04 / **결정**: Valkey (Bitnami standalone) 채택 (vs Redis, Memcached)
@@ -120,10 +80,50 @@
 - pause 단계 — 각 단계에서 모니터링 후 다음 단계로
 - Prometheus 메트릭 기반 자동 판단 확장 가능
 
-## ADR-007: 배포 전략 — Blue/Green (ch5.3)
-**시점**: 2026-04 / **결정**: Argo Rollouts Blue/Green 채택 (vs Flagger, Istio)
+## ADR-011: 노드 스케줄링 — nodeSelector (ch7.2)
+**시점**: 2026-04 / **결정**: GKE 자동 라벨 `cloud.google.com/gke-nodepool` 기반 nodeSelector 채택 (vs nodeAffinity, Taint/Toleration)
 **이유**:
-- 즉각 롤백 — active/preview 서비스 전환으로 이전 버전 즉시 복귀
-- ArgoCD 통합 — Rollout 상태를 ArgoCD UI에서 확인
-- autoPromotionSeconds: 30 — 자동 승격으로 학습 환경에서 빠른 검증
-- Deployment API 호환 — kubectl argo rollouts 플러그인으로 상태 확인
+- GKE가 노드풀 이름을 자동으로 라벨로 부여 — 커스텀 라벨 관리 불필요
+- 단순한 YAML 표현 — `cloud.google.com/gke-nodepool: api-pool` 한 줄로 배치 결정
+- api-pool/worker-pool/ops-pool 역할 분리 — 워크로드 특성에 맞는 머신 타입 배치
+- Spot VM 비용 절감 — 역할별 노드풀에 적합한 VM 크기 선택
+
+## ADR-012: 멀티앱 관리 — App of Apps (ch7.3)
+**시점**: 2026-04 / **결정**: Argo CD App of Apps 패턴 채택 (vs 개별 Application 수동 관리, ApplicationSet)
+**이유**:
+- root-app이 argocd/apps/ 디렉터리를 감시 — 새 Application 파일 추가만으로 자동 배포
+- Sync Wave 어노테이션 — 인프라(0)→플랫폼(1)→앱(2) 순서 보장
+- git이 Application 목록의 단일 진실 소스 — kubectl apply 없이 PR만으로 앱 추가/삭제
+- ArgoCD selfHeal — git 상태와 클러스터 상태 자동 동기화
+
+## ADR-013: 멀티테넌시 — Namespace 분리 (ch7.4)
+**시점**: 2026-04 / **결정**: Namespace 분리 + per-tenant Rollout 채택 (vs 단일 namespace + 라벨 격리, vCluster)
+**이유**:
+- 강한 격리 — RBAC, NetworkPolicy, ResourceQuota를 네임스페이스 단위로 독립 적용
+- ArgoCD App of Apps와 자연 결합 — 테넌트별 Application을 apps/ 디렉터리에 추가만 하면 됨
+- 테넌트별 독립 배포 — smb/enterprise가 각자의 Rollout으로 독립적인 배포 이력 유지
+- 운영 가시성 — kubectl get pods -n enterprise로 테넌트별 상태 즉시 확인
+
+## ADR-014: 메시징 — Kafka (ch8.1)
+**시점**: 2026-04 / **결정**: Strimzi Kafka (KRaft 모드, v4.1.0) 채택 (vs RabbitMQ, NATS, Pulsar)
+**이유**:
+- 고처리량 + 순서 보장 — 알림 이벤트의 파티션별 순서 유지
+- Strimzi로 K8s 네이티브 관리 — KafkaNodePool CRD로 브로커 사양 선언적 관리
+- KRaft 모드 — ZooKeeper 없이 단일 구성요소로 운영 단순화
+- worker-pool 전용 배치 — e2-standard-2로 브로커 성능 격리
+
+## ADR-015: 분산 트레이싱 — Tempo (ch8.2)
+**시점**: 2026-04 / **결정**: Tempo (grafana/tempo 단일 바이너리) 채택 (vs Jaeger, Zipkin)
+**이유**:
+- Grafana 통합 — 메트릭(Prometheus)·로그(Loki)·트레이스(Tempo)를 같은 UI에서 확인
+- OTLP gRPC 수신 — OTel SDK와 표준 프로토콜로 연동, 벤더 종속성 없음
+- 단일 바이너리 모드 — ops-pool 한 노드에서 경량 운영
+- OTel SDK (Go) — 표준 계측으로 향후 다른 백엔드 전환 가능
+
+## ADR-016: 배치 자동화 — K8s CronJob (ch8.3)
+**시점**: 2026-04 / **결정**: K8s CronJob 채택 (vs 외부 cron, Argo Workflows)
+**이유**:
+- 쿠버네티스 네이티브 — 별도 스케줄러 없이 클러스터 내장 CronJob 활용
+- ops-pool 배치 — 배치 워크로드를 운영 전용 노드에 격리
+- ArgoCD가 매니페스트로 관리 — git에서 스케줄 변경 시 ArgoCD가 자동 반영
+- Job 히스토리 보존 — successfulJobsHistoryLimit/failedJobsHistoryLimit으로 실행 이력 추적
