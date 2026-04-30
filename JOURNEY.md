@@ -27,9 +27,9 @@
 | ch7 | 7.2 멀티 노드풀 | ✅ | 2026-04-30 | api/worker/ops 노드풀 생성 |
 | ch7 | 7.3 App of Apps | ✅ | 2026-04-30 | Root-app, App of Apps 패턴 적용 |
 | ch7 | 7.4 멀티테넌시 | ✅ | 2026-04-30 | enterprise 네임스페이스 분리 |
-| ch8 | 8.1 메시징 | ⬜ | | |
-| ch8 | 8.2 트레이싱 | ⬜ | | |
-| ch8 | 8.3 CronJob | ⬜ | | |
+| ch8 | 8.1 메시징 | ✅ | 2026-04-30 | Kafka 4.1.0 KRaft(worker-pool) |
+| ch8 | 8.2 트레이싱 | ✅ | 2026-04-30 | Tempo OTel(ops-pool) |
+| ch8 | 8.3 CronJob | ✅ | 2026-04-30 | 헬스체크(ops-pool) |
 | ch9 | 9.1 저장소 분석 | ⬜ | | |
 | ch9 | 9.2 회고 | ⬜ | | |
 | ch9 | 9.3 온보딩 문서 | ⬜ | | |

@@ -1,0 +1,57 @@
+apiVersion: kafka.strimzi.io/v1
+kind: Kafka
+metadata:
+  name: notiflex-kafka
+  namespace: kafka
+  annotations:
+    strimzi.io/kraft: enabled
+spec:
+  kafka:
+    version: 4.1.0
+    listeners:
+      - name: plain
+        port: 9092
+        type: internal
+        tls: false
+      - name: tls
+        port: 9093
+        type: internal
+        tls: true
+  entityOperator:
+    topicOperator: {}
+---
+apiVersion: kafka.strimzi.io/v1
+kind: KafkaNodePool
+metadata:
+  name: worker-pool
+  namespace: kafka
+  labels:
+    strimzi.io/cluster: notiflex-kafka
+spec:
+  replicas: 1
+  roles:
+  - broker
+  - controller
+  storage:
+    type: jbod
+    volumes:
+    - id: 0
+      type: persistent-claim
+      size: 10Gi
+      deleteClaim: false
+  template:
+    pod:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: cloud.google.com/gke-nodepool
+                operator: In
+                values:
+                - worker-pool
+      tolerations:
+        - key: "cloud.google.com/gke-nodepool"
+          operator: "Equal"
+          value: "worker-pool"
+          effect: "NoSchedule"
