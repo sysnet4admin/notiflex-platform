@@ -8,12 +8,16 @@
 
 동일한 가드레일을 서로 다른 AI 에이전트가 실행한 결과가 브랜치별로 보존되어 있습니다.
 
-```
-Claude Code (가드레일 실행)
-     │
-     ├──▶ claude  (Claude · Anthropic) ──▶ main ★
-     ├──▶ codex   (Codex  · OpenAI   )
-     └──▶ gemini  (Gemini · Google   )
+```mermaid
+flowchart LR
+    CC["Claude Code\n(가드레일 실행)"]
+    CC --> claude["claude\nClaude · Anthropic"]
+    CC --> codex["codex\nCodex · OpenAI"]
+    CC --> gemini["gemini\nGemini · Google"]
+    claude --> main["★ main"]
+
+    style main fill:#f5a623,color:#000,font-weight:bold
+    style claude fill:#d4e8ff,color:#000
 ```
 
 세 브랜치 모두 Claude Code를 실행 도구로 사용했습니다. 동일한 가드레일 위에서 어떤 모델을 연결하느냐에 따라 결과가 어떻게 달라지는지 비교하는 것이 이 저장소의 목적 중 하나입니다. `main`은 claude 브랜치를 검토한 뒤 반영한 브랜치입니다.
