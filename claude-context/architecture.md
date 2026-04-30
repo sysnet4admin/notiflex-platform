@@ -36,15 +36,21 @@ Service: notiflex-api-preview (canary)
     │
     ▼
 Rollout: notiflex-api (Canary 전략)
-  ├── stable ReplicaSet (notiflex/api:v0.2.1)
+  ├── stable ReplicaSet (notiflex/api:v0.3.1)
   └── canary ReplicaSet (배포 시 생성)
     │
     ├── Secret 볼륨 (CSI → Secret Manager)
     │     SecretProviderClass: notiflex-secrets
     │     valkey-password: /mnt/secrets/valkey-password
     │
-    └── Valkey StatefulSet (valkey-primary)
-          INCR 명령으로 분산 ID 생성
+    ├── Valkey StatefulSet (valkey-primary)
+    │     INCR 명령으로 분산 ID 생성
+    │
+    ├── Kafka (notiflex-kafka-kafka-bootstrap:9092)
+    │     notifications 토픽으로 이벤트 발행
+    │
+    └── Tempo (tempo.monitoring:4317)
+          OTel OTLP gRPC로 트레이스 전송
 ```
 
 ## 배포 파이프라인
