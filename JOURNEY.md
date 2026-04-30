@@ -6,10 +6,10 @@
 
 | 챕터 | 서브챕터 | 상태 | 완료일 | 비고 |
 |------|---------|------|--------|------|
-| ch2 | 2.2 설치 확인 | ⬜ | | |
-| ch2 | 2.3 gcloud 설정 | ⬜ | | |
-| ch2 | 2.4 GitHub 저장소 | ⬜ | | |
-| ch2 | 2.5 GKE 클러스터 | ⬜ | | |
+| ch2 | 2.2 설치 확인 | ✅ | 2026-04-29 | Claude Code 2.1.123 확인 |
+| ch2 | 2.3 gcloud 설정 | ✅ | 2026-04-29 | project+region+AR 인증 설정 |
+| ch2 | 2.4 GitHub 저장소 | ✅ | 2026-04-29 | notiflex-platform 구조 초기화 |
+| ch2 | 2.5 GKE 클러스터 | ✅ | 2026-04-29 | notiflex-cluster e2-medium×2 Spot |
 | ch2 | 2.6 빌드/배포 | ✅ | 2026-04-29 | notiflex-api v0.1.0 배포 완료 |
 | ch2 | 2.7 첫 커밋 | ✅ | 2026-04-29 | 초기 커밋 및 `/update-docs` 커스텀 스킬 추가 |
 | ch3 | 3.2 GitOps 도구 | ✅ | 2026-04-29 | ArgoCD 설치 + private GitHub 저장소 연동 완료 |
