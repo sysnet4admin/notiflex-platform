@@ -16,6 +16,11 @@ func main() {
         fmt.Fprintln(w, "OK")
     })
 
+    http.HandleFunc("/version", func(w http.ResponseWriter, r *http.Request) {
+        w.Header().Set("Content-Type", "application/json")
+        fmt.Fprintln(w, `{"version": "v0.1.1"}`)
+    })
+
     http.HandleFunc("/id", func(w http.ResponseWriter, r *http.Request) {
         podName := os.Getenv("HOSTNAME")
         id := atomic.AddInt64(&idCounter, 1)
