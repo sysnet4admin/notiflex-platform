@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+    paths: [app/**]
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - id: auth
+      uses: google-github-actions/auth@v2
+      with:
+        workload_identity_provider: ${{ secrets.GCP_WIF_PROVIDER }}
+        service_account: ${{ secrets.GCP_SA_EMAIL }}
+
+    - run: gcloud auth configure-docker asia-northeast3-docker.pkg.dev --quiet
+
+    - name: Build and push image
+      run: |
+        IMAGE="asia-northeast3-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/notiflex/api:sha-${GITHUB_SHA::7}"
+        docker build -t "$IMAGE" app/
+        docker push "$IMAGE"
+        echo "IMAGE=$IMAGE" >> $GITHUB_ENV
+
+    - name: Update manifest
+      run: |
+        sed -i "s|notiflex/api:.*|notiflex/api:sha-${GITHUB_SHA::7}|" k8s/smb/rollout.yaml
+        git config user.email "ci@github.com"
+        git config user.name "GitHub Actions"
+        git add k8s/smb/rollout.yaml
+        git commit -m "ci: update image to sha-${GITHUB_SHA::7}" || echo "No changes"
+        git push
