@@ -11,10 +11,37 @@ import (
 
 	"github.com/IBM/sarama"
 	"github.com/valkey-io/valkey-go"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
+	"go.opentelemetry.io/otel/propagation"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 var valkeyClient valkey.Client
 var kafkaProducer sarama.SyncProducer
+
+func initTracer(endpoint string) func() {
+	if endpoint == "" {
+		return func() {}
+	}
+	ctx := context.Background()
+	conn, err := grpc.NewClient(endpoint, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		log.Printf("OTel gRPC 연결 실패: %v", err)
+		return func() {}
+	}
+	exp, err := otlptracegrpc.New(ctx, otlptracegrpc.WithGRPCConn(conn))
+	if err != nil {
+		log.Printf("OTel exporter 생성 실패: %v", err)
+		return func() {}
+	}
+	tp := sdktrace.NewTracerProvider(sdktrace.WithBatcher(exp))
+	otel.SetTracerProvider(tp)
+	otel.SetTextMapPropagator(propagation.TraceContext{})
+	return func() { tp.Shutdown(ctx) }
+}
 
 func main() {
 	addr := os.Getenv("VALKEY_ADDR")
@@ -59,6 +86,9 @@ func main() {
 		}
 	}
 
+	shutdown := initTracer(os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT"))
+	defer shutdown()
+
 	http.HandleFunc("/health", healthHandler)
 	http.HandleFunc("/id", idHandler)
 	fmt.Println("Notiflex API server starting on :8080")
@@ -74,26 +104,30 @@ func consumeKafka(broker string) {
 		return
 	}
 	defer consumer.Close()
-
 	pc, err := consumer.ConsumePartition("notifications", 0, sarama.OffsetNewest)
 	if err != nil {
 		log.Printf("Kafka partition consumer 생성 실패: %v", err)
 		return
 	}
 	defer pc.Close()
-
 	for msg := range pc.Messages() {
 		log.Printf("[Kafka] 수신: key=%s value=%s", string(msg.Key), string(msg.Value))
 	}
 }
 
 func healthHandler(w http.ResponseWriter, r *http.Request) {
+	tracer := otel.Tracer("notiflex")
+	_, span := tracer.Start(r.Context(), "health")
+	defer span.End()
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]string{"status": "ok", "version": "v0.3.0"})
+	json.NewEncoder(w).Encode(map[string]string{"status": "ok", "version": "v0.3.1"})
 }
 
 func idHandler(w http.ResponseWriter, r *http.Request) {
-	ctx := context.Background()
+	tracer := otel.Tracer("notiflex")
+	ctx, span := tracer.Start(r.Context(), "id")
+	defer span.End()
+
 	result, err := valkeyClient.Do(ctx, valkeyClient.B().Incr().Key("notiflex:id").Build()).AsInt64()
 	if err != nil {
 		http.Error(w, "Valkey error: "+err.Error(), http.StatusInternalServerError)
