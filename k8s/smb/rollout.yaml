@@ -15,10 +15,12 @@ spec:
     spec:
       containers:
       - name: notiflex-api
-        image: asia-northeast3-docker.pkg.dev/project-75fce205-dfa5-4975-a56/notiflex/api:v0.1.1
+        image: asia-northeast3-docker.pkg.dev/project-75fce205-dfa5-4975-a56/notiflex/api:v0.7.0
         ports:
         - containerPort: 8080
         env:
+        - name: OTEL_EXPORTER_OTLP_ENDPOINT
+          value: tempo.monitoring.svc.cluster.local:4317
         - name: VALKEY_PASSWORD_FILE
           value: /mnt/secrets/valkey-password
         volumeMounts:
