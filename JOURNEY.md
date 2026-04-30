@@ -32,10 +32,10 @@
 | ch8 | 8.1 메시징 | ✅ | 2026-04-30 | Strimzi 0.51 + Kafka 4.1.0(KRaft) 설치, `notifications` 토픽 생성, notiflex-api Producer/Consumer 연동 완료 |
 | ch8 | 8.2 트레이싱 | ✅ | 2026-04-30 | Tempo(OTLP gRPC) 설치 + Notiflex OTel SDK 연동 + Grafana Tempo datasource 구성 |
 | ch8 | 8.3 CronJob | ✅ | 2026-04-30 | `k8s/smb/healthcheck-cronjob.yaml` 추가, `*/5 * * * *` 헬스체크 자동화 + ops-pool 배치 확인 |
-| ch9 | 9.1 저장소 분석 | ⬜ | | |
-| ch9 | 9.2 회고 | ⬜ | | |
-| ch9 | 9.3 온보딩 문서 | ⬜ | | |
-| ch9 | 9.4 GitAIOps 분석 | ⬜ | | |
+| ch9 | 9.1 저장소 분석 | ✅ | 2026-04-30 | 저장소 구조/커밋 히스토리/클러스터-ArgoCD 동기 상태 분석 완료 |
+| ch9 | 9.2 회고 | ✅ | 2026-04-30 | CLAUDE.md 성장/도구 선택 패턴/리소스 사용 현황 회고 완료 |
+| ch9 | 9.3 온보딩 문서 | ✅ | 2026-04-30 | `ONBOARDING.md` 생성(클러스터 실측/배포 플로우/FAQ 반영) |
+| ch9 | 9.4 GitAIOps 분석 | ✅ | 2026-04-30 | Git+AI+Ops 루프 분석 완료(탐색→비교→실행 가속 구조 정리) |
 | ch9 | 9.5 마무리 | ⬜ | | |
 
 ## 도구 선택 기록
@@ -68,7 +68,7 @@
 | 컴포넌트 | 버전 | 변경 이력 |
 |---------|------|----------|
 | Go | 1.25 | 2026-04-29: 초기 버전 설정 |
-| Notiflex 이미지 | `asia-northeast3-docker.pkg.dev/project-75fce205-dfa5-4975-a56/notiflex/api:sha-fb79ab9` | 2026-04-30: ch8.2 OTel SDK/Tempo exporter 코드 반영 후 CI가 최신 이미지(`sha-fb79ab9`)로 GitOps 매니페스트를 갱신해 SMB/Enterprise Rollout에 반영 |
+| Notiflex 이미지 | `smb=asia-northeast3-docker.pkg.dev/project-75fce205-dfa5-4975-a56/notiflex/api:sha-fb79ab9`, `enterprise=asia-northeast3-docker.pkg.dev/project-75fce205-dfa5-4975-a56/notiflex/api:sha-20260430083408-tempo` | 2026-04-30: 현재 Git 매니페스트와 클러스터 실측 기준으로 SMB/Enterprise가 서로 다른 이미지 태그를 사용 중이며, ArgoCD는 두 앱 모두 Synced/Healthy 상태 |
 | ArgoCD | quay.io/argoproj/argocd:v3.3.8 | 2026-04-29: gke-sysnet4admin_book_gitaiops 클러스터에 설치 및 notiflex-platform 저장소 연결 |
 | Argo Rollouts | kubectl-argo-rollouts v1.8.4 / controller quay.io/argoproj/argo-rollouts:v1.9.0 | 2026-04-29: `argo-rollouts` namespace 생성 후 CRD/Controller 설치 완료 |
 | Valkey | bitnami/valkey chart 5.5.1 (app 9.0.3) | 2026-04-29: `notiflex` namespace에 standalone 배포(`valkey-primary`), Secret `valkey/valkey-password` 사용 |
