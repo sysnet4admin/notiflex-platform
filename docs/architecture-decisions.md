@@ -71,3 +71,59 @@
 - **신뢰성 있는 검증**: 실제 운영 트래픽을 통해 신규 버전의 성능과 안정성을 객관적인 지표로 검증할 수 있습니다.
 - **자동화된 롤백**: 모니터링 시스템과 연동하여 문제 발생 시 사람의 개입 없이 자동으로 이전 버전으로 롤백하여 서비스 안정성을 확보합니다.
 - **유연한 트래픽 제어**: 서비스의 특성과 중요도에 따라 트래픽 전환 비율과 검증 시간을 유연하게 조절할 수 있습니다.
+
+## ADR-010: 워크로드별 노드풀 분리 (7장)
+**시점**: 2026-04 / **결정**: GKE 멀티 노드풀(`api-pool`, `worker-pool`, `ops-pool`)과 `nodeSelector(cloud.google.com/gke-nodepool)`로 워크로드를 역할별로 분리한다. taint/toleration은 채택하지 않는다.
+**이유**:
+- GKE 노드풀 생성 시 자동 부여되는 라벨을 그대로 사용해 설정 오류 가능성을 낮출 수 있다.
+- 학습 환경에서 nodeSelector만으로 충분하며 taint보다 이해하기 쉽다.
+- API/Worker/Ops 워크로드를 물리적으로 분리해 리소스 간섭을 줄일 수 있다.
+- 이후 taint/toleration으로 확장 시 기반 토폴로지를 재사용할 수 있다.
+
+## ADR-011: 다중 앱 관리는 App of Apps (7장)
+**시점**: 2026-04 / **결정**: ArgoCD `root-app`과 `argocd/apps/` 디렉터리 기반 App of Apps 패턴을 채택한다. ApplicationSet은 현 단계 기본 경로로 채택하지 않는다.
+**이유**:
+- 하위 Application 선언을 Git 디렉터리 기준으로 일괄 관리할 수 있다.
+- sync-wave를 통해 인프라/플랫폼/앱의 설치 순서를 명시적으로 통제할 수 있다.
+- 기존 ArgoCD/GitOps 흐름을 바꾸지 않고 구조만 확장할 수 있다.
+- ApplicationSet보다 단순해 학습 초기 단계에 적합하다.
+
+## ADR-012: 멀티테넌시는 Namespace 분리 (7장)
+**시점**: 2026-04 / **결정**: Namespace 기반 테넌트 분리(`enterprise`)와 전용 ArgoCD Application을 채택한다. vCluster 및 테넌트별 별도 클러스터는 현재 채택하지 않는다.
+**이유**:
+- 추가 클러스터 없이 비용을 통제하면서 테넌트 격리를 적용할 수 있다.
+- App of Apps 구조에서 테넌트별 배포 단위를 독립적으로 운영할 수 있다.
+- cross-namespace DNS로 공유 Valkey에 접근하는 패턴을 학습할 수 있다.
+- 학습 단계에서 운영 복잡도를 크게 늘리지 않고 멀티테넌시 패턴을 경험할 수 있다.
+
+## ADR-013: 메시징은 Strimzi 기반 Kafka (8장)
+**시점**: 2026-04 / **결정**: 이벤트 스트리밍은 Strimzi Operator + Kafka 4.1.0(KRaft)을 채택한다. RabbitMQ, NATS는 현재 채택하지 않는다.
+**이유**:
+- 이벤트 스트림 기반 토픽 모델이 Notiflex 알림 워크로드 확장에 적합하다.
+- Strimzi로 Kubernetes 네이티브 선언형 운영(CRD/Helm)을 유지할 수 있다.
+- KRaft 단일 브로커 구성으로 실습 환경 리소스 제약에서 운영 복잡도를 낮출 수 있다.
+- 업계 표준 도구로 학습 투자 대비 효과가 높다.
+
+## ADR-014: 분산 트레이싱은 Tempo + OpenTelemetry (8장)
+**시점**: 2026-04 / **결정**: 트레이싱 스택은 Grafana Tempo(monolithic)와 OpenTelemetry Go SDK(OTLP gRPC)를 채택한다. Jaeger와 Zipkin은 현재 채택하지 않는다.
+**이유**:
+- Grafana/Loki/Prometheus와 동일한 관측 스택으로 통합 운영이 쉽다.
+- 단일 바이너리 Tempo 구성이 학습 클러스터 리소스에서 운영 부담이 작다.
+- OTel 표준 계측으로 향후 벤더/백엔드 변경 시 이식성을 확보할 수 있다.
+- OTLP gRPC 경로를 사용해 표준 방식으로 트레이스를 전송할 수 있다.
+
+## ADR-015: 주기 작업은 Kubernetes CronJob (8장)
+**시점**: 2026-04 / **결정**: 정기 헬스체크 배치는 Kubernetes CronJob으로 운영한다. Argo Workflows, 외부 VM cron은 현재 채택하지 않는다.
+**이유**:
+- 단순 반복 작업에는 K8s 기본 리소스만으로 가장 빠르게 구현할 수 있다.
+- GitOps(YAML/ArgoCD) 흐름 안에서 정의/배포/이력 추적을 일관되게 유지할 수 있다.
+- `ops-pool` 스케줄링으로 운영성 워크로드를 애플리케이션 노드와 분리할 수 있다.
+- 실패 재시도/히스토리 보존 등 기본 배치 제어 기능으로 요구사항을 충족한다.
+
+## ADR-016: 알림은 PrometheusRule + Alertmanager (4장)
+**시점**: 2026-04 / **결정**: 알림 규칙과 라우팅은 PrometheusRule + Alertmanager로 구성한다. Grafana UI 중심 알림은 기본 경로로 채택하지 않는다.
+**이유**:
+- 알림 규칙을 YAML로 Git에 버전 관리하여 GitOps 흐름을 유지할 수 있다.
+- kube-prometheus-stack에 포함된 구성요소를 그대로 활용해 추가 설치가 필요 없다.
+- 실무 표준 스택으로 재현성과 팀 공유성이 높다.
+- Alertmanager의 그룹핑/억제/라우팅으로 다단계 알림 정책을 구현할 수 있다.
