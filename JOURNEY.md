@@ -16,11 +16,11 @@
 | ch3 | 3.3 기능 추가 | ✅ | 2026-04-30 | |
 | ch3 | 3.4 CI | ✅ | 2026-04-30 | |
 | ch3 | 3.5 CI-CD 연결 | ✅ | 2026-04-30 | |
-| ch4 | 4.2 메트릭 모니터링 | ⬜ | | |
-| ch4 | 4.3 로그 수집 | ⬜ | | |
-| ch4 | 4.4 알림 | ⬜ | | |
-| ch5 | 5.2 트래픽 관리 | ⬜ | | |
-| ch5 | 5.3 무중단 배포 | ⬜ | | |
+| ch4 | 4.2 메트릭 모니터링 | ✅ | 2026-04-30 | |
+| ch4 | 4.3 로그 수집 | ✅ | 2026-04-30 | |
+| ch4 | 4.4 알림 | ✅ | 2026-04-30 | |
+| ch5 | 5.2 트래픽 관리 | ✅ | 2026-04-30 | |
+| ch5 | 5.3 무중단 배포 | ✅ | 2026-04-30 | |
 | ch6 | 6.1 캐시 | ⬜ | | |
 | ch6 | 6.2 시크릿 관리 | ⬜ | | |
 | ch6 | 6.3 Canary 전환 | ⬜ | | |
@@ -44,6 +44,10 @@
 |------|------|-----------|----------|
 | GitOps | ArgoCD | Flux | Kubernetes 네이티브, 선언적, 다양한 기능 |
 | CI | GitHub Actions | Cloud Build, GitLab CI, Jenkins | GitHub 내장, YAML 선언적, 무료 크레딧 |
+| 메트릭 모니터링 | Prometheus + Grafana | Datadog, CloudWatch, Google Cloud Monitoring | 오픈소스 표준, 무료, Grafana 시각화 |
+| 로그 수집 | Loki + Fluent Bit | ELK Stack, CloudWatch Logs, Google Cloud Logging | 경량, Grafana 통합, 라벨 기반 인덱싱 |
+| 외부 트래픽 관리 | Gateway API | Ingress NGINX, Istio, Traefik | Kubernetes 차세대 표준, GKE 네이티브, 역할 분리 |
+| 무중단 배포 | Argo Rollouts | Flagger, K8s native Rolling Update | ArgoCD 통합, CRD 기반, 점진적 전략 진화 |
 
 ## 현재 버전
 
