@@ -16,9 +16,9 @@
 | ch3 | 3.3 기능 추가 | ✅ | 2026-04-30 | |
 | ch3 | 3.4 CI | ✅ | 2026-04-30 | |
 | ch3 | 3.5 CI-CD 연결 | ✅ | 2026-04-30 | |
-| ch4 | 4.2 메트릭 모니터링 | ⬜ | | |
-| ch4 | 4.3 로그 수집 | ⬜ | | |
-| ch4 | 4.4 알림 | ⬜ | | |
+| ch4 | 4.2 메트릭 모니터링 | ✅ | 2026-04-30 | |
+| ch4 | 4.3 로그 수집 | ✅ | 2026-04-30 | |
+| ch4 | 4.4 알림 | ✅ | 2026-04-30 | |
 | ch5 | 5.2 트래픽 관리 | ⬜ | | |
 | ch5 | 5.3 무중단 배포 | ⬜ | | |
 | ch5 | 5.4 ADR 기록 | ⬜ | | |
@@ -46,6 +46,9 @@
 |------|------|-----------|----------|
 | GitOps (ch3.2) | ArgoCD v3.3.8 | Flux, Jenkins X | K8s 네이티브, Web UI, App of Apps 지원 |
 | CI (ch3.4) | GitHub Actions | Jenkins, GitLab CI | 저장소 통합, WIF 지원, 무료 |
+| 메트릭 (ch4.2) | Prometheus + Grafana | Datadog, New Relic | 오픈소스, kube-prometheus-stack 통합 |
+| 로깅 (ch4.3) | Loki + Fluent Bit | ELK, Datadog Logs | Grafana 통합, 경량 인덱싱 |
+| 알림 (ch4.4) | PrometheusRule | Grafana Alert | Prometheus 네이티브, PromQL 표현식 |
 
 ## 현재 버전
 
