@@ -62,10 +62,10 @@
 | 컴포넌트 | 버전 | 변경 이력 |
 |---------|------|----------|
 | Go | 1.25 | |
-| Notiflex 이미지 | v0.2.1 | v0.1.0→v0.1.1(롤링)→v0.2.0(Valkey)→v0.2.1(CSI) |
+| Notiflex 이미지 | v0.3.1 | v0.1.0→v0.1.1→v0.2.0(Valkey)→v0.2.1(CSI)→v0.3.0(Kafka)→v0.3.1(OTel) |
 | ArgoCD | v3.3.8 | |
-| Kafka | | |
-| OTel SDK | | |
+| Kafka | 4.1.0 (Strimzi 1.0.0, KRaft) | |
+| OTel SDK | - (Tempo 설치, SDK 적용) | |
 
 ## 현재 리소스
 

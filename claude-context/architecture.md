@@ -1,4 +1,4 @@
-# Notiflex 아키텍처 스냅샷 — ch7 완료 시점
+# Notiflex 아키텍처 스냅샷 — ch9 완료 시점
 
 이 문서는 AI가 매 대화에서 현재 아키텍처를 빠르게 파악할 수 있도록 한 페이지로 요약한다.
 
@@ -77,13 +77,15 @@ Argo Rollouts (Canary)
 | Loki | 로그 저장 (SingleBinary, filesystem) | monitoring |
 | Fluent Bit | 로그 수집 DaemonSet → Loki | monitoring |
 | Alertmanager | 알림 라우팅 (PrometheusRule 연동) | monitoring |
+| Tempo | 분산 트레이싱 (OTLP gRPC, ops-pool) | monitoring |
 
 ## 주요 네임스페이스
 
 | 네임스페이스 | 주요 워크로드 |
 |------------|-------------|
-| notiflex | Rollout/notiflex-api(api-pool), valkey-primary(default), notiflex-sa (WI) |
+| notiflex | Rollout/notiflex-api(api-pool, v0.3.1), valkey-primary(default), CronJob/notiflex-healthcheck(ops-pool) |
 | enterprise | Rollout/notiflex-api(api-pool), notiflex-sa (WI) — enterprise 테넌트 |
+| kafka | Strimzi KRaft Kafka 4.1.0 (worker-pool), KafkaTopic/notifications |
 | argocd | ArgoCD v3.3.8 (root-app + notiflex-smb + notiflex-enterprise) |
 | argo-rollouts | Argo Rollouts 컨트롤러 |
 | monitoring | kube-prometheus-stack, Loki, Fluent Bit |

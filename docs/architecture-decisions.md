@@ -1,5 +1,29 @@
 # Architecture Decision Records
 
+## ADR-014: 메시징 — Kafka (ch8.1)
+**시점**: 2026-04 / **결정**: Strimzi Kafka (KRaft 모드, v4.1.0) 채택 (vs RabbitMQ, NATS, Pulsar)
+**이유**:
+- 고처리량 + 순서 보장 — 알림 이벤트의 파티션별 순서 유지
+- Strimzi로 K8s 네이티브 관리 — KafkaNodePool CRD로 브로커 사양 선언적 관리
+- KRaft 모드 — ZooKeeper 없이 단일 구성요소로 운영 단순화
+- worker-pool 전용 배치 — e2-standard-2로 브로커 성능 격리
+
+## ADR-015: 분산 트레이싱 — Tempo (ch8.2)
+**시점**: 2026-04 / **결정**: Tempo (grafana/tempo 단일 바이너리) 채택 (vs Jaeger, Zipkin)
+**이유**:
+- Grafana 통합 — 메트릭(Prometheus)·로그(Loki)·트레이스(Tempo)를 같은 UI에서 확인
+- OTLP gRPC 수신 — OTel SDK와 표준 프로토콜로 연동, 벤더 종속성 없음
+- 단일 바이너리 모드 — ops-pool 한 노드에서 경량 운영
+- OTel SDK (Go) — 표준 계측으로 향후 다른 백엔드 전환 가능
+
+## ADR-016: 배치 자동화 — K8s CronJob (ch8.3)
+**시점**: 2026-04 / **결정**: K8s CronJob 채택 (vs 외부 cron, Argo Workflows)
+**이유**:
+- 쿠버네티스 네이티브 — 별도 스케줄러 없이 클러스터 내장 CronJob 활용
+- ops-pool 배치 — 배치 워크로드를 운영 전용 노드에 격리
+- ArgoCD가 매니페스트로 관리 — git에서 스케줄 변경 시 ArgoCD가 자동 반영
+- Job 히스토리 보존 — successfulJobsHistoryLimit/failedJobsHistoryLimit으로 실행 이력 추적
+
 ## ADR-001: GitOps 도구 — ArgoCD (ch3.2)
 **시점**: 2026-04 / **결정**: ArgoCD v3.3.8 채택 (vs Flux, Jenkins X)
 **이유**:
