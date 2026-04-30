@@ -9,12 +9,19 @@
 동일한 가드레일을 서로 다른 AI 에이전트가 실행한 결과가 브랜치별로 보존되어 있습니다.
 
 ```
-claude (Claude Code · Anthropic) ─┐
-codex  (Codex · OpenAI)          ─┼─→  main  ★
-gemini (Gemini · Google)         ─┘
+                     Claude Code
+                    (가드레일 실행)
+                         │
+          ┌──────────────┼──────────────┐
+          ▼              ▼              ▼
+       claude          codex          gemini
+    (Claude 모델)  (Codex 모델)  (Gemini 모델)
+          │
+          ▼
+         main  ★
 ```
 
-각 에이전트가 동일한 가드레일로 구축한 결과를 독립 브랜치에 스냅샷으로 보존하고, 검토를 거친 결과를 `main`에 반영합니다.
+세 브랜치 모두 Claude Code를 실행 도구로 사용했습니다. 동일한 가드레일 위에서 어떤 모델을 연결하느냐에 따라 결과가 어떻게 달라지는지 비교하는 것이 이 저장소의 목적 중 하나입니다. `main`은 claude 브랜치를 검토한 뒤 반영한 브랜치입니다.
 
 같은 지침을 주었을 때 에이전트마다 어떤 결과가 나오는지 비교하는 것이 이 저장소의 목적 중 하나입니다. 각 브랜치의 `docs/architecture-decisions.md`에서 ADR-001~016의 내용과 표현 방식 차이를 확인할 수 있습니다.
 
