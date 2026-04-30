@@ -19,9 +19,9 @@
 | ch4 | 4.2 메트릭 모니터링 | ✅ | 2026-04-30 | |
 | ch4 | 4.3 로그 수집 | ✅ | 2026-04-30 | |
 | ch4 | 4.4 알림 | ✅ | 2026-04-30 | |
-| ch5 | 5.2 트래픽 관리 | ⬜ | | |
-| ch5 | 5.3 무중단 배포 | ⬜ | | |
-| ch5 | 5.4 ADR 기록 | ⬜ | | |
+| ch5 | 5.2 트래픽 관리 | ✅ | 2026-04-30 | |
+| ch5 | 5.3 무중단 배포 | ✅ | 2026-04-30 | |
+| ch5 | 5.4 ADR 기록 | ✅ | 2026-04-30 | |
 | ch6 | 6.1 캐시 | ⬜ | | |
 | ch6 | 6.2 시크릿 관리 | ⬜ | | |
 | ch6 | 6.3 Canary 전환 | ⬜ | | |
@@ -49,6 +49,8 @@
 | 메트릭 (ch4.2) | Prometheus + Grafana | Datadog, New Relic | 오픈소스, kube-prometheus-stack 통합 |
 | 로깅 (ch4.3) | Loki + Fluent Bit | ELK, Datadog Logs | Grafana 통합, 경량 인덱싱 |
 | 알림 (ch4.4) | PrometheusRule | Grafana Alert | Prometheus 네이티브, PromQL 표현식 |
+| 트래픽 관리 (ch5.2) | Gateway API (gke-l7-regional-external-managed) | Ingress, NGINX | GKE 네이티브, K8s 표준, HealthCheckPolicy |
+| 배포 전략 (ch5.3) | Argo Rollouts Blue/Green | Flagger, Istio | ArgoCD 통합, 즉각 롤백, autoPromotion |
 
 ## 현재 버전
 

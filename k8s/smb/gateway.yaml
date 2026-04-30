@@ -1,0 +1,31 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: notiflex-gateway
+  namespace: notiflex
+spec:
+  gatewayClassName: gke-l7-regional-external-managed
+  listeners:
+  - name: http
+    port: 80
+    protocol: HTTP
+    allowedRoutes:
+      namespaces:
+        from: Same
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: notiflex-route
+  namespace: notiflex
+spec:
+  parentRefs:
+  - name: notiflex-gateway
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /
+    backendRefs:
+    - name: notiflex-api
+      port: 80

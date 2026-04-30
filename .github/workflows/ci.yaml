@@ -32,9 +32,9 @@ jobs:
 
     - name: Update manifest
       run: |
-        sed -i "s|notiflex/api:.*|notiflex/api:sha-${GITHUB_SHA::7}|" k8s/smb/deployment.yaml
+        sed -i "s|notiflex/api:.*|notiflex/api:sha-${GITHUB_SHA::7}|" k8s/smb/rollout.yaml
         git config user.email "ci@github.com"
         git config user.name "GitHub Actions"
-        git add k8s/smb/deployment.yaml
+        git add k8s/smb/rollout.yaml
         git commit -m "ci: update image to sha-${GITHUB_SHA::7}" || echo "No changes"
         git push
