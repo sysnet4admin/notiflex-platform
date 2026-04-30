@@ -70,7 +70,10 @@
 
 | 노드풀 | 머신 타입 | 노드 수 | 주요 워크로드 |
 |--------|----------|---------|-------------|
-| default-pool | e2-medium | 2 | notiflex-api |
+| default-pool | e2-medium | 2 | Valkey, ArgoCD, monitoring |
+| api-pool | e2-medium | 1 | notiflex-api (smb + enterprise) |
+| worker-pool | e2-standard-2 | 1 | Kafka (ch8) |
+| ops-pool | e2-small | 1 | Tempo, CronJob (ch8) |
 
 ## 트러블슈팅 이력
 

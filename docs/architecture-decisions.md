@@ -48,6 +48,30 @@
 - HealthCheckPolicy — `/health` 경로·포트를 직접 지정하여 정확한 헬스체크
 - K8s 표준 API — 벤더 종속성 최소화
 
+## ADR-011: 노드 스케줄링 — nodeSelector (ch7.2)
+**시점**: 2026-04 / **결정**: GKE 자동 라벨 `cloud.google.com/gke-nodepool` 기반 nodeSelector 채택 (vs nodeAffinity, Taint/Toleration)
+**이유**:
+- GKE가 노드풀 이름을 자동으로 라벨로 부여 — 커스텀 라벨 관리 불필요
+- 단순한 YAML 표현 — `cloud.google.com/gke-nodepool: api-pool` 한 줄로 배치 결정
+- api-pool/worker-pool/ops-pool 역할 분리 — 워크로드 특성에 맞는 머신 타입 배치
+- Spot VM 비용 절감 — 역할별 노드풀에 적합한 VM 크기 선택
+
+## ADR-012: 멀티앱 관리 — App of Apps (ch7.3)
+**시점**: 2026-04 / **결정**: Argo CD App of Apps 패턴 채택 (vs 개별 Application 수동 관리, ApplicationSet)
+**이유**:
+- root-app이 argocd/apps/ 디렉터리를 감시 — 새 Application 파일 추가만으로 자동 배포
+- Sync Wave 어노테이션 — 인프라(0)→플랫폼(1)→앱(2) 순서 보장
+- git이 Application 목록의 단일 진실 소스 — kubectl apply 없이 PR만으로 앱 추가/삭제
+- ArgoCD selfHeal — git 상태와 클러스터 상태 자동 동기화
+
+## ADR-013: 멀티테넌시 — Namespace 분리 (ch7.4)
+**시점**: 2026-04 / **결정**: Namespace 분리 + per-tenant Rollout 채택 (vs 단일 namespace + 라벨 격리, vCluster)
+**이유**:
+- 강한 격리 — RBAC, NetworkPolicy, ResourceQuota를 네임스페이스 단위로 독립 적용
+- ArgoCD App of Apps와 자연 결합 — 테넌트별 Application을 apps/ 디렉터리에 추가만 하면 됨
+- 테넌트별 독립 배포 — smb/enterprise가 각자의 Rollout으로 독립적인 배포 이력 유지
+- 운영 가시성 — kubectl get pods -n enterprise로 테넌트별 상태 즉시 확인
+
 ## ADR-008: 캐시 — Valkey (ch6.1)
 **시점**: 2026-04 / **결정**: Valkey (Bitnami standalone) 채택 (vs Redis, Memcached)
 **이유**:

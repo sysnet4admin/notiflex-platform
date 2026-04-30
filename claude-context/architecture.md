@@ -1,4 +1,4 @@
-# Notiflex 아키텍처 스냅샷 — ch6 완료 시점
+# Notiflex 아키텍처 스냅샷 — ch7 완료 시점
 
 이 문서는 AI가 매 대화에서 현재 아키텍처를 빠르게 파악할 수 있도록 한 페이지로 요약한다.
 
@@ -18,7 +18,7 @@ CLAUDE.md는 매 대화 자동 로드, claude-context는 AI가 참조 요청 시
 |------|-----|
 | 클러스터 | notiflex-cluster |
 | 리전/존 | asia-northeast3 / asia-northeast3-a |
-| 노드풀 | default-pool (e2-medium × 2, Spot VM) |
+| 노드풀 | default-pool(e2-medium×2), api-pool(e2-medium×1), worker-pool(e2-standard-2×1), ops-pool(e2-small×1) |
 | GKE 기능 | Gateway API, Workload Identity, Secret Manager CSI |
 
 ## 컴포넌트 다이어그램
@@ -82,7 +82,8 @@ Argo Rollouts (Canary)
 
 | 네임스페이스 | 주요 워크로드 |
 |------------|-------------|
-| notiflex | Rollout/notiflex-api, valkey-primary, notiflex-sa (WI) |
-| argocd | ArgoCD v3.3.8 (notiflex-smb Application) |
+| notiflex | Rollout/notiflex-api(api-pool), valkey-primary(default), notiflex-sa (WI) |
+| enterprise | Rollout/notiflex-api(api-pool), notiflex-sa (WI) — enterprise 테넌트 |
+| argocd | ArgoCD v3.3.8 (root-app + notiflex-smb + notiflex-enterprise) |
 | argo-rollouts | Argo Rollouts 컨트롤러 |
 | monitoring | kube-prometheus-stack, Loki, Fluent Bit |
