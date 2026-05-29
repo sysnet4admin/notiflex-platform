@@ -1,5 +1,22 @@
 # Notiflex Platform
 
+![GitAIOps](https://img.shields.io/badge/GitAIOps-8A2BE2)
+![Claude Code](https://img.shields.io/badge/Claude%20Code-D97757?logo=anthropic&logoColor=white)
+![AI Agent](https://img.shields.io/badge/AI%20Agent-5A45FF)
+![GitOps](https://img.shields.io/badge/GitOps-1F6FEB)
+&nbsp;
+![Go](https://img.shields.io/badge/Go-00ADD8?logo=go&logoColor=white)
+![Kubernetes](https://img.shields.io/badge/Kubernetes-326CE5?logo=kubernetes&logoColor=white)
+![GKE](https://img.shields.io/badge/GKE-4285F4?logo=googlecloud&logoColor=white)
+![ArgoCD](https://img.shields.io/badge/Argo%20CD-EF7B4D?logo=argo&logoColor=white)
+![Argo Rollouts](https://img.shields.io/badge/Argo%20Rollouts-EF7B4D?logo=argo&logoColor=white)
+![Kafka](https://img.shields.io/badge/Kafka-231F20?logo=apachekafka&logoColor=white)
+![Strimzi](https://img.shields.io/badge/Strimzi-0DB7ED)
+![Valkey](https://img.shields.io/badge/Valkey-2A6DB0?logo=valkey&logoColor=white)
+![OpenTelemetry](https://img.shields.io/badge/OpenTelemetry-425CC7?logo=opentelemetry&logoColor=white)
+![Prometheus](https://img.shields.io/badge/Prometheus-E6522C?logo=prometheus&logoColor=white)
+![Grafana](https://img.shields.io/badge/Grafana-F46800?logo=grafana&logoColor=white)
+
 「AI 시대에 개발자가 알아야 하는 인프라 구성 배포 with 클로드 코드」의 실습 저장소입니다.
 
 [sysnet4admin/_Book_GitAIOps](https://github.com/sysnet4admin/_Book_GitAIOps)의 가드레일과 실행 지침을 기반으로, AI 에이전트가 B2B 알림 SaaS 플랫폼을 GKE 위에 직접 구축한 결과물입니다.
