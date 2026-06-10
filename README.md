@@ -1,6 +1,6 @@
 # Notiflex Platform
 
-**🇰🇷 한국어** | [🇬🇧 English](README.en.md)
+**한국어** | [English](README.en.md)
 
 ![GitAIOps](https://img.shields.io/badge/GitAIOps-8A2BE2)
 ![Claude Code](https://img.shields.io/badge/Claude%20Code-D97757?logo=anthropic&logoColor=white)
