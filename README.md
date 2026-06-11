@@ -23,7 +23,7 @@
 
 [sysnet4admin/_Book_GitAIOps](https://github.com/sysnet4admin/_Book_GitAIOps)의 가드레일과 실행 지침을 기반으로, AI 에이전트가 B2B 알림 SaaS 플랫폼을 GKE 위에 직접 구축한 결과물입니다.
 
-## 브랜치 구조 — AI 에이전트별 실행 결과
+## 브랜치 구조: AI 에이전트별 실행 결과
 
 동일한 가드레일을 서로 다른 AI 에이전트가 실행한 결과가 브랜치별로 보존되어 있습니다.
 
